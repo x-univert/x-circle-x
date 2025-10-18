@@ -1,0 +1,179 @@
+# === Fichiers système ===
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*~
+
+# === Node.js ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-debug.log*
+.npm
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# === Build outputs ===
+dist/
+build/
+output/
+out/
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+
+# === Rust / Smart Contracts ===
+target/
+**/*.rs.bk
+Cargo.lock
+wasm/output/*.wasm
+wasm/output/*.abi.json
+*.wat
+*.wat.txt
+
+# === MultiversX ===
+*.pem
+wallets/*.pem
+*.wasm
+output/
+mandos-go*/
+test-wallets/
+
+# === IDE / Editors ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.project
+.classpath
+.settings/
+*.sublime-*
+
+# === Environment variables ===
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# === Testing ===
+coverage/
+.nyc_output/
+*.lcov
+.coverage/
+htmlcov/
+.pytest_cache/
+
+# === Documentation ===
+docs/_build/
+docs/.doctrees/
+site/
+
+# === OS specific ===
+# Windows
+[Tt]humbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+
+# === Secrets & Keys (IMPORTANT!) ===
+*.pem
+*.key
+*.cert
+*.p12
+secrets/
+credentials/
+.credentials/
+private/
+
+# === Temporary files ===
+tmp/
+temp/
+*.cache
+*.pid
+*.seed
+*.pid.lock
+
+# === Database ===
+*.db
+*.sqlite
+*.sqlite3
+*.sql
+
+# === Logs ===
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+lerna-debug.log*
+pnpm-debug.log*
+
+# === Package manager ===
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# === Backup files ===
+*.bak
+*.backup
+*.old
+*~
+
+# === Compiled files ===
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# === Archives ===
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# === Blockchain specific ===
+# Wallets privés - NE JAMAIS COMMITER!
+mywallet.pem
+wallet.pem
+deployer.pem
+*.pem
+
+# État local blockchain
+.chainstate/
+.blockchain/
+
+# === CI/CD ===
+.github/workflows/*.secret
+.gitlab-ci-local/
+
+# === Custom ===
+# Ajoutez vos exclusions personnalisées ici
+TODO.txt
+NOTES.md
+scratch/
