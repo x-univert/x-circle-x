@@ -1,0 +1,14 @@
+[package]
+name = "xcirclex-token-protection"
+version = "0.1.0"
+edition = "2021"
+authors = ["X-CIRCLE-X Team"]
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies.multiversx-sc]
+version = "0.53.2"
+
+[dev-dependencies.multiversx-sc-scenario]
+version = "0.53.2"

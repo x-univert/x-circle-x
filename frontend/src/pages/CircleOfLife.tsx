@@ -1,0 +1,3374 @@
+import { useGetIsLoggedIn, useGetAccountInfo } from 'lib'
+import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react'
+import { TransactionModal, TransactionStep } from '../components/TransactionModal'
+import { useCircleOfLife } from '../hooks/useCircleOfLife'
+import { CIRCLE_OF_LIFE_ADDRESS } from '../config/contracts'
+import { CircleNavTabs, TabId } from '../components/CircleNavTabs'
+import { CircleSkeleton } from '../components/CircleSkeleton'
+import { AdminPanel } from '../components/AdminPanel'
+import { RouteNamesEnum } from 'localConstants'
+
+// Lazy load tabs for faster initial render
+const MyPeripheralTab = lazy(() => import('../components/tabs/MyPeripheralTab').then(m => ({ default: m.MyPeripheralTab })))
+const NftTab = lazy(() => import('../components/tabs/NftTab').then(m => ({ default: m.NftTab })))
+const TokenTab = lazy(() => import('../components/tabs/TokenTab').then(m => ({ default: m.TokenTab })))
+const DaoTab = lazy(() => import('../components/tabs/DaoTab').then(m => ({ default: m.DaoTab })))
+const ScCentralTab = lazy(() => import('../components/tabs/ScCentralTab').then(m => ({ default: m.ScCentralTab })))
+const StakingTab = lazy(() => import('../components/tabs/StakingTab').then(m => ({ default: m.StakingTab })))
+
+function CircleOfLife() {
+  const isLoggedIn = useGetIsLoggedIn()
+  const { address } = useGetAccountInfo()
+  const navigate = useNavigate()
+
+  // Hook pour interagir avec le contrat
+  const {
+    isLoading,
+    error,
+    circleInfo,
+    myContract,
+    isMyTurn,
+    isActive,
+    activeContracts,
+    inactiveContracts,
+    contractBalance,
+    isPaused,
+    cycleHolder,
+    hasPreSigned,
+    hasSignedThisCycle,
+    preSignedMembers,
+    pendingAutoTransfers,
+    cycleStats,
+    sc0Owner,
+    contractOwners,
+    scStats,
+    peripheralBalances,
+    rewardsInfo,
+    pendingRewards,
+    canClaim,
+    dayOfWeek,
+    burnStats,
+    autoSignStatus,
+    starterBonusInfo,
+    optionFInfo,
+    pioneerInfo,
+    depositBonusInfo,
+    createPeripheralContract,
+    signAndForward,
+    startDailyCycle,
+    setActive,
+    setInactive,
+    preSign,
+    processAllPendingTransfers,
+    failCycle,
+    claimRewards,
+    enableAutoSign,
+    enableAutoSignForCycles,
+    disableAutoSign,
+    deposit,
+    refreshData,
+    clearError
+  } = useCircleOfLife()
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState<TabId>('circle')
+
+  // Zoom state for circle visualization
+  const [zoomLevel, setZoomLevel] = useState(1)
+  const minZoom = 0.5
+  const maxZoom = 3
+
+  // Window size for responsive SVG
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 500)
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Calculate responsive SVG size
+  const svgSize = useMemo(() => {
+    const baseSize = 500 * zoomLevel
+    const maxSize = windowWidth < 640 ? windowWidth - 48 : windowWidth < 1024 ? windowWidth - 80 : 600
+    return Math.min(baseSize, maxSize)
+  }, [zoomLevel, windowWidth])
+
+  // Rotation angle state for orbit animation
+  const [rotationAngle, setRotationAngle] = useState(0)
+
+  // Animation loop for rotation
+  useEffect(() => {
+    const startTime = Date.now()
+    const duration = 120000 // 120 seconds for full rotation
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime
+      const angle = (elapsed / duration) * 360 % 360
+      setRotationAngle(angle)
+      requestAnimationFrame(animate)
+    }
+
+    const animationId = requestAnimationFrame(animate)
+    return () => cancelAnimationFrame(animationId)
+  }, [])
+
+  // Fetch last transaction hashes for SC0 and peripherals
+  useEffect(() => {
+    const fetchLastTxHashes = async () => {
+      try {
+        // Fetch last transaction/transfer for SC0 (check both transactions and transfers)
+        const [sc0TxRes, sc0TransferRes] = await Promise.all([
+          fetch(`https://devnet-api.multiversx.com/accounts/${CIRCLE_OF_LIFE_ADDRESS}/transactions?size=1&order=desc`),
+          fetch(`https://devnet-api.multiversx.com/accounts/${CIRCLE_OF_LIFE_ADDRESS}/transfers?size=1&order=desc`)
+        ])
+
+        let latestSc0Tx: string | null = null
+        let latestSc0Time = 0
+
+        if (sc0TxRes.ok) {
+          const txs = await sc0TxRes.json()
+          if (txs.length > 0) {
+            latestSc0Tx = txs[0].txHash
+            latestSc0Time = txs[0].timestamp || 0
+          }
+        }
+        if (sc0TransferRes.ok) {
+          const transfers = await sc0TransferRes.json()
+          if (transfers.length > 0 && (transfers[0].timestamp || 0) > latestSc0Time) {
+            latestSc0Tx = transfers[0].txHash
+          }
+        }
+        if (latestSc0Tx) {
+          setLastTxHashSc0(latestSc0Tx)
+        }
+
+        // Fetch last transactions/transfers for all peripheral contracts
+        if (activeContracts.length > 0) {
+          const newPeripheralHashes = new Map<string, string>()
+          await Promise.all(activeContracts.map(async (contractAddr) => {
+            try {
+              const [txRes, transferRes] = await Promise.all([
+                fetch(`https://devnet-api.multiversx.com/accounts/${contractAddr}/transactions?size=1&order=desc`),
+                fetch(`https://devnet-api.multiversx.com/accounts/${contractAddr}/transfers?size=1&order=desc`)
+              ])
+
+              let latestHash: string | null = null
+              let latestTime = 0
+
+              if (txRes.ok) {
+                const txs = await txRes.json()
+                if (txs.length > 0) {
+                  latestHash = txs[0].txHash
+                  latestTime = txs[0].timestamp || 0
+                }
+              }
+              if (transferRes.ok) {
+                const transfers = await transferRes.json()
+                if (transfers.length > 0 && (transfers[0].timestamp || 0) > latestTime) {
+                  latestHash = transfers[0].txHash
+                }
+              }
+              if (latestHash) {
+                newPeripheralHashes.set(contractAddr, latestHash)
+              }
+            } catch (e) {
+              console.error(`Error fetching tx for ${contractAddr}:`, e)
+            }
+          }))
+          setLastTxHashPeripherals(newPeripheralHashes)
+        }
+      } catch (e) {
+        console.error('Error fetching last tx hashes:', e)
+      }
+    }
+
+    fetchLastTxHashes()
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchLastTxHashes, 30000)
+    return () => clearInterval(interval)
+  }, [activeContracts])
+
+  // Tooltip state for circle nodes
+  const [tooltipInfo, setTooltipInfo] = useState<{
+    visible: boolean
+    x: number
+    y: number
+    type: 'sc0' | 'peripheral'
+    scAddress: string
+    ownerAddress: string | null
+    scIndex: number
+    isMyContract: boolean
+  } | null>(null)
+
+  // Hover state for peripheral SC zoom effect
+  const [hoveredScIndex, setHoveredScIndex] = useState<number | null>(null)
+
+  // Hover state for SC0 zoom effect
+  const [hoveredSc0, setHoveredSc0] = useState(false)
+
+  // Tooltip deposit state
+  const [tooltipDepositAmount, setTooltipDepositAmount] = useState('0.01')
+  const [isDepositing, setIsDepositing] = useState(false)
+
+  // Last transaction hashes state
+  const [lastTxHashSc0, setLastTxHashSc0] = useState<string | null>(null)
+  const [lastTxHashPeripherals, setLastTxHashPeripherals] = useState<Map<string, string>>(new Map())
+
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(prev + 0.25, maxZoom))
+  }
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(prev - 0.25, minZoom))
+  }
+
+  const handleZoomReset = () => {
+    setZoomLevel(1)
+  }
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault()
+    if (e.deltaY < 0) {
+      setZoomLevel(prev => Math.min(prev + 0.1, maxZoom))
+    } else {
+      setZoomLevel(prev => Math.max(prev - 0.1, minZoom))
+    }
+  }
+
+  // Tooltip handlers for circle nodes
+  const handleNodeClick = (
+    e: React.MouseEvent | React.TouchEvent,
+    type: 'sc0' | 'peripheral',
+    scAddress: string,
+    ownerAddress: string | null,
+    scIndex: number,
+    isMyContractNode: boolean
+  ) => {
+    e.stopPropagation()
+
+    // Set hover state for zoom effect on touch devices
+    if (type === 'sc0') {
+      setHoveredSc0(true)
+      setHoveredScIndex(null)
+    } else {
+      setHoveredScIndex(scIndex - 1) // scIndex is 1-based, hoveredScIndex is 0-based
+      setHoveredSc0(false)
+    }
+
+    const rect = (e.currentTarget as SVGElement).closest('svg')?.getBoundingClientRect()
+    if (rect) {
+      // Get coordinates from mouse or touch event
+      const clientX = 'touches' in e ? e.touches[0]?.clientX || 0 : e.clientX
+      const clientY = 'touches' in e ? e.touches[0]?.clientY || 0 : e.clientY
+
+      setTooltipInfo({
+        visible: true,
+        x: clientX - rect.left,
+        y: clientY - rect.top,
+        type,
+        scAddress,
+        ownerAddress,
+        scIndex,
+        isMyContract: isMyContractNode
+      })
+    }
+  }
+
+  const handleCloseTooltip = () => {
+    setTooltipInfo(null)
+    setTooltipDepositAmount('0.01')
+    // Clear hover states when closing tooltip
+    setHoveredScIndex(null)
+    setHoveredSc0(false)
+  }
+
+  // Handle deposit from tooltip popup
+  const handleTooltipDeposit = async () => {
+    if (!tooltipInfo || isDepositing || !address) return
+
+    const amount = parseFloat(tooltipDepositAmount)
+    if (isNaN(amount) || amount <= 0) return
+
+    setIsDepositing(true)
+    try {
+      if (tooltipInfo.type === 'sc0') {
+        // Deposit to SC0 using the existing function
+        const result = await deposit(tooltipDepositAmount)
+        if (result) {
+          handleCloseTooltip()
+          await refreshData()
+        }
+      } else {
+        // For peripheral contracts, we need to send EGLD directly
+        // Import signAndSendTransactions dynamically
+        const { signAndSendTransactionsWithHash } = await import('../helpers/signAndSendTransactions')
+        const { Address, Transaction, TransactionPayload, TokenTransfer } = await import('lib')
+
+        const amountInWei = BigInt(Math.floor(amount * 1e18))
+        const recipientAddress = new Address(tooltipInfo.scAddress)
+        const senderAddress = new Address(address)
+
+        // Create a simple EGLD transfer with 'deposit' data
+        const transaction = new Transaction({
+          sender: senderAddress,
+          receiver: recipientAddress,
+          value: amountInWei,
+          gasLimit: BigInt(5000000),
+          data: new TransactionPayload('deposit'),
+          chainID: 'D'
+        })
+
+        const result = await signAndSendTransactionsWithHash({
+          transactions: [transaction],
+          transactionsDisplayInfo: {
+            processingMessage: 'Depot en cours...',
+            successMessage: 'Depot reussi!',
+            errorMessage: 'Erreur lors du depot'
+          },
+          senderAddress: address
+        })
+
+        if (result) {
+          handleCloseTooltip()
+          await refreshData()
+        }
+      }
+    } catch (err) {
+      console.error('Error depositing:', err)
+    } finally {
+      setIsDepositing(false)
+    }
+  }
+
+  // Calculate orbiting circles based on cycles completed
+  const getOrbitingCirclesData = (cyclesCompleted: number) => {
+    // Each 30 cycles = 1 orbiting circle, max 12 at 360
+    const completed360Cycles = Math.floor(cyclesCompleted / 360)
+    const remainingCycles = cyclesCompleted % 360
+    const numOrbitingCircles = Math.min(Math.floor(remainingCycles / 30), 12)
+
+    return {
+      completed360Cycles,
+      numOrbitingCircles,
+      showBadge: completed360Cycles > 0 && numOrbitingCircles === 0
+    }
+  }
+
+  // Modal states
+  const [showJoinModal, setShowJoinModal] = useState(false)
+  const [joinModalStep, setJoinModalStep] = useState<TransactionStep>('confirm')
+  const [joinTransactionHash, setJoinTransactionHash] = useState('')
+
+  const [showSignModal, setShowSignModal] = useState(false)
+  const [signModalStep, setSignModalStep] = useState<TransactionStep>('confirm')
+  const [signTransactionHash, setSignTransactionHash] = useState('')
+
+  const [showStartCycleModal, setShowStartCycleModal] = useState(false)
+  const [startCycleModalStep, setStartCycleModalStep] = useState<TransactionStep>('confirm')
+  const [startCycleTransactionHash, setStartCycleTransactionHash] = useState('')
+
+  const [showPreSignModal, setShowPreSignModal] = useState(false)
+  const [preSignModalStep, setPreSignModalStep] = useState<TransactionStep>('confirm')
+  const [preSignTransactionHash, setPreSignTransactionHash] = useState('')
+
+  const [showProcessModal, setShowProcessModal] = useState(false)
+  const [processModalStep, setProcessModalStep] = useState<TransactionStep>('confirm')
+  const [processTransactionHash, setProcessTransactionHash] = useState('')
+
+  const [showFailCycleModal, setShowFailCycleModal] = useState(false)
+  const [failCycleModalStep, setFailCycleModalStep] = useState<TransactionStep>('confirm')
+  const [failCycleTransactionHash, setFailCycleTransactionHash] = useState('')
+
+  const [showActivateModal, setShowActivateModal] = useState(false)
+  const [activateModalStep, setActivateModalStep] = useState<TransactionStep>('confirm')
+  const [activateTransactionHash, setActivateTransactionHash] = useState('')
+
+  const [showDeactivateModal, setShowDeactivateModal] = useState(false)
+  const [deactivateModalStep, setDeactivateModalStep] = useState<TransactionStep>('confirm')
+  const [deactivateTransactionHash, setDeactivateTransactionHash] = useState('')
+
+  const [showClaimRewardsModal, setShowClaimRewardsModal] = useState(false)
+  const [claimRewardsModalStep, setClaimRewardsModalStep] = useState<TransactionStep>('confirm')
+  const [claimRewardsTransactionHash, setClaimRewardsTransactionHash] = useState('')
+
+  // Auto-sign modal states
+  const [showAutoSignModal, setShowAutoSignModal] = useState(false)
+  const [autoSignModalStep, setAutoSignModalStep] = useState<TransactionStep>('confirm')
+  const [autoSignTransactionHash, setAutoSignTransactionHash] = useState('')
+  const [autoSignCycles, setAutoSignCycles] = useState(30)
+  const [autoSignType, setAutoSignType] = useState<'permanent' | 'cycles'>('cycles')
+
+  const [showDisableAutoSignModal, setShowDisableAutoSignModal] = useState(false)
+  const [disableAutoSignModalStep, setDisableAutoSignModalStep] = useState<TransactionStep>('confirm')
+  const [disableAutoSignTransactionHash, setDisableAutoSignTransactionHash] = useState('')
+
+  // Clear error on mount
+  useEffect(() => {
+    clearError()
+  }, [])
+
+  // Handlers
+  const handleJoinConfirm = async () => {
+    setJoinModalStep('pending')
+    try {
+      const result = await createPeripheralContract()
+      if (result && result.transactionHash) {
+        setJoinTransactionHash(result.transactionHash)
+        setJoinModalStep('processing')
+      } else {
+        setJoinModalStep('error')
+      }
+    } catch (err) {
+      console.error('Error joining Circle of Life:', err)
+      setJoinModalStep('error')
+    }
+  }
+
+  const handleSignConfirm = async () => {
+    setSignModalStep('pending')
+    try {
+      const result = await signAndForward()
+      if (result && result.transactionHash) {
+        setSignTransactionHash(result.transactionHash)
+        setSignModalStep('processing')
+      } else {
+        setSignModalStep('error')
+      }
+    } catch (err) {
+      console.error('Error signing cycle:', err)
+      setSignModalStep('error')
+    }
+  }
+
+  const handleStartCycleConfirm = async () => {
+    setStartCycleModalStep('pending')
+    try {
+      const result = await startDailyCycle()
+      console.log('startDailyCycle result:', result)
+
+      if (result) {
+        // Le hash peut être dans transactionHash ou dans sessionId
+        const txHash = result.transactionHash || result.sessionId
+        if (txHash) {
+          console.log('Using transaction hash:', txHash)
+          setStartCycleTransactionHash(txHash)
+          setStartCycleModalStep('processing')
+        } else {
+          console.error('No transaction hash found in result:', result)
+          setStartCycleModalStep('error')
+        }
+      } else {
+        console.error('No result returned from startDailyCycle')
+        setStartCycleModalStep('error')
+      }
+    } catch (err) {
+      console.error('Error starting cycle:', err)
+      setStartCycleModalStep('error')
+    }
+  }
+
+  const handlePreSignConfirm = async () => {
+    setPreSignModalStep('pending')
+    try {
+      const result = await preSign()
+      if (result && result.transactionHash) {
+        setPreSignTransactionHash(result.transactionHash)
+        setPreSignModalStep('processing')
+      } else {
+        setPreSignModalStep('error')
+      }
+    } catch (err) {
+      console.error('Error pre-signing:', err)
+      setPreSignModalStep('error')
+    }
+  }
+
+  const handleProcessConfirm = async () => {
+    console.log('handleProcessConfirm: starting...')
+    setProcessModalStep('pending')
+    try {
+      const result = await processAllPendingTransfers()
+      console.log('processAllPendingTransfers result:', result)
+
+      if (result) {
+        const txHash = result.transactionHash || result.sessionId
+        if (txHash) {
+          console.log('Using transaction hash for process:', txHash)
+          setProcessTransactionHash(txHash)
+          setProcessModalStep('processing')
+        } else {
+          console.error('No transaction hash found in result:', result)
+          setProcessModalStep('error')
+        }
+      } else {
+        console.error('No result returned from processAllPendingTransfers')
+        setProcessModalStep('error')
+      }
+    } catch (err) {
+      console.error('Error processing all transfers:', err)
+      setProcessModalStep('error')
+    }
+  }
+
+  const handleFailCycleConfirm = async () => {
+    setFailCycleModalStep('pending')
+    try {
+      const result = await failCycle()
+      if (result && result.transactionHash) {
+        setFailCycleTransactionHash(result.transactionHash)
+        setFailCycleModalStep('processing')
+      } else {
+        setFailCycleModalStep('error')
+      }
+    } catch (err) {
+      console.error('Error failing cycle:', err)
+      setFailCycleModalStep('error')
+    }
+  }
+
+  const handleActivateConfirm = async () => {
+    setActivateModalStep('pending')
+    try {
+      const result = await setActive()
+      if (result && result.transactionHash) {
+        setActivateTransactionHash(result.transactionHash)
+        setActivateModalStep('processing')
+      } else {
+        setActivateModalStep('error')
+      }
+    } catch (err) {
+      console.error('Error activating:', err)
+      setActivateModalStep('error')
+    }
+  }
+
+  const handleDeactivateConfirm = async () => {
+    setDeactivateModalStep('pending')
+    try {
+      const result = await setInactive()
+      if (result && result.transactionHash) {
+        setDeactivateTransactionHash(result.transactionHash)
+        setDeactivateModalStep('processing')
+      } else {
+        setDeactivateModalStep('error')
+      }
+    } catch (err) {
+      console.error('Error deactivating:', err)
+      setDeactivateModalStep('error')
+    }
+  }
+
+  const handleClaimRewardsConfirm = async () => {
+    setClaimRewardsModalStep('pending')
+    try {
+      const result = await claimRewards()
+      if (result && result.transactionHash) {
+        setClaimRewardsTransactionHash(result.transactionHash)
+        setClaimRewardsModalStep('processing')
+      } else {
+        setClaimRewardsModalStep('error')
+      }
+    } catch (err) {
+      console.error('Error claiming rewards:', err)
+      setClaimRewardsModalStep('error')
+    }
+  }
+
+  const handleAutoSignConfirm = async () => {
+    setAutoSignModalStep('pending')
+    try {
+      let result
+      console.log('Auto-sign type:', autoSignType, 'cycles:', autoSignCycles)
+      if (autoSignType === 'permanent') {
+        console.log('Calling enableAutoSign...')
+        result = await enableAutoSign()
+      } else {
+        console.log('Calling enableAutoSignForCycles with', autoSignCycles, 'cycles...')
+        result = await enableAutoSignForCycles(autoSignCycles)
+      }
+      console.log('Auto-sign result:', result)
+      if (result && result.transactionHash) {
+        setAutoSignTransactionHash(result.transactionHash)
+        setAutoSignModalStep('processing')
+      } else if (result && result.sessionId) {
+        // Transaction envoyée mais hash pas encore disponible
+        setAutoSignModalStep('processing')
+      } else {
+        console.error('No result from auto-sign call')
+        setAutoSignModalStep('error')
+      }
+    } catch (err) {
+      console.error('Error enabling auto-sign:', err)
+      setAutoSignModalStep('error')
+    }
+  }
+
+  const handleDisableAutoSignConfirm = async () => {
+    setDisableAutoSignModalStep('pending')
+    try {
+      const result = await disableAutoSign()
+      if (result && result.transactionHash) {
+        setDisableAutoSignTransactionHash(result.transactionHash)
+        setDisableAutoSignModalStep('processing')
+      } else {
+        setDisableAutoSignModalStep('error')
+      }
+    } catch (err) {
+      console.error('Error disabling auto-sign:', err)
+      setDisableAutoSignModalStep('error')
+    }
+  }
+
+  const getDayName = (day: number): string => {
+    const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
+    return day >= 0 && day < 7 ? days[day] : 'Inconnu'
+  }
+
+  const formatTimeRemaining = () => {
+    const now = new Date()
+    // Calculer minuit UTC (prochain jour UTC)
+    const midnightUTC = new Date(Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() + 1,
+      0, 0, 0, 0
+    ))
+    const remaining = midnightUTC.getTime() - now.getTime()
+
+    const hours = Math.floor(remaining / 3600000)
+    const minutes = Math.floor((remaining % 3600000) / 60000)
+    return `${hours}h ${minutes}min`
+  }
+
+  const getContractPosition = (index: number, total: number) => {
+    const angle = (index / total) * 2 * Math.PI - Math.PI / 2
+    const radius = 120
+    const x = Math.cos(angle) * radius
+    const y = Math.sin(angle) * radius
+    return { x, y }
+  }
+
+  const formatAddress = (addr: string) => {
+    if (!addr) return ''
+    return `${addr.substring(0, 10)}...${addr.substring(addr.length - 6)}`
+  }
+
+  const creationFee = circleInfo?.entryFee || '1'
+  const circulationAmount = circleInfo?.circulationAmount || '0.001'
+  const totalContracts = circleInfo?.totalMembers || 0
+  const activeContractsCount = circleInfo?.activeMembers || 0
+  const currentCycleIndex = circleInfo?.currentCycleIndex || 0
+  const cycleDay = circleInfo?.cycleDay || 0
+
+  // Current day on blockchain (UTC): day = timestamp / 86400
+  const currentDay = Math.floor(Date.now() / 1000 / 86400)
+
+  // Determine if cycle is complete (all members have signed TODAY, money back to center)
+  // Only consider complete if cycleDay matches currentDay
+  const isCycleComplete = cycleDay === currentDay && cycleDay > 0 && !cycleHolder && activeContractsCount > 0
+
+  // Determine if cycle is in timeout (current day > cycle day AND there's still a cycleHolder)
+  const isCycleInTimeout = cycleHolder && cycleDay > 0 && currentDay > cycleDay
+
+  // Determine if a cycle is currently active (there's a holder OR cycle completed today)
+  const isCycleActive = !!cycleHolder || isCycleComplete
+
+  // Check if user's SC is banned
+  const myScStats = myContract ? scStats.get(myContract) : null
+  const isMyScBanned = myScStats?.isBanned || false
+  const myBanUntil = myScStats?.banUntil || 0
+  const banEndDate = myBanUntil > 0 ? new Date(myBanUntil * 1000).toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }) : ''
+
+  // Calculer la vraie position actuelle basée sur cycleHolder
+  // cycleHolder = le SC qui détient actuellement les fonds et doit signer
+  const actualCurrentPosition = cycleHolder && activeContracts.length > 0
+    ? activeContracts.indexOf(cycleHolder)
+    : -1
+
+  // Calculate progress percentage
+  const progressPercentage = isCycleComplete
+    ? 100
+    : actualCurrentPosition >= 0 && activeContractsCount > 0
+      ? Math.round((actualCurrentPosition / activeContractsCount) * 100)
+      : 0
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 overflow-x-hidden">
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 max-w-full overflow-hidden">
+
+        {/* Header */}
+        <div className="text-center mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-2">
+            &#x1F300; Cercle de Vie
+          </h1>
+          <p className="text-sm sm:text-xl text-gray-300 mb-4 sm:mb-6">
+            Ecosysteme de Smart Contracts Circulaires
+          </p>
+          {isPaused && (
+            <div className="mb-4 inline-block bg-red-500/20 border border-red-500/50 text-red-300 px-4 py-2 rounded-lg">
+              Le contrat est actuellement en pause
+            </div>
+          )}
+        </div>
+
+        {/* Navigation Tabs - Toujours visible */}
+        <CircleNavTabs activeTab={activeTab} onTabChange={setActiveTab} />
+
+        {/* Non connecte */}
+        {!isLoggedIn && (
+          <div className="flex items-center justify-center py-12">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-2xl max-w-md text-center">
+              <div className="text-6xl mb-4">&#x1F300;</div>
+              <h2 className="text-2xl font-semibold text-white mb-4">
+                Connexion requise
+              </h2>
+              <p className="text-gray-200 mb-6">
+                Connectez-vous pour rejoindre le Cercle de Vie et participer aux transactions circulaires.
+              </p>
+              <button
+                onClick={() => navigate(RouteNamesEnum.unlock)}
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200"
+              >
+                Se connecter
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Chargement avec Skeleton */}
+        {isLoggedIn && isLoading && !circleInfo && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-6 shadow-xl">
+              <div className="flex justify-between items-center mb-4">
+                <div className="h-6 w-48 bg-white/10 rounded animate-pulse"></div>
+                <div className="h-8 w-24 bg-white/10 rounded animate-pulse"></div>
+              </div>
+              <div className="relative overflow-hidden bg-gradient-to-br from-black/20 to-black/40 rounded-xl border border-white/10">
+                <CircleSkeleton numPeripherals={6} />
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl h-48 animate-pulse"></div>
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl h-32 animate-pulse"></div>
+            </div>
+          </div>
+        )}
+
+        {/* Contenu principal - seulement si connecte et charge */}
+        {isLoggedIn && (circleInfo || !isLoading) && (
+        <>
+        {/* Error display */}
+        {error && (
+          <div className="mb-6 bg-red-500/20 border border-red-500/50 text-red-300 px-4 py-3 rounded-lg flex justify-between items-center">
+            <span>{error}</span>
+            <button onClick={clearError} className="text-red-300 hover:text-white">&times;</button>
+          </div>
+        )}
+
+        {/* Tab Content - Lazy loaded with Suspense */}
+        <Suspense fallback={
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin text-4xl mb-2">&#x1F300;</div>
+              <p className="text-gray-400">Chargement...</p>
+            </div>
+          </div>
+        }>
+          {activeTab === 'sc-central' && <ScCentralTab />}
+          {activeTab === 'my-sc' && <MyPeripheralTab />}
+          {activeTab === 'staking' && <StakingTab />}
+          {activeTab === 'nft' && <NftTab />}
+          {activeTab === 'token' && <TokenTab />}
+          {activeTab === 'dao' && <DaoTab />}
+        </Suspense>
+
+        {/* Circle Tab - Main Grid */}
+        {activeTab === 'circle' && (
+        <>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 w-full">
+
+          {/* Circle Visualization */}
+          <div className="lg:col-span-2 bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 shadow-xl w-full overflow-hidden">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 mb-4">
+              <h2 className="text-lg sm:text-xl font-bold text-white">Visualisation du Cercle</h2>
+              <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                {/* Zoom controls - compact on mobile */}
+                <div className="flex items-center gap-0.5 sm:gap-1 bg-white/10 rounded-lg p-0.5 sm:p-1">
+                  <button
+                    onClick={handleZoomOut}
+                    disabled={zoomLevel <= minZoom}
+                    className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-white hover:bg-white/20 rounded disabled:opacity-30 disabled:cursor-not-allowed transition"
+                    title="Dezoomer"
+                  >
+                    <span className="text-base sm:text-lg font-bold">-</span>
+                  </button>
+                  <button
+                    onClick={handleZoomReset}
+                    className="px-1.5 sm:px-2 h-7 sm:h-8 flex items-center justify-center text-white hover:bg-white/20 rounded text-xs sm:text-sm font-mono transition min-w-[40px]"
+                    title="Reinitialiser le zoom"
+                  >
+                    {Math.round(zoomLevel * 100)}%
+                  </button>
+                  <button
+                    onClick={handleZoomIn}
+                    disabled={zoomLevel >= maxZoom}
+                    className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-white hover:bg-white/20 rounded disabled:opacity-30 disabled:cursor-not-allowed transition"
+                    title="Zoomer"
+                  >
+                    <span className="text-base sm:text-lg font-bold">+</span>
+                  </button>
+                </div>
+                <button
+                  onClick={refreshData}
+                  disabled={isLoading}
+                  className="text-xs sm:text-sm text-gray-300 hover:text-white transition px-2 sm:px-3 py-1 bg-white/10 rounded-lg whitespace-nowrap"
+                >
+                  {isLoading ? '...' : 'Actualiser'}
+                </button>
+              </div>
+            </div>
+
+            {/* SVG Circle - Responsive with zoom */}
+            <div
+              className="relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-black/20 to-black/40 rounded-lg sm:rounded-xl border border-white/10 w-full"
+              style={{ minHeight: '280px', maxHeight: '60vh', height: 'auto', aspectRatio: '1/1' }}
+              onWheel={handleWheel}
+              onClick={handleCloseTooltip}
+            >
+              {/* Zoom hint - responsive */}
+              <div className="absolute top-2 left-2 text-[10px] sm:text-xs text-gray-400 bg-black/30 px-1.5 sm:px-2 py-1 rounded z-10">
+                <span className="hidden sm:inline">Molette pour zoomer | Glisser pour deplacer</span>
+                <span className="sm:hidden">Pincer pour zoomer</span>
+              </div>
+              <svg
+                viewBox="-180 -180 360 360"
+                className="transition-all duration-200 ease-out flex-shrink-0"
+                preserveAspectRatio="xMidYMid meet"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  maxWidth: `${svgSize}px`,
+                  maxHeight: `${svgSize}px`
+                }}
+              >
+                {/* Gradient and marker definitions - en dehors du groupe anime */}
+                <defs>
+                  {/* Spin animation for orbiting circles */}
+                  <style>{`
+                    @keyframes orbitSpin {
+                      from { transform: rotate(0deg); }
+                      to { transform: rotate(360deg); }
+                    }
+                    .orbit-circle {
+                      animation: orbitSpin 8s linear infinite;
+                      transform-origin: center;
+                    }
+                    .orbit-circle-fast {
+                      animation: orbitSpin 4s linear infinite;
+                      transform-origin: center;
+                    }
+                  `}</style>
+                  <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="rgba(168, 85, 247, 0.8)" />
+                  </marker>
+                  <marker id="arrowheadGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="rgba(34, 197, 94, 0.9)" />
+                  </marker>
+                  <radialGradient id="sc0Gradient">
+                    <stop offset="0%" stopColor="#a855f7" />
+                    <stop offset="100%" stopColor="#6366f1" />
+                  </radialGradient>
+                  <radialGradient id="sc0CompleteGradient">
+                    <stop offset="0%" stopColor="#22c55e" />
+                    <stop offset="100%" stopColor="#15803d" />
+                  </radialGradient>
+                  <radialGradient id="completedGradient">
+                    <stop offset="0%" stopColor="#86efac" />
+                    <stop offset="100%" stopColor="#22c55e" />
+                  </radialGradient>
+                  <radialGradient id="activeGradient">
+                    <stop offset="0%" stopColor="#22c55e" />
+                    <stop offset="100%" stopColor="#16a34a" />
+                  </radialGradient>
+                  <radialGradient id="inactiveGradient">
+                    <stop offset="0%" stopColor="#6b7280" />
+                    <stop offset="100%" stopColor="#4b5563" />
+                  </radialGradient>
+                  <radialGradient id="currentGradient">
+                    <stop offset="0%" stopColor="#f59e0b" />
+                    <stop offset="100%" stopColor="#d97706" />
+                  </radialGradient>
+                  <radialGradient id="myContractGradient">
+                    <stop offset="0%" stopColor="#3b82f6" />
+                    <stop offset="100%" stopColor="#2563eb" />
+                  </radialGradient>
+                </defs>
+
+                {/* Groupe qui tourne autour du centre (0,0) - contient le cercle orbital et les SC peripheriques */}
+                <g transform={`rotate(${rotationAngle})`}>
+
+                  {/* Circle path - orbite des SC peripheriques */}
+                  <circle
+                    cx="0"
+                    cy="0"
+                    r="120"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.2)"
+                    strokeWidth="2"
+                    strokeDasharray="5,5"
+                  />
+
+                {/* Circular arrows between active contracts - RENDERED FIRST so peripherals appear on top when zoomed */}
+                {activeContracts.length > 0 && (
+                  <path
+                    d={`M ${getContractPosition(0, activeContracts.length).x * 0.85} ${getContractPosition(0, activeContracts.length).y * 0.85}
+                        A 102 102 0 1 1 ${getContractPosition(0, activeContracts.length).x * 0.85 - 1} ${getContractPosition(0, activeContracts.length).y * 0.85}`}
+                    fill="none"
+                    stroke={isCycleComplete ? "rgba(34, 197, 94, 0.7)" : "rgba(168, 85, 247, 0.5)"}
+                    strokeWidth={isCycleComplete ? "3" : "2"}
+                    markerEnd={isCycleComplete ? "url(#arrowheadGreen)" : "url(#arrowhead)"}
+                  />
+                )}
+
+                {/* Peripheral contracts - render: others first, then user's SC (MOI), then current turn, then hovered on top */}
+                {activeContracts
+                  .map((contractAddr, index) => ({
+                    contractAddr,
+                    index,
+                    isMyContract: myContract === contractAddr,
+                    isCurrentTurn: actualCurrentPosition === index && !isCycleComplete && isCycleActive
+                  }))
+                  .sort((a, b) => {
+                    // Render hovered element last (highest z-index)
+                    if (a.index === hoveredScIndex) return 1
+                    if (b.index === hoveredScIndex) return -1
+                    // Render current turn SC second to last (above others and MOI but below hovered)
+                    if (a.isCurrentTurn) return 1
+                    if (b.isCurrentTurn) return -1
+                    // Render user's SC third to last (above others but below current turn)
+                    if (a.isMyContract) return 1
+                    if (b.isMyContract) return -1
+                    return 0
+                  })
+                  .map(({ contractAddr, index }) => {
+                  const pos = getContractPosition(index, activeContracts.length || 1)
+                  // Utiliser actualCurrentPosition (basé sur cycleHolder) au lieu de currentCycleIndex
+                  const isCurrent = actualCurrentPosition === index && !isCycleComplete && isCycleActive
+                  const isMyContractNode = myContract === contractAddr
+                  // Only show as completed if cycle is active (has holder or completed today)
+                  const hasCompleted = isCycleComplete || (isCycleActive && actualCurrentPosition >= 0 && index < actualCurrentPosition)
+
+                  // Check if the owner of this contract has pre-signed
+                  const ownerAddress = contractOwners.get(contractAddr)
+                  const hasOwnerPreSigned = ownerAddress ? preSignedMembers.includes(ownerAddress) : false
+
+                  // Determine gradient based on state
+                  let gradientId = 'activeGradient'
+                  if (isCycleComplete) {
+                    gradientId = 'completedGradient'
+                  } else if (isCurrent) {
+                    gradientId = 'currentGradient'
+                  } else if (isMyContractNode) {
+                    gradientId = 'myContractGradient'
+                  } else if (hasCompleted) {
+                    gradientId = 'completedGradient'
+                  }
+
+                  // Determine line color: gold if current turn, green if completed, blue if pre-signed, purple otherwise
+                  let lineColor = "rgba(168, 85, 247, 0.4)"
+                  let lineWidth = "1"
+                  if (isCurrent) {
+                    lineColor = "rgba(251, 191, 36, 0.8)"
+                    lineWidth = "3"
+                  } else if (hasCompleted || isCycleComplete) {
+                    lineColor = "rgba(34, 197, 94, 0.6)"
+                    lineWidth = "2"
+                  } else if (hasOwnerPreSigned) {
+                    lineColor = "rgba(59, 130, 246, 0.6)"
+                    lineWidth = "2"
+                  }
+
+                  // Check if this node is hovered or is current turn
+                  const isHovered = hoveredScIndex === index
+                  // Scale: hovered > current turn > normal
+                  const scale = isHovered ? 1.4 : isCurrent ? 1.2 : 1
+
+                  return (
+                    <g key={contractAddr}>
+                      {/* Line to center - green when completed, blue when pre-signed */}
+                      <line
+                        x1="0"
+                        y1="0"
+                        x2={pos.x * 0.7}
+                        y2={pos.y * 0.7}
+                        stroke={lineColor}
+                        strokeWidth={lineWidth}
+                      />
+                      {/* Checkmark indicator for completed - avec contre-rotation */}
+                      {(hasCompleted || isCycleComplete) && (
+                        <g>
+                          <circle
+                            cx={pos.x * 0.5}
+                            cy={pos.y * 0.5}
+                            r="8"
+                            fill="rgba(34, 197, 94, 0.9)"
+                          />
+                          <text
+                            x={pos.x * 0.5}
+                            y={pos.y * 0.5 + 3}
+                            textAnchor="middle"
+                            fill="white"
+                            fontSize="10"
+                            transform={`rotate(${-rotationAngle}, ${pos.x * 0.5}, ${pos.y * 0.5})`}
+                          >
+                            &#x2713;
+                          </text>
+                        </g>
+                      )}
+                      {/* Pre-signed indicator (blue checkmark) - only if not completed */}
+                      {hasOwnerPreSigned && !hasCompleted && !isCycleComplete && (
+                        <g>
+                          <circle
+                            cx={pos.x * 0.5}
+                            cy={pos.y * 0.5}
+                            r="8"
+                            fill="rgba(59, 130, 246, 0.9)"
+                          />
+                          <text
+                            x={pos.x * 0.5}
+                            y={pos.y * 0.5 + 3}
+                            textAnchor="middle"
+                            fill="white"
+                            fontSize="10"
+                            transform={`rotate(${-rotationAngle}, ${pos.x * 0.5}, ${pos.y * 0.5})`}
+                          >
+                            &#x2713;
+                          </text>
+                        </g>
+                      )}
+                      {/* Contract node - clickable with hover zoom effect */}
+                      <g
+                        className="cursor-pointer"
+                        style={{ transition: 'transform 0.2s ease-out' }}
+                        transform={`translate(${pos.x}, ${pos.y}) scale(${scale}) translate(${-pos.x}, ${-pos.y})`}
+                        onClick={(e) => handleNodeClick(e, 'peripheral', contractAddr, contractOwners.get(contractAddr) || null, index + 1, isMyContractNode)}
+                        onMouseEnter={() => setHoveredScIndex(index)}
+                        onMouseLeave={() => setHoveredScIndex(null)}
+                      >
+                        {/* Badge showing 360 cycle count - ALWAYS visible, positioned on outer side */}
+                        {(() => {
+                          const peripheralStats = scStats.get(contractAddr)
+                          const peripheralCycles = peripheralStats?.cyclesCompleted || 0
+                          const orbitData = getOrbitingCirclesData(peripheralCycles)
+
+                          // Calculate outward direction from SC0 center (0,0) to this peripheral
+                          const distFromCenter = Math.sqrt(pos.x * pos.x + pos.y * pos.y)
+                          const dirX = pos.x / distFromCenter
+                          const dirY = pos.y / distFromCenter
+                          const badgeDistance = 38 // Distance from peripheral center to badge
+
+                          // Badge position: peripheral position + outward direction * badgeDistance
+                          const badgeX = pos.x + dirX * badgeDistance
+                          const badgeY = pos.y + dirY * badgeDistance
+
+                          return (
+                            <g>
+                              <circle
+                                cx={badgeX}
+                                cy={badgeY}
+                                r="8"
+                                fill={orbitData.completed360Cycles > 0 ? "rgba(255, 215, 0, 0.9)" : "rgba(128, 128, 128, 0.6)"}
+                                stroke="rgba(255, 255, 255, 0.3)"
+                                strokeWidth="1"
+                              />
+                              <text
+                                x={badgeX}
+                                y={badgeY + 3}
+                                textAnchor="middle"
+                                fill="white"
+                                fontSize="7"
+                                fontWeight="bold"
+                                transform={`rotate(${-rotationAngle}, ${badgeX}, ${badgeY})`}
+                              >
+                                {orbitData.completed360Cycles}
+                              </text>
+                            </g>
+                          )
+                        })()}
+
+                        {/* Orbiting circles - only visible on hover */}
+                        {isHovered && (() => {
+                          const peripheralStats = scStats.get(contractAddr)
+                          const peripheralCycles = peripheralStats?.cyclesCompleted || 0
+                          const orbitData = getOrbitingCirclesData(peripheralCycles)
+                          const orbitRadius = 50 // Outside the badge
+                          const orbitingCircleRadius = 5
+                          const peripheralOrbitAngle = (rotationAngle * 5) % 360
+
+                          if (orbitData.numOrbitingCircles > 0 || orbitData.completed360Cycles > 0) {
+                            const numCircles = orbitData.numOrbitingCircles > 0 ? orbitData.numOrbitingCircles : 1
+                            return (
+                              <g transform={`rotate(${-rotationAngle}, ${pos.x}, ${pos.y})`}>
+                                {/* Orbit path */}
+                                <circle
+                                  cx={pos.x}
+                                  cy={pos.y}
+                                  r={orbitRadius}
+                                  fill="none"
+                                  stroke={orbitData.completed360Cycles > 0 ? "rgba(255, 215, 0, 0.4)" : "rgba(168, 85, 247, 0.3)"}
+                                  strokeWidth="1"
+                                  strokeDasharray="2,2"
+                                />
+                                {/* Orbiting circles - rotating around the peripheral center */}
+                                {Array.from({ length: numCircles }).map((_, i) => {
+                                  const baseAngle = (i * 360) / numCircles
+                                  const currentAngle = (baseAngle + peripheralOrbitAngle) % 360
+                                  const ox = pos.x + orbitRadius * Math.cos((currentAngle * Math.PI) / 180)
+                                  const oy = pos.y + orbitRadius * Math.sin((currentAngle * Math.PI) / 180)
+                                  return (
+                                    <g key={`peripheral-orbit-${i}`}>
+                                      <circle
+                                        cx={ox}
+                                        cy={oy}
+                                        r={orbitingCircleRadius}
+                                        fill={orbitData.completed360Cycles > 0 ? "rgba(255, 215, 0, 0.9)" : "rgba(168, 85, 247, 0.8)"}
+                                        stroke="rgba(255, 255, 255, 0.5)"
+                                        strokeWidth="1"
+                                      />
+                                    </g>
+                                  )
+                                })}
+                              </g>
+                            )
+                          }
+                          return null
+                        })()}
+
+                        {/* Sun glow effect for user's SC (MOI) - pulsing rays */}
+                        {isMyContractNode && (
+                          <>
+                            {/* Outer pulsing glow */}
+                            <circle
+                              cx={pos.x}
+                              cy={pos.y}
+                              r="42"
+                              fill="none"
+                              stroke="rgba(59, 130, 246, 0.3)"
+                              strokeWidth="4"
+                              className="animate-ping"
+                              style={{ animationDuration: '2s' }}
+                            />
+                            {/* Middle glow ring */}
+                            <circle
+                              cx={pos.x}
+                              cy={pos.y}
+                              r="38"
+                              fill="none"
+                              stroke="rgba(59, 130, 246, 0.5)"
+                              strokeWidth="3"
+                              className="animate-pulse"
+                            />
+                            {/* Inner bright ring */}
+                            <circle
+                              cx={pos.x}
+                              cy={pos.y}
+                              r="34"
+                              fill="none"
+                              stroke="rgba(147, 197, 253, 0.6)"
+                              strokeWidth="2"
+                            />
+                          </>
+                        )}
+
+                        {/* CURRENT TURN - Blinking glow effect (orange/gold) */}
+                        {isCurrent && (
+                          <>
+                            {/* Outer pulsing ping effect */}
+                            <circle
+                              cx={pos.x}
+                              cy={pos.y}
+                              r="50"
+                              fill="none"
+                              stroke="rgba(251, 191, 36, 0.4)"
+                              strokeWidth="4"
+                              className="animate-ping"
+                              style={{ animationDuration: '1.5s' }}
+                            />
+                            {/* Middle pulsing glow */}
+                            <circle
+                              cx={pos.x}
+                              cy={pos.y}
+                              r="42"
+                              fill="none"
+                              stroke="rgba(251, 191, 36, 0.6)"
+                              strokeWidth="3"
+                              className="animate-pulse"
+                            />
+                            {/* Inner bright ring */}
+                            <circle
+                              cx={pos.x}
+                              cy={pos.y}
+                              r="36"
+                              fill="none"
+                              stroke="rgba(253, 224, 71, 0.7)"
+                              strokeWidth="2"
+                            />
+                          </>
+                        )}
+
+                        <circle
+                          cx={pos.x}
+                          cy={pos.y}
+                          r="30"
+                          fill={`url(#${gradientId})`}
+                          className={`filter ${isHovered ? 'drop-shadow-xl' : isCurrent ? 'drop-shadow-lg' : 'drop-shadow-md'}`}
+                          stroke={isHovered ? 'rgba(255,255,255,0.5)' : isCurrent ? 'rgba(253, 224, 71, 0.9)' : isMyContractNode ? 'rgba(147, 197, 253, 0.8)' : 'none'}
+                          strokeWidth={isHovered ? '2' : isCurrent ? '3' : isMyContractNode ? '2' : '0'}
+                        />
+                        {/* Textes des noeuds avec contre-rotation pour rester horizontaux */}
+                        <g transform={`rotate(${-rotationAngle}, ${pos.x}, ${pos.y})`}>
+                          <text x={pos.x} y={pos.y - 10} textAnchor="middle" fill="white" fontSize="9" fontWeight="bold">
+                            SC{index + 1}
+                          </text>
+                          <text x={pos.x} y={pos.y + 2} textAnchor="middle" fill="rgba(255,255,255,0.5)" fontSize="6">
+                            {peripheralBalances.get(contractAddr) || '0'} EGLD
+                          </text>
+                          <text x={pos.x} y={pos.y + 14} textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="6">
+                            {isCycleComplete ? 'FAIT' : isMyContractNode ? 'MOI' : hasCompleted ? 'FAIT' : isCurrent ? 'TOUR' : hasOwnerPreSigned ? 'PRE' : 'ACTIF'}
+                          </text>
+                        </g>
+                      </g>
+                    </g>
+                  )
+                })}
+                </g>
+                {/* Fin du groupe qui tourne */}
+
+                {/* SC0 - Center (rendered last to be on top of lines and checkmarks) - FIXE, ne tourne pas */}
+                {/* SC0 with hover zoom effect */}
+                {(() => {
+                  const sc0Scale = hoveredSc0 ? 1.3 : 1
+                  return (
+                    <g
+                      className="cursor-pointer"
+                      style={{ transition: 'transform 0.2s ease-out' }}
+                      transform={`scale(${sc0Scale})`}
+                      onClick={(e) => handleNodeClick(e, 'sc0', CIRCLE_OF_LIFE_ADDRESS, sc0Owner, 0, false)}
+                      onMouseEnter={() => setHoveredSc0(true)}
+                      onMouseLeave={() => setHoveredSc0(false)}
+                    >
+                      {/* Permanent sun glow effect around SC0 - always visible */}
+                      <>
+                        {/* Outermost pulsing glow ray */}
+                        <circle
+                          cx="0"
+                          cy="0"
+                          r="55"
+                          fill="none"
+                          stroke={isCycleComplete ? "rgba(34, 197, 94, 0.2)" : "rgba(168, 85, 247, 0.15)"}
+                          strokeWidth="6"
+                          className="animate-ping"
+                          style={{ animationDuration: '3s' }}
+                        />
+                        {/* Outer glow ring */}
+                        <circle
+                          cx="0"
+                          cy="0"
+                          r="48"
+                          fill="none"
+                          stroke={isCycleComplete ? "rgba(34, 197, 94, 0.3)" : "rgba(168, 85, 247, 0.25)"}
+                          strokeWidth="4"
+                          className="animate-pulse"
+                          style={{ animationDuration: '2s' }}
+                        />
+                        {/* Middle glow ring */}
+                        <circle
+                          cx="0"
+                          cy="0"
+                          r="43"
+                          fill="none"
+                          stroke={isCycleComplete ? "rgba(34, 197, 94, 0.5)" : "rgba(168, 85, 247, 0.4)"}
+                          strokeWidth="3"
+                        />
+                        {/* Inner bright ring */}
+                        <circle
+                          cx="0"
+                          cy="0"
+                          r="39"
+                          fill="none"
+                          stroke={isCycleComplete ? "rgba(134, 239, 172, 0.6)" : "rgba(196, 181, 253, 0.5)"}
+                          strokeWidth="2"
+                        />
+                      </>
+
+                      {/* Additional glow effect when cycle is complete */}
+                      {isCycleComplete && (
+                        <circle
+                          cx="0"
+                          cy="0"
+                          r="60"
+                          fill="none"
+                          stroke="rgba(34, 197, 94, 0.3)"
+                          strokeWidth="8"
+                          className="animate-ping"
+                          style={{ animationDuration: '1.5s' }}
+                        />
+                      )}
+
+                      {/* Main SC0 circle */}
+                      <circle
+                        cx="0"
+                        cy="0"
+                        r="35"
+                        fill={isCycleComplete ? "url(#sc0CompleteGradient)" : "url(#sc0Gradient)"}
+                        className={`filter ${hoveredSc0 ? 'drop-shadow-xl' : 'drop-shadow-lg'} ${isCycleComplete ? 'animate-pulse' : ''}`}
+                        stroke={hoveredSc0 ? 'rgba(255,255,255,0.5)' : isCycleComplete ? 'rgba(134, 239, 172, 0.8)' : 'rgba(196, 181, 253, 0.6)'}
+                        strokeWidth={hoveredSc0 ? '3' : '2'}
+                      />
+                      <text x="0" y="-5" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">SC0</text>
+                      <text x="0" y="10" textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="8">
+                        {isCycleComplete ? 'COMPLET!' : 'CENTRE'}
+                      </text>
+                      <text x="0" y="22" textAnchor="middle" fill={isCycleComplete ? "rgba(34, 197, 94, 0.9)" : "rgba(255,255,255,0.5)"} fontSize="6">
+                        {contractBalance} EGLD
+                      </text>
+
+                      {/* Orbiting circles based on cycles completed (30 cycles = 1 circle, max 12) - RENDERED LAST (on top of glow) */}
+                      {(() => {
+                        const orbitData = getOrbitingCirclesData(cycleStats.cyclesCompleted)
+                        const orbitRadius = 50 // Distance from center
+                        const orbitingCircleRadius = 8
+                        // Use rotationAngle * 3 for faster orbit speed (3x faster than main rotation)
+                        const orbitAngle = (rotationAngle * 3) % 360
+
+                        // If we have completed 360 cycles but no remaining cycles, show badge with count
+                        if (orbitData.completed360Cycles > 0 && orbitData.numOrbitingCircles === 0) {
+                          // Single orbiting circle position
+                          const x = orbitRadius * Math.cos((orbitAngle * Math.PI) / 180)
+                          const y = orbitRadius * Math.sin((orbitAngle * Math.PI) / 180)
+                          return (
+                            <g>
+                              {/* Orbit path */}
+                              <circle
+                                cx="0"
+                                cy="0"
+                                r={orbitRadius}
+                                fill="none"
+                                stroke="rgba(255, 215, 0, 0.3)"
+                                strokeWidth="1"
+                                strokeDasharray="3,3"
+                              />
+                              {/* Single orbiting circle with 360 completion count */}
+                              <circle
+                                cx={x}
+                                cy={y}
+                                r={orbitingCircleRadius + 2}
+                                fill="url(#sc0Gradient)"
+                                stroke="rgba(255, 215, 0, 0.8)"
+                                strokeWidth="2"
+                              />
+                              <text
+                                x={x}
+                                y={y + 3}
+                                textAnchor="middle"
+                                fill="white"
+                                fontSize="8"
+                                fontWeight="bold"
+                              >
+                                {orbitData.completed360Cycles}
+                              </text>
+                            </g>
+                          )
+                        }
+
+                        // Show orbiting circles based on progress toward next 360
+                        if (orbitData.numOrbitingCircles > 0) {
+                          return (
+                            <g>
+                              {/* Orbit path */}
+                              <circle
+                                cx="0"
+                                cy="0"
+                                r={orbitRadius}
+                                fill="none"
+                                stroke="rgba(168, 85, 247, 0.3)"
+                                strokeWidth="1"
+                                strokeDasharray="3,3"
+                              />
+                              {/* Orbiting circles - positioned based on orbitAngle */}
+                              {Array.from({ length: orbitData.numOrbitingCircles }).map((_, i) => {
+                                const baseAngle = (i * 360) / orbitData.numOrbitingCircles
+                                const currentAngle = (baseAngle + orbitAngle) % 360
+                                const x = orbitRadius * Math.cos((currentAngle * Math.PI) / 180)
+                                const y = orbitRadius * Math.sin((currentAngle * Math.PI) / 180)
+                                return (
+                                  <g key={`sc0-orbit-${i}`}>
+                                    <circle
+                                      cx={x}
+                                      cy={y}
+                                      r={orbitingCircleRadius}
+                                      fill={i === 0 && orbitData.completed360Cycles > 0 ? "url(#sc0Gradient)" : "rgba(168, 85, 247, 0.8)"}
+                                      stroke="rgba(255, 255, 255, 0.5)"
+                                      strokeWidth="1"
+                                    />
+                                    {/* Show 360 completion count on first circle if > 0 */}
+                                    {i === 0 && orbitData.completed360Cycles > 0 && (
+                                      <text
+                                        x={x}
+                                        y={y + 3}
+                                        textAnchor="middle"
+                                        fill="white"
+                                        fontSize="7"
+                                        fontWeight="bold"
+                                      >
+                                        {orbitData.completed360Cycles}
+                                      </text>
+                                    )}
+                                  </g>
+                                )
+                              })}
+                            </g>
+                          )
+                        }
+
+                        return null
+                      })()}
+                    </g>
+                  )
+                })()}
+              </svg>
+
+            </div>
+
+            {/* Legend - responsive grid on mobile */}
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-2 sm:gap-4 mt-3 sm:mt-4">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full flex-shrink-0 ${isCycleComplete ? 'bg-gradient-to-r from-green-500 to-green-700' : 'bg-gradient-to-r from-purple-500 to-indigo-500'}`}></div>
+                <span className="text-gray-300 text-xs sm:text-sm">SC0</span>
+              </div>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex-shrink-0 bg-gradient-to-r from-green-500 to-green-600"></div>
+                <span className="text-gray-300 text-xs sm:text-sm">Actif</span>
+              </div>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex-shrink-0 bg-gradient-to-r from-amber-500 to-amber-600"></div>
+                <span className="text-gray-300 text-xs sm:text-sm">Tour</span>
+              </div>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex-shrink-0 bg-gradient-to-r from-blue-500 to-blue-600"></div>
+                <span className="text-gray-300 text-xs sm:text-sm">Moi</span>
+              </div>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex-shrink-0 bg-gradient-to-r from-blue-400 to-blue-500"></div>
+                <span className="text-gray-300 text-xs sm:text-sm">Pre-signe</span>
+              </div>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex-shrink-0 bg-gradient-to-r from-green-300 to-green-500"></div>
+                <span className="text-gray-300 text-xs sm:text-sm">Signe</span>
+              </div>
+            </div>
+
+            {/* Cycle Complete Banner */}
+            {isCycleComplete && (
+              <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-green-500/20 border border-green-500/50 rounded-lg sm:rounded-xl text-center">
+                <p className="text-green-300 font-bold text-base sm:text-lg">Cycle #{cycleDay} Termine!</p>
+                <p className="text-green-200/80 text-xs sm:text-sm mt-1">
+                  Les fonds ({circulationAmount} EGLD) sont revenus au SC0.
+                </p>
+              </div>
+            )}
+
+            {/* Actions - Moved under visualization */}
+            <div className="mt-4 sm:mt-6 bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 shadow-xl">
+              <h3 className="text-base sm:text-lg font-bold text-white mb-3 sm:mb-4">Actions</h3>
+
+              <div className="space-y-3">
+                {!myContract ? (
+                  <button
+                    onClick={() => setShowJoinModal(true)}
+                    disabled={isPaused || isLoading}
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition"
+                  >
+                    Rejoindre le Cercle ({creationFee} EGLD)
+                  </button>
+                ) : (
+                  <>
+                    {/* Boutons de signature - seulement si le cycle est demarre (cycleHolder existe) et PAS en timeout */}
+                    {cycleHolder && !isCycleInTimeout && (
+                      <>
+                        {/* Bouton Signer - seulement si c'est son tour et pas banni */}
+                        {isMyTurn && !isMyScBanned && (
+                          <button
+                            onClick={() => setShowSignModal(true)}
+                            disabled={isPaused || isLoading}
+                            className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition animate-pulse"
+                          >
+                            Signer le Transfert (C&apos;est votre tour!)
+                          </button>
+                        )}
+
+                        {/* Bouton Pre-signer - si pas encore pre-signe, pas son tour, pas deja signe, et pas banni */}
+                        {!hasPreSigned && !isMyTurn && !hasSignedThisCycle && !isMyScBanned && (
+                          <button
+                            onClick={() => setShowPreSignModal(true)}
+                            disabled={isPaused || isLoading}
+                            className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition"
+                          >
+                            Pre-signer a l&apos;avance
+                          </button>
+                        )}
+
+                        {/* Indicateur pre-signature */}
+                        {hasPreSigned && !isMyTurn && !hasSignedThisCycle && (
+                          <div className="p-3 bg-blue-500/20 border border-blue-500/30 rounded-lg">
+                            <p className="text-blue-300 text-sm text-center">
+                              Vous avez deja pre-signe
+                            </p>
+                            <p className="text-blue-400/70 text-xs text-center mt-1">
+                              Le transfert s&apos;executera automatiquement quand ce sera votre tour
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Indicateur tour termine */}
+                        {hasSignedThisCycle && !isMyTurn && (
+                          <div className="p-3 bg-green-500/20 border border-green-500/30 rounded-lg">
+                            <p className="text-green-300 text-sm text-center">
+                              &#x2713; Votre tour est termine pour ce cycle
+                            </p>
+                            <p className="text-green-400/70 text-xs text-center mt-1">
+                              Vous avez deja signe et transfere
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* Section Auto-Sign */}
+                    {!isMyScBanned && (
+                      <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-purple-300 font-semibold text-sm">Auto-Signature</h4>
+                          {(autoSignStatus.isPermanent || autoSignStatus.remainingCycles > 0) && (
+                            <span className="px-2 py-1 bg-purple-500/30 text-purple-300 text-xs rounded-full">
+                              {autoSignStatus.isPermanent ? 'Permanent' : `${autoSignStatus.remainingCycles} cycles restants`}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Status actuel */}
+                        {autoSignStatus.isPermanent && (
+                          <div className="p-2 bg-purple-500/20 rounded-lg">
+                            <p className="text-purple-300 text-xs text-center">
+                              Auto-signature permanente activee
+                            </p>
+                            <p className="text-purple-400/70 text-xs text-center mt-1">
+                              Vos cycles seront signes automatiquement indefiniment
+                            </p>
+                          </div>
+                        )}
+
+                        {!autoSignStatus.isPermanent && autoSignStatus.remainingCycles > 0 && (
+                          <div className="p-2 bg-purple-500/20 rounded-lg">
+                            <p className="text-purple-300 text-xs text-center">
+                              Auto-signature active pour {autoSignStatus.remainingCycles} cycle{autoSignStatus.remainingCycles > 1 ? 's' : ''}
+                            </p>
+                            <p className="text-purple-400/70 text-xs text-center mt-1">
+                              Vos cycles seront signes automatiquement
+                            </p>
+                          </div>
+                        )}
+
+                        {!autoSignStatus.isPermanent && autoSignStatus.remainingCycles === 0 && (
+                          <p className="text-purple-400/70 text-xs text-center">
+                            Activez l&apos;auto-signature pour ne plus avoir a signer manuellement chaque jour
+                          </p>
+                        )}
+
+                        {/* Boutons */}
+                        <div className="flex gap-2">
+                          {!autoSignStatus.isPermanent && autoSignStatus.remainingCycles === 0 && (
+                            <button
+                              onClick={() => setShowAutoSignModal(true)}
+                              disabled={isPaused || isLoading}
+                              className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 text-white font-semibold py-2 px-3 rounded-lg transition text-sm"
+                            >
+                              Activer Auto-Sign
+                            </button>
+                          )}
+
+                          {(autoSignStatus.isPermanent || autoSignStatus.remainingCycles > 0) && (
+                            <>
+                              <button
+                                onClick={() => setShowAutoSignModal(true)}
+                                disabled={isPaused || isLoading}
+                                className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 text-white font-semibold py-2 px-3 rounded-lg transition text-sm"
+                              >
+                                Modifier
+                              </button>
+                              <button
+                                onClick={() => setShowDisableAutoSignModal(true)}
+                                disabled={isPaused || isLoading}
+                                className="flex-1 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 disabled:opacity-50 text-white font-semibold py-2 px-3 rounded-lg transition text-sm"
+                              >
+                                Desactiver
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Message quand le cycle n'est pas demarre */}
+                    {!cycleHolder && !isCycleComplete && (
+                      <div className="p-3 bg-orange-500/20 border border-orange-500/30 rounded-lg">
+                        <p className="text-orange-300 text-sm text-center">
+                          Le cycle quotidien n&apos;est pas encore demarre
+                        </p>
+                        <p className="text-orange-400/70 text-xs text-center mt-1">
+                          Attendez qu&apos;un membre demarre le cycle pour pouvoir pre-signer ou signer
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Member status card */}
+                    <div className={`p-3 ${isMyScBanned ? 'bg-red-500/20 border-red-500/30' : isActive ? 'bg-green-500/20 border-green-500/30' : 'bg-gray-500/20 border-gray-500/30'} border rounded-lg`}>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className={`${isMyScBanned ? 'text-red-300' : isActive ? 'text-green-300' : 'text-gray-300'} text-sm`}>
+                            Vous etes membre du cercle
+                          </p>
+                          <p className={`${isMyScBanned ? 'text-red-400/70' : isActive ? 'text-green-400/70' : 'text-gray-400/70'} text-xs mt-1 font-mono`}>
+                            {formatAddress(myContract)}
+                          </p>
+                          {isMyScBanned && banEndDate && (
+                            <p className="text-red-400 text-xs mt-1">
+                              Fin du ban: {banEndDate}
+                            </p>
+                          )}
+                        </div>
+                        <div className={`px-2 py-1 rounded text-xs font-semibold ${isMyScBanned ? 'bg-red-500/30 text-red-300' : isActive ? 'bg-green-500/30 text-green-300' : 'bg-gray-500/30 text-gray-300'}`}>
+                          {isMyScBanned ? 'Banni' : isActive ? 'Actif' : 'Inactif'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Toggle Active/Inactive button */}
+                    {isActive ? (
+                      <button
+                        onClick={() => setShowDeactivateModal(true)}
+                        disabled={isPaused || isLoading}
+                        className="w-full bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 disabled:opacity-50 text-white font-semibold py-2 px-4 rounded-lg transition text-sm"
+                      >
+                        Desactiver mon point
+                      </button>
+                    ) : isMyScBanned ? (
+                      <div className="space-y-2">
+                        <button
+                          disabled={true}
+                          className="w-full bg-gradient-to-r from-red-800 to-red-900 opacity-50 cursor-not-allowed text-white font-semibold py-2 px-4 rounded-lg transition text-sm"
+                        >
+                          Reactiver mon point (Banni)
+                        </button>
+                        <p className="text-center text-xs text-red-400">
+                          Vous ne pouvez pas reactiver votre point pendant la periode de ban
+                        </p>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setShowActivateModal(true)}
+                        disabled={isPaused || isLoading}
+                        className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 text-white font-semibold py-2 px-4 rounded-lg transition text-sm"
+                      >
+                        Reactiver mon point
+                      </button>
+                    )}
+                  </>
+                )}
+
+                {/* Start cycle button - seulement si le cycle n'est pas en cours */}
+                {activeContractsCount > 0 && !cycleHolder && !isCycleComplete && (
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => setShowStartCycleModal(true)}
+                      disabled={isPaused || isLoading}
+                      className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition"
+                    >
+                      Demarrer le Cycle Quotidien
+                      {starterBonusInfo.percentage > 0 && (
+                        <span className="ml-2 text-cyan-200 text-sm">&#x2B50; +{(starterBonusInfo.percentage / 100).toFixed(0)}%</span>
+                      )}
+                    </button>
+                    {starterBonusInfo.percentage > 0 && (
+                      <p className="text-cyan-400 text-xs text-center">
+                        Bonus: +{starterBonusInfo.potentialBonus} XCX pour demarrer!
+                      </p>
+                    )}
+                    <p className="text-center text-xs text-gray-400">
+                      Lancez le cycle pour commencer les transferts
+                    </p>
+                  </div>
+                )}
+
+                {/* Indicateur cycle en cours */}
+                {cycleHolder && !isCycleInTimeout && (
+                  <div className="p-3 bg-green-500/20 border border-green-500/30 rounded-lg">
+                    <p className="text-green-300 text-sm text-center font-semibold">
+                      Cycle en cours
+                    </p>
+                    <p className="text-green-400/70 text-xs text-center mt-1">
+                      Le cycle quotidien est actif - les membres peuvent signer
+                    </p>
+                  </div>
+                )}
+
+                {/* Indicateur cycle en timeout + bouton pour declarer echec */}
+                {isCycleInTimeout && (
+                  <div className="space-y-3">
+                    <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
+                      <p className="text-red-300 text-sm text-center font-semibold">
+                        Cycle en Timeout!
+                      </p>
+                      <p className="text-red-400/70 text-xs text-center mt-1">
+                        Le cycle du jour #{cycleDay} n&apos;a pas ete complete a temps
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowFailCycleModal(true)}
+                      disabled={isPaused || isLoading}
+                      className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition"
+                    >
+                      Declarer Cycle Echoue (Bannir le SC responsable)
+                    </button>
+                    <p className="text-center text-xs text-red-400/70">
+                      Le SC qui bloque sera banni pour 7 jours
+                    </p>
+                  </div>
+                )}
+
+                {/* Indicateur cycle termine */}
+                {isCycleComplete && (
+                  <div className="p-3 bg-purple-500/20 border border-purple-500/30 rounded-lg">
+                    <p className="text-purple-300 text-sm text-center font-semibold">
+                      Cycle #{cycleDay} termine!
+                    </p>
+                    <p className="text-purple-400/70 text-xs text-center mt-1">
+                      Tous les membres ont signe. Prochain cycle demain.
+                    </p>
+                  </div>
+                )}
+
+                {/* Bouton pour traiter TOUS les transferts en attente en une seule transaction */}
+                {/* Ne pas afficher si le cycle est en timeout (echec) - il faut d'abord declarer l'echec */}
+                {pendingAutoTransfers > 0 && !isCycleInTimeout && (
+                  <button
+                    onClick={() => setShowProcessModal(true)}
+                    disabled={isPaused || isLoading}
+                    className="w-full bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition"
+                  >
+                    Executer les {pendingAutoTransfers} transfert(s) en 1 clic
+                  </button>
+                )}
+
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-4 rounded-lg transition"
+                >
+                  Mon Dashboard
+                </button>
+              </div>
+            </div>
+
+            {/* Comment ca marche - Liste verticale */}
+            <div className="mt-4 sm:mt-6 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6">
+              <h3 className="text-base sm:text-lg font-bold text-white mb-3 sm:mb-4">Comment ca marche ?</h3>
+
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <span className="bg-purple-500/30 text-purple-300 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</span>
+                  <span className="text-gray-300 text-sm">Payez {creationFee} EGLD pour creer votre smart contract</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="bg-purple-500/30 text-purple-300 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">2</span>
+                  <span className="text-gray-300 text-sm">SC0 devient co-proprietaire avec vous</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="bg-purple-500/30 text-purple-300 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">3</span>
+                  <span className="text-gray-300 text-sm">Chaque jour, {circulationAmount} EGLD transite entre les SC</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="bg-purple-500/30 text-purple-300 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">4</span>
+                  <span className="text-gray-300 text-sm">Signez avant minuit (UTC) pour valider le transfert</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="bg-purple-500/30 text-purple-300 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">5</span>
+                  <span className="text-gray-300 text-sm">Si vous ne signez pas, les fonds vont a SC0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Stats & Actions */}
+          <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+
+            {/* Cycle Status */}
+            <div className="bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 shadow-xl">
+              <h3 className="text-lg font-bold text-white mb-4">Statut du Cercle</h3>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">Contrats totaux</span>
+                  <span className="text-white font-semibold">{totalContracts}</span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">Contrats actifs</span>
+                  <span className="text-white font-semibold">{activeContractsCount}</span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">Position actuelle</span>
+                  <span className="text-white font-semibold">
+                    {isCycleComplete
+                      ? 'Cycle termine'
+                      : actualCurrentPosition >= 0
+                        ? `SC${actualCurrentPosition + 1} / ${activeContractsCount}`
+                        : 'N/A'}
+                  </span>
+                </div>
+
+                {/* Cycle Holder - Debug info */}
+                {cycleHolder && (
+                  <div className="p-3 bg-amber-500/20 border border-amber-500/30 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="text-amber-300 text-sm">Detenteur du cycle</span>
+                      <span className="text-amber-100 font-mono text-xs">
+                        {formatAddress(cycleHolder)}
+                      </span>
+                    </div>
+                    <p className="text-amber-200/70 text-xs mt-1">
+                      {cycleHolder === myContract ? 'C\'est VOTRE tour de signer!' :
+                       activeContracts.indexOf(cycleHolder) >= 0
+                         ? `SC${activeContracts.indexOf(cycleHolder) + 1} doit signer`
+                         : 'Cycle termine'}
+                    </p>
+                  </div>
+                )}
+
+                {!cycleHolder && cycleDay > 0 && (
+                  <div className="p-3 bg-green-500/20 border border-green-500/30 rounded-lg">
+                    <p className="text-green-300 text-sm text-center">
+                      Cycle du jour #{cycleDay} termine!
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">Montant circulant</span>
+                  <span className="text-white font-semibold">{circulationAmount} EGLD</span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">Prochain cycle (UTC)</span>
+                  <span className="text-orange-400 font-semibold">{formatTimeRemaining()}</span>
+                </div>
+
+                {/* Progress bar */}
+                {activeContractsCount > 0 && (
+                  <div className="mt-4">
+                    <div className="flex justify-between text-xs text-gray-400 mb-1">
+                      <span>Progression</span>
+                      <span className={isCycleComplete ? 'text-green-400 font-bold' : ''}>
+                        {progressPercentage}%{isCycleComplete && ' - Termine!'}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div
+                        className={`h-2 rounded-full transition-all duration-500 ${
+                          isCycleComplete
+                            ? 'bg-gradient-to-r from-green-500 to-emerald-500'
+                            : 'bg-gradient-to-r from-purple-500 to-pink-500'
+                        }`}
+                        style={{ width: `${progressPercentage}%` }}
+                      />
+                    </div>
+                    {isCycleComplete && (
+                      <p className="text-green-400 text-xs mt-2 text-center animate-pulse">
+                        Le cycle est complet! Les fonds sont revenus au centre (SC0)
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Cycle Statistics */}
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
+              <h3 className="text-lg font-bold text-white mb-4">Statistiques des Cycles</h3>
+
+              <div className="space-y-4">
+                {/* Total cycles */}
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">Total des cycles</span>
+                  <span className="text-white font-semibold">{cycleStats.totalCycles}</span>
+                </div>
+
+                {/* Success/Fail ratio */}
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Completed */}
+                  <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold text-green-400">{cycleStats.cyclesCompleted}</div>
+                    <div className="text-xs text-green-300">Reussis</div>
+                  </div>
+
+                  {/* Failed */}
+                  <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold text-red-400">{cycleStats.cyclesFailed}</div>
+                    <div className="text-xs text-red-300">Echoues</div>
+                  </div>
+                </div>
+
+                {/* Success rate progress bar */}
+                {cycleStats.totalCycles > 0 && (
+                  <div>
+                    <div className="flex justify-between text-xs text-gray-400 mb-1">
+                      <span>Taux de reussite</span>
+                      <span className={cycleStats.cyclesCompleted / cycleStats.totalCycles >= 0.8 ? 'text-green-400' : cycleStats.cyclesCompleted / cycleStats.totalCycles >= 0.5 ? 'text-yellow-400' : 'text-red-400'}>
+                        {Math.round((cycleStats.cyclesCompleted / cycleStats.totalCycles) * 100)}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+                      <div className="flex h-full">
+                        <div
+                          className="bg-gradient-to-r from-green-500 to-green-400 h-full transition-all duration-500"
+                          style={{ width: `${(cycleStats.cyclesCompleted / cycleStats.totalCycles) * 100}%` }}
+                        />
+                        <div
+                          className="bg-gradient-to-r from-red-500 to-red-400 h-full transition-all duration-500"
+                          style={{ width: `${(cycleStats.cyclesFailed / cycleStats.totalCycles) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-xs mt-1">
+                      <span className="text-green-400">{cycleStats.cyclesCompleted} reussis</span>
+                      <span className="text-red-400">{cycleStats.cyclesFailed} echoues</span>
+                    </div>
+                  </div>
+                )}
+
+                {cycleStats.totalCycles === 0 && (
+                  <p className="text-gray-400 text-sm text-center py-2">
+                    Aucun cycle termine pour le moment
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Rewards Section */}
+            {myContract && (
+              <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 shadow-xl overflow-hidden">
+                <h3 className="text-base sm:text-lg font-bold text-white mb-3 sm:mb-4 flex items-center gap-2">
+                  <span>&#x1F3C6;</span> <span className="truncate">Recompenses XCIRCLEX</span>
+                </h3>
+
+                <div className="space-y-3 sm:space-y-4">
+                  {/* Current day */}
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-gray-400 text-sm sm:text-base">Jour (UTC)</span>
+                    <span className={`font-semibold text-sm sm:text-base ${canClaim.isSunday ? 'text-green-400' : 'text-white'}`}>
+                      {getDayName(dayOfWeek)}
+                      {canClaim.isSunday && ' ✓'}
+                    </span>
+                  </div>
+
+                  {/* Pending rewards */}
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-gray-400 text-sm sm:text-base truncate">Mes recompenses</span>
+                    <span className={`font-bold text-sm sm:text-lg flex-shrink-0 ${parseFloat(pendingRewards) > 0 ? 'text-yellow-400' : 'text-gray-400'}`}>
+                      {pendingRewards} XCX
+                    </span>
+                  </div>
+
+                  {/* Reward per cycle */}
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-gray-400 text-sm sm:text-base truncate">Recompense/cycle</span>
+                    <span className="text-white text-sm sm:text-base flex-shrink-0">{rewardsInfo.rewardPerCycle} XCX</span>
+                  </div>
+
+                  {/* Potential reward with bonuses */}
+                  {myContract && (
+                    <div className="mt-2 p-2 sm:p-3 bg-gradient-to-r from-yellow-500/10 to-green-500/10 border border-yellow-500/30 rounded-lg overflow-hidden">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 mb-2">
+                        <span className="text-yellow-300 font-semibold text-sm sm:text-base truncate">Recompense potentielle</span>
+                        <span className="text-green-400 font-bold text-base sm:text-lg">
+                          {(() => {
+                            const scCount = activeContracts.length || 1;
+                            const totalReward = parseFloat(rewardsInfo.rewardPerCycle) || 0;
+                            const basePerSc = totalReward / scCount;
+                            const pioneerBonus = pioneerInfo.isPioneer ? basePerSc * (pioneerInfo.bonusPercentage / 10000) : 0;
+                            const depositBonus = basePerSc * (depositBonusInfo.bonusBps / 10000);
+                            // Starter bonus: 10% of base/SC, only if user started the cycle
+                            // cycleStarter contains the WALLET address, not the SC address
+                            const isStarterActive = starterBonusInfo.percentage > 0 && starterBonusInfo.cycleStarter === address;
+                            const starterBonus = isStarterActive ? parseFloat(starterBonusInfo.potentialBonus) || 0 : 0;
+                            const total = basePerSc + pioneerBonus + depositBonus + starterBonus;
+                            return total.toFixed(2);
+                          })()} XCX
+                        </span>
+                      </div>
+                      <div className="space-y-1 text-xs">
+                        <div className="flex justify-between items-center text-gray-400 gap-2">
+                          <span className="truncate">Base (/{activeContracts.length || 1} SC)</span>
+                          <span className="flex-shrink-0">{((parseFloat(rewardsInfo.rewardPerCycle) || 0) / (activeContracts.length || 1)).toFixed(2)}</span>
+                        </div>
+                        {/* Starter bonus - active only if user started the cycle */}
+                        {starterBonusInfo.percentage > 0 && (
+                          <div className={`flex justify-between items-center gap-2 ${starterBonusInfo.cycleStarter === address ? 'text-cyan-400' : 'text-gray-500'}`}>
+                            <span className="truncate">
+                              + Starter (+{(starterBonusInfo.percentage / 100).toFixed(1)}%)
+                              {starterBonusInfo.cycleStarter !== address && <span className="ml-1 text-gray-600">(inactif)</span>}
+                            </span>
+                            <span className="flex-shrink-0">
+                              {starterBonusInfo.cycleStarter === address
+                                ? `+${starterBonusInfo.potentialBonus}`
+                                : '-'}
+                            </span>
+                          </div>
+                        )}
+                        {pioneerInfo.isPioneer && (
+                          <div className="flex justify-between items-center text-emerald-400 gap-2">
+                            <span className="truncate">+ Pioneer (+{(pioneerInfo.bonusPercentage / 100).toFixed(2)}%)</span>
+                            <span className="flex-shrink-0">+{(((parseFloat(rewardsInfo.rewardPerCycle) || 0) / (activeContracts.length || 1)) * pioneerInfo.bonusPercentage / 10000).toFixed(2)}</span>
+                          </div>
+                        )}
+                        {depositBonusInfo.bonusPercent > 0 && (
+                          <div className="flex justify-between items-center text-amber-400 gap-2">
+                            <span className="truncate">+ Depot (+{depositBonusInfo.bonusPercent}%)</span>
+                            <span className="flex-shrink-0">+{(((parseFloat(rewardsInfo.rewardPerCycle) || 0) / (activeContracts.length || 1)) * depositBonusInfo.bonusBps / 10000).toFixed(2)}</span>
+                          </div>
+                        )}
+                        {!pioneerInfo.isPioneer && depositBonusInfo.bonusPercent === 0 && starterBonusInfo.percentage === 0 && (
+                          <div className="text-gray-500 text-center text-xs">
+                            Deposez EGLD ou devenez pionnier!
+                          </div>
+                        )}
+                        <div className="flex justify-between items-center text-green-300 font-semibold pt-1 border-t border-green-500/20">
+                          <span>Total bonus</span>
+                          <span>+{(() => {
+                            // Only count starter if active for this user (compare with wallet address, not SC)
+                            const isStarterActive = starterBonusInfo.percentage > 0 && starterBonusInfo.cycleStarter === address;
+                            const starterPct = isStarterActive ? starterBonusInfo.percentage / 100 : 0;
+                            const pioneerPct = pioneerInfo.isPioneer ? pioneerInfo.bonusPercentage / 100 : 0;
+                            const depositPct = depositBonusInfo.bonusPercent;
+                            return (starterPct + pioneerPct + depositPct).toFixed(2);
+                          })()}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Rewards pool */}
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-gray-400 text-sm sm:text-base truncate">Pool</span>
+                    <span className="text-white text-sm sm:text-base flex-shrink-0">{rewardsInfo.rewardsPool} XCX</span>
+                  </div>
+
+                  {/* Total distributed */}
+                  <div className="flex justify-between items-center gap-2 text-xs sm:text-sm">
+                    <span className="text-gray-500 truncate">Total distribue</span>
+                    <span className="text-gray-400 flex-shrink-0">{rewardsInfo.totalRewardsDistributed} XCX</span>
+                  </div>
+
+                  {/* Burn Stats Section */}
+                  <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-red-500/20">
+                    <h4 className="text-red-400 font-semibold mb-2 flex items-center gap-2 text-sm sm:text-base">
+                      <span>&#x1F525;</span> Burn
+                    </h4>
+                    <div className="space-y-2 text-xs sm:text-sm">
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-gray-400 truncate">Burn/SC/cycle</span>
+                        <span className="text-red-300 flex-shrink-0">{burnStats.burnPerSc} XCX</span>
+                      </div>
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-gray-400 truncate">Prochain burn</span>
+                        <span className="text-red-400 flex-shrink-0">{burnStats.estimatedNextBurn} XCX</span>
+                      </div>
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-gray-500 truncate">Total brule</span>
+                        <span className="text-red-500 font-bold flex-shrink-0">{burnStats.totalBurned} XCX</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Starter Bonus Section */}
+                  {starterBonusInfo.percentage > 0 && (
+                    <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-cyan-500/20">
+                      <h4 className="text-cyan-400 font-semibold mb-2 flex items-center gap-2 text-sm sm:text-base">
+                        <span>&#x2B50;</span> Starter
+                      </h4>
+                      <div className="space-y-2 text-xs sm:text-sm">
+                        <div className="flex justify-between items-center gap-2">
+                          <span className="text-gray-400 truncate">Bonus</span>
+                          <span className="text-cyan-300 font-bold flex-shrink-0">+{(starterBonusInfo.percentage / 100).toFixed(1)}%</span>
+                        </div>
+                        <div className="flex justify-between items-center gap-2">
+                          <span className="text-gray-400 truncate">Potentiel</span>
+                          <span className="text-cyan-400 flex-shrink-0">
+                            {starterBonusInfo.potentialBonus} XCX
+                          </span>
+                        </div>
+                        {starterBonusInfo.cycleStarter && (
+                          <div className="flex justify-between items-center gap-2">
+                            <span className="text-gray-400 truncate">Demarre par</span>
+                            <span className={`font-mono text-xs flex-shrink-0 ${starterBonusInfo.cycleStarter === address ? 'text-green-400 font-bold' : 'text-cyan-300'}`}>
+                              {starterBonusInfo.cycleStarter === address ? 'VOUS!' : formatAddress(starterBonusInfo.cycleStarter)}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex justify-between items-center gap-2">
+                          <span className="text-gray-500 truncate">Total distribue</span>
+                          <span className="text-cyan-500 flex-shrink-0">{starterBonusInfo.totalDistributed} XCX</span>
+                        </div>
+                      </div>
+                      {!cycleHolder && !starterBonusInfo.cycleStarter && (
+                        <p className="text-cyan-400/70 text-xs mt-2 text-center">
+                          Demarrez le cycle pour le bonus!
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* π × 360 Halving System */}
+                  <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-purple-500/20">
+                    <h4 className="text-purple-400 font-semibold mb-2 flex items-center gap-2 text-sm sm:text-base">
+                      <span>&#x03C0;</span> <span className="truncate">Systeme &#x03C0;x360</span>
+                    </h4>
+                    <div className="space-y-2 text-xs sm:text-sm">
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-gray-400 truncate">Recompense</span>
+                        <span className="text-purple-300 font-bold flex-shrink-0">{optionFInfo.currentReward || rewardsInfo.rewardPerCycle} XCX</span>
+                      </div>
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-gray-400 truncate">Ere</span>
+                        <span className="text-purple-300 flex-shrink-0">Ere {optionFInfo.currentEra}</span>
+                      </div>
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-gray-400 truncate">Halving</span>
+                        <span className="text-purple-400 flex-shrink-0">Dans {optionFInfo.cyclesUntilHalving} cycles</span>
+                      </div>
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-gray-400 truncate">Cercle complet</span>
+                        <span className="text-purple-300 flex-shrink-0">#{optionFInfo.nextCircleComplete}</span>
+                      </div>
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-gray-400 truncate">Bonus &#x03C0;%</span>
+                        <span className="text-pink-400 font-bold flex-shrink-0">+{optionFInfo.piBonusAmount || ((parseFloat(rewardsInfo.rewardPerCycle) * 0.0314).toFixed(2))} XCX</span>
+                      </div>
+                    </div>
+                    <p className="text-purple-400/60 text-xs mt-2 text-center">
+                      Halving /360 cycles - Bonus +3.14% aux #360, #720...
+                    </p>
+                  </div>
+
+                  {/* Pioneer Bonus Section */}
+                  <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-emerald-500/20">
+                    <h4 className="text-emerald-400 font-semibold mb-2 flex items-center gap-2 text-sm sm:text-base">
+                      <span>&#x1F31F;</span> <span className="truncate">Pionnier &#x03C0;%</span>
+                    </h4>
+                    <div className="space-y-2 text-xs sm:text-sm">
+                      {/* User Pioneer Status */}
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-gray-400 truncate">Statut</span>
+                        {pioneerInfo.isPioneer ? (
+                          <span className="text-emerald-400 font-bold flex items-center gap-1 flex-shrink-0">
+                            <span className="animate-pulse">&#x2B50;</span> #{pioneerInfo.index}
+                          </span>
+                        ) : (
+                          <span className="text-gray-500 flex-shrink-0">Non pionnier</span>
+                        )}
+                      </div>
+
+                      {/* Pioneer Bonus */}
+                      {pioneerInfo.isPioneer && (
+                        <div className="flex justify-between items-center gap-2">
+                          <span className="text-gray-400 truncate">Bonus</span>
+                          <span className="text-emerald-300 font-bold flex-shrink-0">+{(pioneerInfo.bonusPercentage / 100).toFixed(2)}%</span>
+                        </div>
+                      )}
+
+                      {/* Pioneer Slots */}
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-gray-400 truncate">Places</span>
+                        <span className={`font-semibold flex-shrink-0 ${pioneerInfo.remainingSlots > 0 ? 'text-emerald-300' : 'text-gray-500'}`}>
+                          {pioneerInfo.totalPioneers}/360
+                        </span>
+                      </div>
+
+                      {/* Remaining slots */}
+                      {pioneerInfo.remainingSlots > 0 && (
+                        <div className="flex justify-between items-center gap-2">
+                          <span className="text-gray-400 truncate">Restantes</span>
+                          <span className="text-emerald-400 font-bold flex-shrink-0">{pioneerInfo.remainingSlots}</span>
+                        </div>
+                      )}
+
+                      {/* Progress bar */}
+                      <div className="mt-2">
+                        <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
+                            style={{ width: `${(pioneerInfo.totalPioneers / 360) * 100}%` }}
+                          />
+                        </div>
+                        <p className="text-emerald-400/60 text-xs mt-1 text-center">
+                          {((pioneerInfo.totalPioneers / 360) * 100).toFixed(1)}% attribuees
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-emerald-400/60 text-xs mt-2 text-center">
+                      360 premiers SC = +3.14% permanent
+                    </p>
+                  </div>
+
+                  {/* Deposit Bonus Section */}
+                  <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-amber-500/20">
+                    <h4 className="text-amber-400 font-semibold mb-2 flex items-center gap-2 text-sm sm:text-base">
+                      <span>&#x1F4B0;</span> <span className="truncate">Depot EGLD</span>
+                    </h4>
+                    <div className="space-y-2 text-xs sm:text-sm">
+                      {/* Deposit bonus info */}
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-gray-400 truncate">Depots</span>
+                        <span className={`font-semibold flex-shrink-0 ${parseFloat(depositBonusInfo.totalDeposits) > 0 ? 'text-amber-300' : 'text-gray-500'}`}>
+                          {parseFloat(depositBonusInfo.totalDeposits).toFixed(2)} EGLD
+                        </span>
+                      </div>
+
+                      {/* Current bonus */}
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-gray-400 truncate">Bonus</span>
+                        <span className={`font-bold flex-shrink-0 ${depositBonusInfo.bonusPercent > 0 ? 'text-amber-400' : 'text-gray-500'}`}>
+                          +{depositBonusInfo.bonusPercent}%
+                        </span>
+                      </div>
+
+                      {/* Max bonus */}
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-gray-400 truncate">Max</span>
+                        <span className="text-amber-300/70 flex-shrink-0">+{depositBonusInfo.maxBonusPercent}%</span>
+                      </div>
+
+                      {/* Progress bar */}
+                      <div className="mt-2">
+                        <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-amber-500 to-yellow-400 transition-all duration-500"
+                            style={{ width: `${(depositBonusInfo.bonusPercent / depositBonusInfo.maxBonusPercent) * 100}%` }}
+                          />
+                        </div>
+                        <p className="text-amber-400/60 text-xs mt-1 text-center">
+                          {depositBonusInfo.bonusPercent}/{depositBonusInfo.maxBonusPercent}%
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-amber-400/60 text-xs mt-2 text-center">
+                      1 EGLD = +1% (max 360 EGLD = 360%)
+                    </p>
+                  </div>
+
+                  {/* Claim info */}
+                  {!canClaim.isSunday && parseFloat(pendingRewards) > 0 && (
+                    <div className="p-3 bg-orange-500/20 border border-orange-500/30 rounded-lg">
+                      <p className="text-orange-300 text-sm text-center">
+                        &#x23F0; Les recompenses peuvent etre reclamees uniquement le dimanche (UTC)
+                      </p>
+                      <p className="text-orange-200 text-xs text-center mt-1">
+                        Dimanche UTC = Dimanche 01:00 heure francaise
+                      </p>
+                    </div>
+                  )}
+
+                  {canClaim.isSunday && parseFloat(pendingRewards) > 0 && (
+                    <div className="p-3 bg-green-500/20 border border-green-500/30 rounded-lg">
+                      <p className="text-green-300 text-sm text-center">
+                        &#x2705; C&apos;est dimanche (UTC) ! Vous pouvez reclamer vos recompenses
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Claim button */}
+                  <button
+                    onClick={() => setShowClaimRewardsModal(true)}
+                    disabled={isPaused || isLoading || !canClaim.isSunday || parseFloat(pendingRewards) <= 0}
+                    className={`w-full font-semibold py-3 px-4 rounded-lg transition ${
+                      canClaim.isSunday && parseFloat(pendingRewards) > 0
+                        ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white'
+                        : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    {canClaim.isSunday
+                      ? parseFloat(pendingRewards) > 0
+                        ? `Reclamer ${pendingRewards} XCIRCLEX`
+                        : 'Aucune recompense a reclamer'
+                      : `Disponible dimanche (${pendingRewards} XCIRCLEX)`}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Pre-signatures Status */}
+            {preSignedMembers.length > 0 && (
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6">
+                <h3 className="text-lg font-bold text-blue-300 mb-3">
+                  Pre-signatures ({preSignedMembers.length})
+                </h3>
+                <p className="text-blue-200/70 text-sm mb-3">
+                  Ces membres ont pre-signe. Leur transfert s&apos;executera automatiquement.
+                </p>
+                <div className="space-y-2">
+                  {preSignedMembers.slice(0, 5).map((member, index) => (
+                    <div key={member} className="flex items-center gap-2 text-sm">
+                      <span className="text-blue-400">&#x2713;</span>
+                      <span className="text-blue-200 font-mono">{formatAddress(member)}</span>
+                      {member === address && <span className="text-blue-400 text-xs">(vous)</span>}
+                    </div>
+                  ))}
+                  {preSignedMembers.length > 5 && (
+                    <p className="text-blue-300/50 text-xs">
+                      +{preSignedMembers.length - 5} autres...
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+
+        {/* Contracts List */}
+        <div className="mt-8 bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
+          <h2 className="text-xl font-bold text-white mb-4">
+            Smart Contracts Actifs ({activeContracts.length})
+          </h2>
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="text-left text-gray-400 border-b border-white/10">
+                  <th className="pb-3 pr-4">Position</th>
+                  <th className="pb-3 pr-4">Adresse du Contrat</th>
+                  <th className="pb-3 pr-4">Proprietaire</th>
+                  <th className="pb-3 pr-4">Cycles Reussis</th>
+                  <th className="pb-3 pr-4">Cycles Echoues</th>
+                  <th className="pb-3 pr-4">Statut</th>
+                  <th className="pb-3">Tour</th>
+                </tr>
+              </thead>
+              <tbody>
+                {activeContracts.map((contractAddr, index) => {
+                  // Utiliser actualCurrentPosition (basé sur cycleHolder) au lieu de currentCycleIndex
+                  const isCurrent = actualCurrentPosition === index && !isCycleComplete && isCycleActive
+                  const isMyContractNode = myContract === contractAddr
+                  // Only show as signed if cycle is active
+                  const hasSigned = isCycleComplete || (isCycleActive && actualCurrentPosition >= 0 && index < actualCurrentPosition)
+                  const stats = scStats.get(contractAddr)
+                  const ownerAddress = contractOwners.get(contractAddr)
+                  const isMyAccount = ownerAddress === address
+
+                  return (
+                    <tr key={contractAddr} className={`border-b border-white/5 hover:bg-white/5 ${isMyContractNode ? 'bg-blue-500/10' : ''} ${isCycleComplete ? 'bg-green-500/5' : ''}`}>
+                      <td className="py-3 pr-4">
+                        <span className={`px-2 py-1 rounded font-mono text-sm ${isCycleComplete ? 'bg-green-500/20 text-green-300' : 'bg-purple-500/20 text-purple-300'}`}>
+                          SC{index + 1}
+                        </span>
+                      </td>
+                      <td className="py-3 pr-4">
+                        <a
+                          href={`https://devnet-explorer.multiversx.com/accounts/${contractAddr}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-300 font-mono text-sm hover:text-blue-400 transition"
+                        >
+                          {formatAddress(contractAddr)}
+                        </a>
+                        {isMyContractNode && (
+                          <span className="ml-2 text-xs text-blue-400">(votre SC)</span>
+                        )}
+                      </td>
+                      <td className="py-3 pr-4">
+                        {ownerAddress ? (
+                          <a
+                            href={`https://devnet-explorer.multiversx.com/accounts/${ownerAddress}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`font-mono text-sm hover:text-blue-400 transition ${isMyAccount ? 'text-blue-400' : 'text-gray-400'}`}
+                          >
+                            {formatAddress(ownerAddress)}
+                            {isMyAccount && <span className="ml-1 text-xs">(vous)</span>}
+                          </a>
+                        ) : (
+                          <span className="text-gray-500 text-sm">-</span>
+                        )}
+                      </td>
+                      <td className="py-3 pr-4">
+                        <span className="text-green-400 font-semibold">{stats?.cyclesCompleted || 0}</span>
+                      </td>
+                      <td className="py-3 pr-4">
+                        <span className={`font-semibold ${(stats?.cyclesFailed || 0) > 0 ? 'text-red-400' : 'text-gray-500'}`}>
+                          {stats?.cyclesFailed || 0}
+                        </span>
+                      </td>
+                      <td className="py-3 pr-4">
+                        <span className="px-2 py-1 rounded text-xs font-semibold bg-green-500/20 text-green-300">
+                          Actif
+                        </span>
+                      </td>
+                      <td className="py-3">
+                        {isCycleComplete ? (
+                          <span className="px-2 py-1 rounded text-xs font-semibold bg-green-500/20 text-green-300">
+                            Signe &#x2713;
+                          </span>
+                        ) : isCurrent ? (
+                          <span className="px-2 py-1 rounded text-xs font-semibold bg-amber-500/20 text-amber-300 animate-pulse">
+                            Tour actuel
+                          </span>
+                        ) : hasSigned ? (
+                          <span className="px-2 py-1 rounded text-xs font-semibold bg-green-500/20 text-green-300">
+                            Signe &#x2713;
+                          </span>
+                        ) : (
+                          <span className="text-gray-500 text-sm">En attente</span>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {activeContracts.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-gray-400">Aucun smart contract actif pour le moment</p>
+              <p className="text-gray-500 text-sm mt-2">Soyez le premier a rejoindre le Cercle de Vie !</p>
+            </div>
+          )}
+        </div>
+
+        {/* Inactive Contracts List */}
+        {inactiveContracts.length > 0 && (
+          <div className="mt-6 bg-white/5 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-gray-500/20">
+            <h2 className="text-xl font-bold text-gray-400 mb-4">
+              Smart Contracts Inactifs ({inactiveContracts.length})
+            </h2>
+
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="text-left text-gray-500 border-b border-white/10">
+                    <th className="pb-3 pr-4">Contrat</th>
+                    <th className="pb-3 pr-4">Adresse du Contrat</th>
+                    <th className="pb-3 pr-4">Proprietaire</th>
+                    <th className="pb-3 pr-4">Cycles Reussis</th>
+                    <th className="pb-3 pr-4">Cycles Echoues</th>
+                    <th className="pb-3">Statut</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {inactiveContracts.map((contractAddr, index) => {
+                    const isMyContractNode = myContract === contractAddr
+                    const ownerAddress = contractOwners.get(contractAddr)
+                    const isMyAccount = ownerAddress === address
+                    const stats = scStats.get(contractAddr)
+                    const isBannedSc = stats?.isBanned || false
+                    const banUntilDate = stats?.banUntil ? new Date(stats.banUntil * 1000).toLocaleDateString() : null
+
+                    return (
+                      <tr key={contractAddr} className={`border-b border-white/5 hover:bg-white/5 ${isMyContractNode ? 'bg-blue-500/10' : ''} ${isBannedSc ? 'bg-red-500/10' : ''}`}>
+                        <td className="py-3 pr-4">
+                          <span className="px-2 py-1 rounded font-mono text-sm bg-gray-500/20 text-gray-400">
+                            SC
+                          </span>
+                        </td>
+                        <td className="py-3 pr-4">
+                          <a
+                            href={`https://devnet-explorer.multiversx.com/accounts/${contractAddr}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-gray-400 font-mono text-sm hover:text-blue-400 transition"
+                          >
+                            {formatAddress(contractAddr)}
+                          </a>
+                          {isMyContractNode && (
+                            <span className="ml-2 text-xs text-blue-400">(votre SC)</span>
+                          )}
+                        </td>
+                        <td className="py-3 pr-4">
+                          {ownerAddress ? (
+                            <a
+                              href={`https://devnet-explorer.multiversx.com/accounts/${ownerAddress}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`font-mono text-sm hover:text-blue-400 transition ${isMyAccount ? 'text-blue-400' : 'text-gray-500'}`}
+                            >
+                              {formatAddress(ownerAddress)}
+                              {isMyAccount && <span className="ml-1 text-xs">(vous)</span>}
+                            </a>
+                          ) : (
+                            <span className="text-gray-500 text-sm">-</span>
+                          )}
+                        </td>
+                        <td className="py-3 pr-4">
+                          <span className="text-green-400 font-semibold">{stats?.cyclesCompleted || 0}</span>
+                        </td>
+                        <td className="py-3 pr-4">
+                          <span className={`font-semibold ${(stats?.cyclesFailed || 0) > 0 ? 'text-red-400' : 'text-gray-500'}`}>
+                            {stats?.cyclesFailed || 0}
+                          </span>
+                        </td>
+                        <td className="py-3">
+                          {isBannedSc ? (
+                            <div>
+                              <span className="px-2 py-1 rounded text-xs font-semibold bg-red-500/20 text-red-400">
+                                Banni
+                              </span>
+                              <p className="text-red-400/70 text-xs mt-1">
+                                jusqu&apos;au {banUntilDate}
+                              </p>
+                            </div>
+                          ) : (
+                            <span className="px-2 py-1 rounded text-xs font-semibold bg-gray-500/20 text-gray-400">
+                              Inactif
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <p className="text-gray-500 text-sm mt-4 text-center">
+              Les contrats inactifs ne participent pas aux cycles quotidiens.
+              {inactiveContracts.some(c => scStats.get(c)?.isBanned) && (
+                <span className="text-red-400 block mt-1">
+                  Les contrats bannis ne peuvent pas etre reactives avant la fin du ban (7 jours).
+                </span>
+              )}
+            </p>
+          </div>
+        )}
+
+        {/* Smart Contract Info */}
+        <div className="mt-8 bg-white/5 rounded-xl p-4 border border-white/10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <p className="text-gray-400 text-sm">Smart Contract Circle of Life Center (SC0)</p>
+              <p className="text-white font-mono text-xs md:text-sm break-all">{CIRCLE_OF_LIFE_ADDRESS}</p>
+            </div>
+            <a
+              href={`https://devnet-explorer.multiversx.com/accounts/${CIRCLE_OF_LIFE_ADDRESS}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 transition"
+            >
+              Voir sur Explorer &#8599;
+            </a>
+          </div>
+        </div>
+        </>
+        )}
+        </>
+        )}
+      </div>
+
+      {/* Join Modal */}
+      <TransactionModal
+        isOpen={showJoinModal}
+        step={joinModalStep}
+        title="Rejoindre le Cercle de Vie"
+        confirmTitle="Creer votre Smart Contract"
+        confirmDescription="Vous allez creer un smart contract peripherique et rejoindre le Cercle de Vie."
+        confirmDetails={
+          <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 space-y-3">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Frais de creation</span>
+              <span className="text-white font-bold">{creationFee} EGLD</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Gas estime</span>
+              <span className="text-white">~0.03 EGLD</span>
+            </div>
+            <div className="border-t border-purple-500/30 pt-3">
+              <p className="text-gray-300 text-sm">
+                SC0 deviendra co-proprietaire de votre smart contract.
+                Vous devrez signer les transactions circulaires quotidiennes.
+              </p>
+            </div>
+          </div>
+        }
+        successTitle="Bienvenue dans le Cercle !"
+        successMessage="Votre smart contract a ete cree. Vous faites maintenant partie du Cercle de Vie."
+        errorMessage="Erreur lors de la creation du smart contract."
+        transactionHash={joinTransactionHash}
+        onConfirm={handleJoinConfirm}
+        onClose={() => {
+          setShowJoinModal(false)
+          setTimeout(() => {
+            setJoinModalStep('confirm')
+            setJoinTransactionHash('')
+          }, 300)
+        }}
+        onSuccess={() => {
+          refreshData()
+        }}
+      />
+
+      {/* Sign Modal */}
+      <TransactionModal
+        isOpen={showSignModal}
+        step={signModalStep}
+        title="Signer le Transfert"
+        confirmTitle="Valider le Cycle"
+        confirmDescription="Vous allez signer le transfert des fonds vers le prochain smart contract."
+        confirmDetails={
+          <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 space-y-3">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Montant</span>
+              <span className="text-white font-bold">{circulationAmount} EGLD</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">De</span>
+              <span className="text-white">Votre SC</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Vers</span>
+              <span className="text-white">SC suivant</span>
+            </div>
+            <div className="border-t border-green-500/30 pt-3">
+              <p className="text-orange-300 text-sm">
+                Attention: Si vous ne signez pas avant minuit, les fonds iront directement a SC0.
+              </p>
+            </div>
+          </div>
+        }
+        successTitle="Signature validee !"
+        successMessage="Le transfert a ete effectue vers le prochain smart contract."
+        errorMessage="Erreur lors de la signature."
+        transactionHash={signTransactionHash}
+        onConfirm={handleSignConfirm}
+        onClose={() => {
+          setShowSignModal(false)
+          setTimeout(() => {
+            setSignModalStep('confirm')
+            setSignTransactionHash('')
+          }, 300)
+        }}
+        onSuccess={() => {
+          refreshData()
+        }}
+      />
+
+      {/* Start Cycle Modal */}
+      <TransactionModal
+        isOpen={showStartCycleModal}
+        step={startCycleModalStep}
+        title="Demarrer le Cycle"
+        confirmTitle="Lancer le Cycle Quotidien"
+        confirmDescription="Vous allez demarrer le cycle quotidien. SC0 enverra le montant circulant au premier SC actif."
+        confirmDetails={
+          <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4 space-y-3">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Montant a envoyer</span>
+              <span className="text-white font-bold">{circulationAmount} EGLD</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">De</span>
+              <span className="text-white">SC0 (Centre)</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Vers</span>
+              <span className="text-white">SC1 (Premier actif)</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Participants</span>
+              <span className="text-white">{activeContractsCount} SC actifs</span>
+            </div>
+            {starterBonusInfo.percentage > 0 && (
+              <div className="flex justify-between items-center bg-cyan-500/20 rounded-lg p-2 -mx-1">
+                <span className="text-cyan-300 font-semibold flex items-center gap-1">
+                  <span>&#x2B50;</span> Bonus Starter
+                </span>
+                <span className="text-cyan-400 font-bold">+{starterBonusInfo.potentialBonus} XCX</span>
+              </div>
+            )}
+            <div className="border-t border-orange-500/30 pt-3">
+              <p className="text-gray-300 text-sm">
+                Une fois le cycle demarre, chaque membre devra signer dans l&apos;ordre pour faire circuler les fonds.
+                {starterBonusInfo.percentage > 0 && (
+                  <span className="text-cyan-300"> Vous recevrez un bonus de {(starterBonusInfo.percentage / 100).toFixed(1)}% si le cycle se termine avec succes!</span>
+                )}
+              </p>
+            </div>
+          </div>
+        }
+        successTitle="Cycle demarre !"
+        successMessage="Le cycle quotidien a ete lance. Le montant circulant a ete envoye au premier SC."
+        errorMessage="Erreur lors du demarrage du cycle. Verifiez que SC0 a suffisamment de fonds."
+        transactionHash={startCycleTransactionHash}
+        onConfirm={handleStartCycleConfirm}
+        onClose={() => {
+          setShowStartCycleModal(false)
+          setTimeout(() => {
+            setStartCycleModalStep('confirm')
+            setStartCycleTransactionHash('')
+          }, 300)
+        }}
+        onSuccess={() => {
+          refreshData()
+        }}
+      />
+
+      {/* Pre-Sign Modal */}
+      <TransactionModal
+        isOpen={showPreSignModal}
+        step={preSignModalStep}
+        title="Pre-signer a l'avance"
+        confirmTitle="Confirmer la Pre-signature"
+        confirmDescription="Vous allez pre-signer votre participation au cycle. Le transfert s'executera automatiquement quand ce sera votre tour."
+        confirmDetails={
+          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 space-y-3">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Action</span>
+              <span className="text-white font-bold">Pre-signature</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Montant a transferer</span>
+              <span className="text-white">{circulationAmount} EGLD</span>
+            </div>
+            <div className="border-t border-blue-500/30 pt-3">
+              <p className="text-blue-300 text-sm">
+                Avantages de la pre-signature:
+              </p>
+              <ul className="text-gray-300 text-sm mt-2 space-y-1">
+                <li>&#x2713; Pas besoin d&apos;etre present quand c&apos;est votre tour</li>
+                <li>&#x2713; Le transfert s&apos;execute automatiquement</li>
+                <li>&#x2713; Evite de manquer votre tour</li>
+              </ul>
+            </div>
+          </div>
+        }
+        successTitle="Pre-signature enregistree !"
+        successMessage="Votre pre-signature a ete enregistree. Le transfert s'executera automatiquement quand ce sera votre tour."
+        errorMessage="Erreur lors de la pre-signature."
+        transactionHash={preSignTransactionHash}
+        onConfirm={handlePreSignConfirm}
+        onClose={() => {
+          setShowPreSignModal(false)
+          setTimeout(() => {
+            setPreSignModalStep('confirm')
+            setPreSignTransactionHash('')
+          }, 300)
+        }}
+        onSuccess={() => {
+          refreshData()
+        }}
+      />
+
+      {/* Process ALL Transfers Modal - Batch processing in 1 transaction */}
+      <TransactionModal
+        isOpen={showProcessModal}
+        step={processModalStep}
+        title="Executer TOUS les Transferts"
+        confirmTitle="Traiter TOUS les Transferts en 1 Transaction"
+        confirmDescription="Vous allez executer TOUS les transferts en attente en une seule transaction. Plus besoin de cliquer plusieurs fois !"
+        confirmDetails={
+          <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-4 space-y-3">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Transferts a executer</span>
+              <span className="text-white font-bold text-lg">{pendingAutoTransfers}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Montant par transfert</span>
+              <span className="text-white">{circulationAmount} EGLD</span>
+            </div>
+            <div className="bg-green-500/20 border border-green-500/30 rounded p-2 mt-2">
+              <p className="text-green-400 text-sm font-semibold text-center">
+                1 signature = {pendingAutoTransfers} transferts executes !
+              </p>
+            </div>
+            <div className="border-t border-cyan-500/30 pt-3">
+              <p className="text-gray-300 text-sm">
+                Cette action est permissionless - n&apos;importe qui peut declencher les transferts pour les membres qui ont active l&apos;auto-sign.
+              </p>
+            </div>
+          </div>
+        }
+        successTitle="Tous les transferts executes !"
+        successMessage={`Les ${pendingAutoTransfers} transferts en attente ont ete traites en une seule transaction !`}
+        errorMessage="Erreur lors du traitement des transferts."
+        transactionHash={processTransactionHash}
+        onConfirm={handleProcessConfirm}
+        onClose={() => {
+          setShowProcessModal(false)
+          setTimeout(() => {
+            setProcessModalStep('confirm')
+            setProcessTransactionHash('')
+          }, 300)
+        }}
+        onSuccess={() => {
+          refreshData()
+        }}
+      />
+
+      {/* Activate Modal */}
+      <TransactionModal
+        isOpen={showActivateModal}
+        step={activateModalStep}
+        title="Reactiver mon Point"
+        confirmTitle="Confirmer la Reactivation"
+        confirmDescription="Vous allez reactiver votre point dans le cercle. Vous participerez a nouveau aux cycles quotidiens."
+        confirmDetails={
+          <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 space-y-3">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Action</span>
+              <span className="text-white font-bold">Reactivation</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Votre contrat</span>
+              <span className="text-white font-mono text-xs">{myContract ? formatAddress(myContract) : '-'}</span>
+            </div>
+            <div className="border-t border-green-500/30 pt-3">
+              <p className="text-green-300 text-sm">
+                Avantages de l&apos;activation:
+              </p>
+              <ul className="text-gray-300 text-sm mt-2 space-y-1">
+                <li>&#x2713; Participe aux cycles quotidiens</li>
+                <li>&#x2713; Recoit les transferts circulaires</li>
+                <li>&#x2713; Fait partie du cercle actif</li>
+              </ul>
+            </div>
+          </div>
+        }
+        successTitle="Point reactive !"
+        successMessage="Votre point est maintenant actif. Vous participez a nouveau aux cycles."
+        errorMessage="Erreur lors de la reactivation."
+        transactionHash={activateTransactionHash}
+        onConfirm={handleActivateConfirm}
+        onClose={() => {
+          setShowActivateModal(false)
+          setTimeout(() => {
+            setActivateModalStep('confirm')
+            setActivateTransactionHash('')
+          }, 300)
+        }}
+        onSuccess={() => {
+          refreshData()
+        }}
+      />
+
+      {/* Deactivate Modal */}
+      <TransactionModal
+        isOpen={showDeactivateModal}
+        step={deactivateModalStep}
+        title="Desactiver mon Point"
+        confirmTitle="Confirmer la Desactivation"
+        confirmDescription="Vous allez desactiver votre point dans le cercle. Vous ne participerez plus aux cycles quotidiens."
+        confirmDetails={
+          <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4 space-y-3">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Action</span>
+              <span className="text-white font-bold">Desactivation</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Votre contrat</span>
+              <span className="text-white font-mono text-xs">{myContract ? formatAddress(myContract) : '-'}</span>
+            </div>
+            <div className="border-t border-orange-500/30 pt-3">
+              <p className="text-orange-300 text-sm">
+                Consequences de la desactivation:
+              </p>
+              <ul className="text-gray-300 text-sm mt-2 space-y-1">
+                <li>&#x26A0; Ne participe plus aux cycles</li>
+                <li>&#x26A0; Ne recoit plus de transferts</li>
+                <li>&#x2713; Peut etre reactive a tout moment</li>
+                <li>&#x2713; Vous restez membre du cercle</li>
+              </ul>
+            </div>
+          </div>
+        }
+        successTitle="Point desactive !"
+        successMessage="Votre point est maintenant inactif. Vous pouvez le reactiver a tout moment."
+        errorMessage="Erreur lors de la desactivation."
+        transactionHash={deactivateTransactionHash}
+        onConfirm={handleDeactivateConfirm}
+        onClose={() => {
+          setShowDeactivateModal(false)
+          setTimeout(() => {
+            setDeactivateModalStep('confirm')
+            setDeactivateTransactionHash('')
+          }, 300)
+        }}
+        onSuccess={() => {
+          refreshData()
+        }}
+      />
+
+      {/* Fail Cycle Modal */}
+      <TransactionModal
+        isOpen={showFailCycleModal}
+        step={failCycleModalStep}
+        title="Declarer Cycle Echoue"
+        confirmTitle="Confirmer l'Echec du Cycle"
+        confirmDescription="Vous allez declarer ce cycle comme echoue. Le SC qui bloque sera automatiquement banni pour 7 jours."
+        confirmDetails={
+          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 space-y-3">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Action</span>
+              <span className="text-white font-bold">Declarer Echec</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Cycle</span>
+              <span className="text-white">#{cycleDay}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">SC Responsable</span>
+              <span className="text-white font-mono text-xs">{cycleHolder ? formatAddress(cycleHolder) : '-'}</span>
+            </div>
+            <div className="border-t border-red-500/30 pt-3">
+              <p className="text-red-300 text-sm font-semibold">
+                Consequences:
+              </p>
+              <ul className="text-gray-300 text-sm mt-2 space-y-1">
+                <li className="text-red-400">&#x26A0; Le SC responsable sera banni 7 jours</li>
+                <li className="text-red-400">&#x26A0; Son compteur d&apos;echecs sera incremente</li>
+                <li>&#x2713; Les fonds seront recuperes vers SC0</li>
+                <li>&#x2713; Un nouveau cycle pourra demarrer</li>
+              </ul>
+            </div>
+          </div>
+        }
+        successTitle="Cycle declare echoue !"
+        successMessage="Le SC responsable a ete banni pour 7 jours. Les fonds ont ete recuperes vers SC0."
+        errorMessage="Erreur lors de la declaration d'echec. Le cycle n'est peut-etre pas encore en timeout."
+        transactionHash={failCycleTransactionHash}
+        onConfirm={handleFailCycleConfirm}
+        onClose={() => {
+          setShowFailCycleModal(false)
+          setTimeout(() => {
+            setFailCycleModalStep('confirm')
+            setFailCycleTransactionHash('')
+          }, 300)
+        }}
+        onSuccess={() => {
+          refreshData()
+        }}
+      />
+
+      {/* Claim Rewards Modal */}
+      <TransactionModal
+        isOpen={showClaimRewardsModal}
+        step={claimRewardsModalStep}
+        title="Reclamer les Recompenses"
+        confirmTitle="Confirmer la Reclamation"
+        confirmDescription="Vous allez reclamer vos recompenses XCIRCLEX accumulees grace a votre participation aux cycles."
+        confirmDetails={
+          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 space-y-3">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Montant a reclamer</span>
+              <span className="text-yellow-400 font-bold">{pendingRewards} XCIRCLEX</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Token</span>
+              <span className="text-white">{rewardsInfo.rewardTokenId || 'XCIRCLEX'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Jour</span>
+              <span className="text-green-400">{getDayName(dayOfWeek)} (jour de reclamation)</span>
+            </div>
+            <div className="border-t border-yellow-500/30 pt-3">
+              <p className="text-gray-300 text-sm">
+                Les tokens seront envoyes directement dans votre portefeuille.
+              </p>
+            </div>
+          </div>
+        }
+        successTitle="Recompenses reclamees !"
+        successMessage={`Vous avez recu ${pendingRewards} XCIRCLEX dans votre portefeuille.`}
+        errorMessage="Erreur lors de la reclamation. Verifiez que c'est bien dimanche et que vous avez des recompenses a reclamer."
+        transactionHash={claimRewardsTransactionHash}
+        onConfirm={handleClaimRewardsConfirm}
+        onClose={() => {
+          setShowClaimRewardsModal(false)
+          setTimeout(() => {
+            setClaimRewardsModalStep('confirm')
+            setClaimRewardsTransactionHash('')
+          }, 300)
+        }}
+        onSuccess={() => {
+          refreshData()
+        }}
+      />
+
+      {/* Auto-Sign Modal */}
+      <TransactionModal
+        isOpen={showAutoSignModal}
+        step={autoSignModalStep}
+        title="Configurer l'Auto-Signature"
+        confirmTitle="Activer l'Auto-Signature"
+        confirmDescription="Choisissez le type d'auto-signature que vous souhaitez activer."
+        confirmDetails={
+          <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 space-y-4">
+            {/* Type Selection */}
+            <div className="space-y-2">
+              <label className="text-gray-300 text-sm font-medium">Type d&apos;auto-signature</label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setAutoSignType('cycles')}
+                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition ${
+                    autoSignType === 'cycles'
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                >
+                  Limite (cycles)
+                </button>
+                <button
+                  onClick={() => setAutoSignType('permanent')}
+                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition ${
+                    autoSignType === 'permanent'
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                >
+                  Permanent
+                </button>
+              </div>
+            </div>
+
+            {/* Cycles Input - Only shown for 'cycles' type */}
+            {autoSignType === 'cycles' && (
+              <div className="space-y-2">
+                <label className="text-gray-300 text-sm font-medium">Nombre de cycles (1-365)</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="range"
+                    min="1"
+                    max="365"
+                    value={autoSignCycles}
+                    onChange={(e) => setAutoSignCycles(parseInt(e.target.value))}
+                    className="flex-1 accent-purple-500"
+                  />
+                  <input
+                    type="number"
+                    min="1"
+                    max="365"
+                    value={autoSignCycles}
+                    onChange={(e) => setAutoSignCycles(Math.min(365, Math.max(1, parseInt(e.target.value) || 1)))}
+                    className="w-16 bg-gray-700 text-white text-center rounded-lg py-1 px-2"
+                  />
+                </div>
+                <div className="flex justify-between text-xs text-gray-400">
+                  <span>1 jour</span>
+                  <span>1 mois (30)</span>
+                  <span>1 an (365)</span>
+                </div>
+              </div>
+            )}
+
+            {/* Description based on selection */}
+            <div className="border-t border-purple-500/30 pt-3">
+              {autoSignType === 'permanent' ? (
+                <p className="text-purple-300 text-sm">
+                  L&apos;auto-signature permanente signera automatiquement tous vos cycles futurs indefiniment.
+                  Vous pourrez la desactiver a tout moment.
+                </p>
+              ) : (
+                <p className="text-purple-300 text-sm">
+                  L&apos;auto-signature sera active pendant <span className="font-bold text-white">{autoSignCycles}</span> cycle{autoSignCycles > 1 ? 's' : ''}.
+                  Apres cela, vous devrez la renouveler ou signer manuellement.
+                </p>
+              )}
+            </div>
+          </div>
+        }
+        successTitle="Auto-Signature activee !"
+        successMessage={autoSignType === 'permanent'
+          ? "L'auto-signature permanente est maintenant active. Vos cycles seront signes automatiquement."
+          : `L'auto-signature est active pour ${autoSignCycles} cycle${autoSignCycles > 1 ? 's' : ''}.`
+        }
+        errorMessage="Erreur lors de l'activation de l'auto-signature. Verifiez que vous etes bien membre actif du cercle."
+        transactionHash={autoSignTransactionHash}
+        onConfirm={handleAutoSignConfirm}
+        onClose={() => {
+          setShowAutoSignModal(false)
+          setTimeout(() => {
+            setAutoSignModalStep('confirm')
+            setAutoSignTransactionHash('')
+          }, 300)
+        }}
+        onSuccess={() => {
+          refreshData()
+        }}
+      />
+
+      {/* Disable Auto-Sign Modal */}
+      <TransactionModal
+        isOpen={showDisableAutoSignModal}
+        step={disableAutoSignModalStep}
+        title="Desactiver l'Auto-Signature"
+        confirmTitle="Confirmer la Desactivation"
+        confirmDescription="Vous allez desactiver l'auto-signature. Vous devrez signer manuellement ou pre-signer chaque cycle."
+        confirmDetails={
+          <div className="bg-gray-500/10 border border-gray-500/30 rounded-lg p-4 space-y-3">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Status actuel</span>
+              <span className="text-purple-400 font-bold">
+                {autoSignStatus.isPermanent ? 'Permanent' : `${autoSignStatus.remainingCycles} cycles restants`}
+              </span>
+            </div>
+            <div className="border-t border-gray-500/30 pt-3">
+              <p className="text-gray-300 text-sm">
+                Apres desactivation, vous devrez:
+              </p>
+              <ul className="text-gray-400 text-sm mt-2 space-y-1 list-disc list-inside">
+                <li>Pre-signer manuellement chaque cycle</li>
+                <li>Ou signer quand c&apos;est votre tour</li>
+                <li>Ou reactiver l&apos;auto-signature</li>
+              </ul>
+            </div>
+          </div>
+        }
+        successTitle="Auto-Signature desactivee"
+        successMessage="L'auto-signature a ete desactivee. Vous devrez maintenant signer manuellement vos cycles."
+        errorMessage="Erreur lors de la desactivation de l'auto-signature."
+        transactionHash={disableAutoSignTransactionHash}
+        onConfirm={handleDisableAutoSignConfirm}
+        onClose={() => {
+          setShowDisableAutoSignModal(false)
+          setTimeout(() => {
+            setDisableAutoSignModalStep('confirm')
+            setDisableAutoSignTransactionHash('')
+          }, 300)
+        }}
+        onSuccess={() => {
+          refreshData()
+        }}
+      />
+
+      {/* Admin Panel - Visible uniquement pour l'admin */}
+      <AdminPanel onRefresh={refreshData} />
+
+      {/* SC Info Modal - Fixed position for proper mobile display */}
+      {tooltipInfo && tooltipInfo.visible && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/60 z-[100]"
+            onClick={handleCloseTooltip}
+          />
+          {/* Modal */}
+          <div
+            className={`
+              fixed z-[101] bg-gray-900 border border-purple-500/50 shadow-2xl overflow-y-auto
+              ${windowWidth < 640
+                ? 'bottom-0 left-0 right-0 rounded-t-2xl max-h-[85vh]'
+                : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl max-h-[80vh] w-[380px]'
+              }
+            `}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Swipe handle for mobile */}
+            {windowWidth < 640 && (
+              <div className="sticky top-0 bg-gray-900 pt-3 pb-2 flex justify-center">
+                <div className="w-12 h-1.5 bg-gray-600 rounded-full" />
+              </div>
+            )}
+
+            <div className="p-4">
+              {/* Header */}
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="text-white font-bold text-lg">
+                  {tooltipInfo.type === 'sc0' ? 'SC0 - Centre' : `SC${tooltipInfo.scIndex}`}
+                  {tooltipInfo.isMyContract && <span className="ml-2 text-blue-400 text-sm">(vous)</span>}
+                </h4>
+                <button
+                  onClick={handleCloseTooltip}
+                  className="text-gray-400 hover:text-white text-2xl leading-none p-2 -mr-2 -mt-2"
+                >
+                  &times;
+                </button>
+              </div>
+
+              {/* SC Address */}
+              <div className="mb-4">
+                <p className="text-gray-400 text-xs mb-1">Adresse du Smart Contract</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-white font-mono text-xs break-all">{tooltipInfo.scAddress}</p>
+                  <a
+                    href={`https://devnet-explorer.multiversx.com/accounts/${tooltipInfo.scAddress}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 text-sm flex-shrink-0"
+                  >
+                    &#8599;
+                  </a>
+                </div>
+              </div>
+
+              {/* Owner Address */}
+              <div className="mb-4">
+                <p className="text-gray-400 text-xs mb-1">
+                  {tooltipInfo.type === 'sc0' ? 'Proprietaire (Deployer)' : 'Compte Associe (Owner)'}
+                </p>
+                {tooltipInfo.ownerAddress ? (
+                  <div className="flex items-center gap-2">
+                    <p className="text-white font-mono text-xs break-all">{tooltipInfo.ownerAddress}</p>
+                    <a
+                      href={`https://devnet-explorer.multiversx.com/accounts/${tooltipInfo.ownerAddress}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 text-sm flex-shrink-0"
+                    >
+                      &#8599;
+                    </a>
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-xs italic">Chargement...</p>
+                )}
+              </div>
+
+              {/* Cycle Stats */}
+              <div className="mb-4 p-3 bg-white/5 rounded-lg">
+                <p className="text-gray-400 text-xs mb-2">Statistiques des Cycles</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="text-center">
+                    <p className="text-green-400 font-bold text-xl">
+                      {tooltipInfo.type === 'sc0'
+                        ? cycleStats.cyclesCompleted
+                        : scStats.get(tooltipInfo.scAddress)?.cyclesCompleted || 0}
+                    </p>
+                    <p className="text-gray-400 text-xs">Reussis</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-red-400 font-bold text-xl">
+                      {tooltipInfo.type === 'sc0'
+                        ? cycleStats.cyclesFailed
+                        : scStats.get(tooltipInfo.scAddress)?.cyclesFailed || 0}
+                    </p>
+                    <p className="text-gray-400 text-xs">Echoues</p>
+                  </div>
+                </div>
+                {/* 360 Cycle badge */}
+                {(() => {
+                  const cycles = tooltipInfo.type === 'sc0'
+                    ? cycleStats.cyclesCompleted
+                    : scStats.get(tooltipInfo.scAddress)?.cyclesCompleted || 0
+                  const orbitData = getOrbitingCirclesData(cycles)
+                  if (orbitData.completed360Cycles > 0) {
+                    return (
+                      <div className="mt-3 text-center">
+                        <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-500/20 border border-amber-500/50 rounded-full">
+                          <span className="text-amber-400">&#x1F3C6;</span>
+                          <span className="text-amber-300 text-sm font-bold">{orbitData.completed360Cycles}x 360 cycles</span>
+                        </span>
+                      </div>
+                    )
+                  }
+                  return null
+                })()}
+              </div>
+
+              {/* Last Transaction Hash */}
+              <div className="mb-4">
+                <p className="text-gray-400 text-xs mb-1">Derniere Transaction</p>
+                {(() => {
+                  const txHash = tooltipInfo.type === 'sc0'
+                    ? lastTxHashSc0
+                    : lastTxHashPeripherals.get(tooltipInfo.scAddress)
+                  if (txHash) {
+                    return (
+                      <div className="flex items-center gap-2">
+                        <p className="text-white font-mono text-xs">
+                          {txHash.slice(0, 12)}...{txHash.slice(-8)}
+                        </p>
+                        <a
+                          href={`https://devnet-explorer.multiversx.com/transactions/${txHash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-300 text-sm flex-shrink-0"
+                        >
+                          &#8599;
+                        </a>
+                      </div>
+                    )
+                  }
+                  return <p className="text-gray-500 text-xs italic">Aucune transaction</p>
+                })()}
+              </div>
+
+              {/* Balance */}
+              <div className="mb-4">
+                <p className="text-gray-400 text-xs mb-1">Balance</p>
+                <p className="text-white font-bold text-lg">
+                  {tooltipInfo.type === 'sc0'
+                    ? contractBalance
+                    : peripheralBalances.get(tooltipInfo.scAddress) || '0'} EGLD
+                </p>
+              </div>
+
+              {/* Deposit Panel */}
+              <div className="mb-4 p-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-lg">
+                <p className="text-white text-sm font-semibold mb-2">
+                  Deposer des EGLD
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.001"
+                    value={tooltipDepositAmount}
+                    onChange={(e) => setTooltipDepositAmount(e.target.value)}
+                    className="flex-1 bg-white/10 border border-white/20 rounded px-3 py-2 text-white focus:border-purple-500 focus:outline-none"
+                    placeholder="0.01"
+                  />
+                  <button
+                    onClick={handleTooltipDeposit}
+                    disabled={isDepositing || parseFloat(tooltipDepositAmount) <= 0}
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 text-white font-semibold px-4 py-2 rounded transition"
+                  >
+                    {isDepositing ? '...' : 'Deposer'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Type indicator */}
+              <div className="pt-3 border-t border-gray-700">
+                <span className={`inline-block px-3 py-1.5 rounded text-sm font-semibold ${
+                  tooltipInfo.type === 'sc0'
+                    ? 'bg-purple-500/20 text-purple-300'
+                    : tooltipInfo.isMyContract
+                      ? 'bg-blue-500/20 text-blue-300'
+                      : 'bg-green-500/20 text-green-300'
+                }`}>
+                  {tooltipInfo.type === 'sc0' ? 'Contrat Central' : tooltipInfo.isMyContract ? 'Mon Contrat' : 'Contrat Peripherique'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+export default CircleOfLife

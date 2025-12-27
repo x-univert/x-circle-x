@@ -1,0 +1,19 @@
+{
+  "buildInfo": {
+    "rustc": {
+      "version": "1.83.0-nightly",
+      "commitHash": "b28fbb655e1d5e663f3de3ce1b70e9c4b3a6ed03",
+      "commitDate": "2024-10-03",
+      "channel": "Nightly",
+      "short": "rustc 1.83.0-nightly (b28fbb655 2024-10-03)"
+    },
+    "contractCrate": {
+      "name": "test-adder",
+      "version": "0.0.0"
+    },
+    "framework": {
+      "name": "multiversx-sc",
+      "version": "0.62.0"
+    }
+  }
+}

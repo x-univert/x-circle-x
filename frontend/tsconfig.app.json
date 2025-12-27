@@ -1,0 +1,56 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "types": ["vite/client"],
+    "skipLibCheck": true,
+    "allowJs": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Path Aliases */
+    "baseUrl": ".",
+    "paths": {
+      "lib": ["src/lib/index.ts"],
+      "lib/*": ["src/lib/*"],
+      "config": ["src/config/index.ts"],
+      "config/*": ["src/config/*"],
+      "components": ["src/components/index.ts"],
+      "components/*": ["src/components/*"],
+      "localConstants": ["src/localConstants/index.ts"],
+      "localConstants/*": ["src/localConstants/*"],
+      "assets/*": ["src/assets/*"],
+      "types": ["src/types/index.ts"],
+      "types/*": ["src/types/*"],
+      "hooks": ["src/hooks/index.ts"],
+      "hooks/*": ["src/hooks/*"],
+      "contracts/*": ["src/contracts/*"],
+      "wrappers": ["src/wrappers/index.ts"],
+      "wrappers/*": ["src/wrappers/*"],
+      "helpers": ["src/helpers/index.ts"],
+      "helpers/*": ["src/helpers/*"],
+      "pages": ["src/pages/index.ts"],
+      "pages/*": ["src/pages/*"],
+      "routes": ["src/routes/index.ts"],
+      "routes/*": ["src/routes/*"]
+    },
+
+    /* Linting */
+    "strict": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"]
+}

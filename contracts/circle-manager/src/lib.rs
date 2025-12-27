@@ -1,478 +1,413 @@
 #![no_std]
 
-/// xCircle DAO - Circle Manager Smart Contract
-///
-/// Ce contrat gère la création et l'orchestration des cercles d'épargne rotative (ROSCA).
-/// Il permet aux utilisateurs de créer des cercles, de voter pour de nouveaux membres,
-/// de contribuer automatiquement et de recevoir des distributions selon un ordre rotatif.
-///
-/// Termes importants:
-/// - ROSCA: Rotating Savings and Credit Association (tontine)
-/// - Circle: Un groupe de personnes qui épargnent ensemble
-/// - Cycle: Une période durant laquelle un membre reçoit la somme collective
-/// - Contribution: Montant que chaque membre verse par cycle
-
 multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
-/// Représente l'état actuel d'un cercle
-#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Clone, Copy, Debug)]
-pub enum CircleStatus {
-    /// Cercle en formation (attend membres)
-    Forming,
-    /// Cercle actif (cycles en cours)
-    Active,
-    /// Cercle complété avec succès
-    Completed,
-    /// Cercle annulé/échoué
-    Cancelled,
-}
-
-/// Structure représentant un cercle d'épargne
-#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode)]
-pub struct Circle<M: ManagedTypeApi> {
-    /// ID unique du cercle
-    pub id: u64,
-
-    /// Créateur du cercle
-    pub creator: ManagedAddress<M>,
-
-    /// Liste des membres actuels
-    pub members: ManagedVec<M, ManagedAddress<M>>,
-
-    /// Montant de contribution par cycle (en EGLD)
-    pub contribution_amount: BigUint<M>,
-
-    /// Durée d'un cycle en secondes (ex: 2592000 = 30 jours)
-    pub cycle_duration: u64,
-
-    /// Nombre maximum de membres
-    pub max_members: u32,
-
-    /// Cycle actuel (commence à 1)
-    pub current_cycle: u32,
-
-    /// Ordre de rotation (qui reçoit à quel cycle)
-    pub rotation_order: ManagedVec<M, ManagedAddress<M>>,
-
-    /// Timestamp de début du cycle actuel
-    pub cycle_start_timestamp: u64,
-
-    /// Statut du cercle
-    pub status: CircleStatus,
-
-    /// Contributions reçues pour le cycle actuel (adresse -> montant)
-    pub current_contributions: ManagedVec<M, ManagedAddress<M>>,
-}
-
-/// Structure pour les demandes d'adhésion
-#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode)]
-pub struct MembershipRequest<M: ManagedTypeApi> {
-    /// Adresse du candidat
-    pub candidate: ManagedAddress<M>,
-
-    /// Timestamp de la demande
-    pub timestamp: u64,
-
-    /// Votes pour (true) ou contre (false)
-    pub votes: ManagedVec<M, (ManagedAddress<M>, bool)>,
-
-    /// Nombre de votes positifs
-    pub yes_votes: u32,
-
-    /// Nombre de votes négatifs
-    pub no_votes: u32,
-}
-
+/// xCircle DAO - CircleManager Smart Contract
+/// Gère les cercles de tontine décentralisée (ROSCA)
 #[multiversx_sc::contract]
-pub trait CircleManagerContract {
-    /// Constructeur du contrat
-    /// Initialise le compteur de cercles à 0
+pub trait CircleManager {
+    /// Initialise le contrat
     #[init]
     fn init(&self) {
-        self.next_circle_id().set(1u64);
-        self.protocol_fee_percentage().set(300u64); // 3% = 300 basis points
+        self.circle_count().set(0u64);
     }
 
-    /// Crée un nouveau cercle d'épargne rotative
+    /// Fonction appelée lors de l'upgrade du contrat
+    #[upgrade]
+    fn upgrade(&self) {}
+
+    /// Crée un nouveau cercle avec configuration complète
     ///
     /// # Arguments
-    /// * `contribution_amount` - Montant que chaque membre doit verser par cycle
-    /// * `cycle_duration` - Durée d'un cycle en secondes
-    /// * `max_members` - Nombre maximum de membres (minimum 3, maximum 50)
-    ///
-    /// # Returns
-    /// ID du cercle créé
-    ///
-    /// # Errors
-    /// - Si contribution_amount est 0
-    /// - Si max_members < 3 ou > 50
-    /// - Si cycle_duration < 1 jour
+    /// * `contribution_amount` - Montant de contribution par cycle (en EGLD)
+    /// * `cycle_duration` - Durée d'un cycle en secondes (ex: 2592000 = 30 jours)
+    /// * `max_members` - Nombre maximum de membres (5-20 selon whitepaper)
+    /// * `name` - Nom du cercle
+    #[payable("EGLD")]
     #[endpoint(createCircle)]
     fn create_circle(
         &self,
         contribution_amount: BigUint,
         cycle_duration: u64,
         max_members: u32,
+        name: ManagedBuffer,
     ) -> u64 {
-        // Validations
-        require!(contribution_amount > 0u64, "Contribution must be greater than 0");
-        require!(max_members >= 3 && max_members <= 50, "Members must be between 3 and 50");
-        require!(cycle_duration >= 86400, "Cycle must be at least 1 day"); // 86400 seconds = 1 day
+        require!(contribution_amount > 0, "Contribution amount must be positive");
+        require!(cycle_duration >= 86400, "Cycle duration must be at least 1 day"); // 86400 secondes = 1 jour
+        require!(max_members >= 5 && max_members <= 20, "Max members must be between 5 and 20");
+        require!(!name.is_empty(), "Circle name cannot be empty");
 
-        let creator = self.blockchain().get_caller();
-        let circle_id = self.next_circle_id().get();
+        let caller = self.blockchain().get_caller();
+        let circle_id = self.circle_count().get() + 1;
+        let current_timestamp = self.blockchain().get_block_timestamp();
 
         // Créer le cercle
-        let mut circle = Circle {
+        let circle = Circle {
             id: circle_id,
-            creator: creator.clone(),
-            members: ManagedVec::new(),
-            contribution_amount,
+            creator: caller.clone(),
+            name,
+            contribution_amount: contribution_amount.clone(),
             cycle_duration,
             max_members,
-            current_cycle: 0,
-            rotation_order: ManagedVec::new(),
-            cycle_start_timestamp: 0,
-            status: CircleStatus::Forming,
-            current_contributions: ManagedVec::new(),
+            current_cycle: 0u32,
+            member_count: 0u32, // Sera incrémenté par add_member_to_circle
+            is_active: true,
+            created_at: current_timestamp,
+            next_distribution_time: current_timestamp + cycle_duration,
         };
 
-        // Le créateur est automatiquement membre
-        circle.members.push(creator.clone());
-        circle.rotation_order.push(creator.clone());
+        self.circles(circle_id).set(circle);
 
-        // Sauvegarder le cercle
-        self.circles(circle_id).set(&circle);
-        self.next_circle_id().set(circle_id + 1);
+        // Ajouter le créateur comme premier membre (incrémente member_count à 1)
+        self.circle_members(circle_id).insert(caller.clone());
+        let mut circle = self.circles(circle_id).get();
+        circle.member_count = 1;
+        self.circles(circle_id).set(circle);
 
-        // Émettre événement
+        // Émettre un événement
         self.circle_created_event(
             circle_id,
-            &creator,
+            &caller,
             &contribution_amount,
-            cycle_duration,
-            max_members,
         );
 
+        self.circle_count().set(circle_id);
         circle_id
     }
 
     /// Demande d'adhésion à un cercle
-    ///
-    /// # Arguments
-    /// * `circle_id` - ID du cercle à rejoindre
-    ///
-    /// # Errors
-    /// - Si le cercle n'existe pas
-    /// - Si le cercle est complet ou pas en formation
-    /// - Si le candidat est déjà membre
-    /// - Si une demande est déjà en cours
     #[endpoint(requestMembership)]
     fn request_membership(&self, circle_id: u64) {
+        require!(self.circles(circle_id).is_empty() == false, "Circle does not exist");
+
         let caller = self.blockchain().get_caller();
-
-        // Vérifier que le cercle existe et est en formation
-        require!(!self.circles(circle_id).is_empty(), "Circle does not exist");
-
         let circle = self.circles(circle_id).get();
-        require!(circle.status == CircleStatus::Forming, "Circle is not accepting members");
-        require!(
-            circle.members.len() < circle.max_members as usize,
-            "Circle is full"
-        );
 
-        // Vérifier que le candidat n'est pas déjà membre
-        for member in circle.members.iter() {
-            require!(member != caller, "Already a member");
-        }
+        require!(circle.is_active, "Circle is not active");
+        require!(circle.member_count < circle.max_members, "Circle is full");
+        require!(!self.is_member(circle_id, &caller), "Already a member");
+        require!(!self.has_pending_request(circle_id, &caller), "Request already pending");
 
-        // Vérifier qu'il n'y a pas déjà une demande en cours
-        let request_key = (circle_id, caller.clone());
-        require!(
-            self.membership_requests(&request_key).is_empty(),
-            "Request already pending"
-        );
+        // Ajouter la demande en attente
+        self.pending_requests(circle_id).insert(caller.clone());
 
-        // Créer la demande
-        let request = MembershipRequest {
-            candidate: caller.clone(),
-            timestamp: self.blockchain().get_block_timestamp(),
-            votes: ManagedVec::new(),
-            yes_votes: 0,
-            no_votes: 0,
-        };
-
-        self.membership_requests(&request_key).set(&request);
-
-        // Émettre événement
         self.membership_requested_event(circle_id, &caller);
     }
 
-    /// Vote pour ou contre un candidat
-    /// Seuls les membres actuels peuvent voter
-    /// L'admission requiert l'unanimité (tous votent OUI)
-    ///
-    /// # Arguments
-    /// * `circle_id` - ID du cercle
-    /// * `candidate` - Adresse du candidat
-    /// * `approve` - true pour approuver, false pour rejeter
+    /// Vote pour accepter ou rejeter un candidat
     #[endpoint(voteForMember)]
     fn vote_for_member(&self, circle_id: u64, candidate: ManagedAddress, approve: bool) {
-        let voter = self.blockchain().get_caller();
+        require!(self.circles(circle_id).is_empty() == false, "Circle does not exist");
 
-        // Vérifier que le cercle existe
-        require!(!self.circles(circle_id).is_empty(), "Circle does not exist");
-        let circle = self.circles(circle_id).get();
-
-        // Vérifier que le votant est membre
-        let mut is_member = false;
-        for member in circle.members.iter() {
-            if member == voter {
-                is_member = true;
-                break;
-            }
-        }
-        require!(is_member, "Only members can vote");
-
-        // Récupérer la demande
-        let request_key = (circle_id, candidate.clone());
-        require!(
-            !self.membership_requests(&request_key).is_empty(),
-            "No pending request"
-        );
-
-        let mut request = self.membership_requests(&request_key).get();
-
-        // Vérifier que le votant n'a pas déjà voté
-        for (voted_address, _) in request.votes.iter() {
-            require!(voted_address != voter, "Already voted");
-        }
+        let caller = self.blockchain().get_caller();
+        require!(self.is_member(circle_id, &caller), "Only members can vote");
+        require!(self.has_pending_request(circle_id, &candidate), "No pending request for this candidate");
 
         // Enregistrer le vote
-        request.votes.push((voter.clone(), approve));
-        if approve {
-            request.yes_votes += 1;
-        } else {
-            request.no_votes += 1;
+        let vote_key = self.get_vote_key(circle_id, &candidate, &caller);
+        require!(self.votes(&vote_key).is_empty(), "Already voted for this candidate");
+
+        self.votes(&vote_key).set(approve);
+
+        // Compter les votes
+        let (yes_votes, total_votes) = self.count_votes(circle_id, &candidate);
+        let members = self.circle_members(circle_id);
+        let member_count = members.len();
+
+        // Si majorité simple atteinte (>50% des membres ont voté oui)
+        // yes_votes * 2 > member_count signifie plus de 50% des membres
+        if yes_votes * 2 > member_count {
+            self.add_member_to_circle(circle_id, &candidate);
+            self.pending_requests(circle_id).swap_remove(&candidate);
+            self.member_approved_event(circle_id, &candidate);
         }
-
-        // Vérifier si tous les membres ont voté
-        let total_votes = request.yes_votes + request.no_votes;
-        let current_members = circle.members.len() as u32;
-
-        if total_votes == current_members {
-            // Tous ont voté - vérifier l'unanimité
-            if request.yes_votes == current_members {
-                // Unanimité ! Ajouter le membre
-                self.add_member_to_circle(circle_id, candidate.clone());
-
-                // Supprimer la demande
-                self.membership_requests(&request_key).clear();
-
-                // Émettre événement
-                self.member_approved_event(circle_id, &candidate);
-            } else {
-                // Rejeté
-                self.membership_requests(&request_key).clear();
-                self.member_rejected_event(circle_id, &candidate);
-            }
-        } else {
-            // Sauvegarder les votes en cours
-            self.membership_requests(&request_key).set(&request);
+        // Si majorité de rejets (>50% des membres ont voté non)
+        else if (total_votes - yes_votes) * 2 > member_count {
+            self.pending_requests(circle_id).swap_remove(&candidate);
+            self.member_rejected_event(circle_id, &candidate);
         }
-
-        // Émettre événement de vote
-        self.vote_cast_event(circle_id, &voter, &candidate, approve);
     }
 
-    /// Ajoute un membre au cercle
-    /// Fonction privée appelée après vote unanime
-    fn add_member_to_circle(&self, circle_id: u64, new_member: ManagedAddress) {
-        let mut circle = self.circles(circle_id).get();
-
-        circle.members.push(new_member.clone());
-        circle.rotation_order.push(new_member);
-
-        // Si le cercle atteint le nombre de membres, le démarrer
-        if circle.members.len() == circle.max_members as usize {
-            circle.status = CircleStatus::Active;
-            circle.current_cycle = 1;
-            circle.cycle_start_timestamp = self.blockchain().get_block_timestamp();
-
-            self.circle_started_event(circle_id);
-        }
-
-        self.circles(circle_id).set(&circle);
-    }
-
-    /// Contribution au cercle pour le cycle actuel
-    /// Chaque membre doit contribuer le montant défini
-    ///
-    /// # Arguments
-    /// * `circle_id` - ID du cercle
-    ///
-    /// # Payment
-    /// Montant EGLD = contribution_amount du cercle
+    /// Contribution au cercle pour le cycle en cours
     #[payable("EGLD")]
     #[endpoint(contribute)]
     fn contribute(&self, circle_id: u64) {
-        let contributor = self.blockchain().get_caller();
-        let payment = self.call_value().egld_value().clone_value();
+        require!(self.circles(circle_id).is_empty() == false, "Circle does not exist");
 
-        // Vérifier que le cercle existe et est actif
-        require!(!self.circles(circle_id).is_empty(), "Circle does not exist");
-        let mut circle = self.circles(circle_id).get();
-        require!(circle.status == CircleStatus::Active, "Circle is not active");
+        let caller = self.blockchain().get_caller();
+        let payment = self.call_value().egld();
+        let circle = self.circles(circle_id).get();
 
-        // Vérifier que le contributeur est membre
-        let mut is_member = false;
-        for member in circle.members.iter() {
-            if member == contributor {
-                is_member = true;
-                break;
-            }
-        }
-        require!(is_member, "Not a member");
+        require!(circle.is_active, "Circle is not active");
+        require!(self.is_member(circle_id, &caller), "Not a member of this circle");
+        require!(payment.clone_value() == circle.contribution_amount, "Invalid contribution amount");
 
-        // Vérifier le montant
-        require!(
-            payment == circle.contribution_amount,
-            "Incorrect contribution amount"
-        );
-
-        // Vérifier que le membre n'a pas déjà contribué ce cycle
-        for contributed_member in circle.current_contributions.iter() {
-            require!(contributed_member != contributor, "Already contributed this cycle");
-        }
+        let cycle = circle.current_cycle;
+        require!(!self.has_contributed(circle_id, cycle, &caller), "Already contributed for this cycle");
 
         // Enregistrer la contribution
-        circle.current_contributions.push(contributor.clone());
+        self.contributions(circle_id, cycle, &caller).set(payment.clone_value());
 
-        // Vérifier si tous ont contribué
-        if circle.current_contributions.len() == circle.members.len() {
-            // Distribuer les fonds
-            self.distribute_funds(circle_id, &mut circle);
-        } else {
-            self.circles(circle_id).set(&circle);
-        }
-
-        // Émettre événement
-        self.contribution_made_event(circle_id, &contributor, &payment);
+        self.contribution_made_event(circle_id, cycle, &caller, &payment.clone_value());
     }
 
-    /// Distribue les fonds collectés au bénéficiaire du cycle
-    /// Fonction privée appelée quand tous ont contribué
-    fn distribute_funds(&self, circle_id: u64, circle: &mut Circle<Self::Api>) {
-        // Calculer le montant total
-        let total = &circle.contribution_amount * circle.members.len();
+    /// Force la distribution des fonds (admin/créateur uniquement)
+    /// Ignore la vérification du temps de distribution
+    #[endpoint(forceDistribute)]
+    fn force_distribute(&self, circle_id: u64) {
+        require!(self.circles(circle_id).is_empty() == false, "Circle does not exist");
 
-        // Calculer les frais du protocole (3%)
-        let fee_percentage = self.protocol_fee_percentage().get();
-        let protocol_fee = &total * fee_percentage / 10000u64; // 300 / 10000 = 3%
-        let amount_to_distribute = total - &protocol_fee;
+        let caller = self.blockchain().get_caller();
+        let circle = self.circles(circle_id).get();
 
-        // Déterminer le bénéficiaire (basé sur current_cycle)
-        let beneficiary_index = (circle.current_cycle - 1) as usize % circle.rotation_order.len();
-        let beneficiary = circle.rotation_order.get(beneficiary_index);
+        // Seul le créateur peut forcer la distribution
+        require!(caller == circle.creator, "Only creator can force distribute");
+        require!(circle.is_active, "Circle is not active");
 
-        // Transférer les fonds
-        self.send().direct_egld(&beneficiary, &amount_to_distribute);
+        // Appeler la logique interne de distribution
+        self.internal_distribute(circle_id);
+    }
 
-        // Accumuler les frais dans la trésorerie
-        let mut treasury_balance = self.treasury_balance().get();
-        treasury_balance += protocol_fee;
-        self.treasury_balance().set(&treasury_balance);
+    /// Distribue les fonds au bénéficiaire du cycle
+    /// Seuls les membres ou le créateur du cercle peuvent distribuer
+    #[endpoint(distributeFunds)]
+    fn distribute_funds(&self, circle_id: u64) {
+        require!(self.circles(circle_id).is_empty() == false, "Circle does not exist");
 
-        // Préparer le cycle suivant
-        circle.current_cycle += 1;
-        circle.current_contributions.clear();
-        circle.cycle_start_timestamp = self.blockchain().get_block_timestamp();
+        let caller = self.blockchain().get_caller();
+        let circle = self.circles(circle_id).get();
+        let current_time = self.blockchain().get_block_timestamp();
 
-        // Vérifier si tous les cycles sont complétés
-        if circle.current_cycle > circle.members.len() as u32 {
-            circle.status = CircleStatus::Completed;
-            self.circle_completed_event(circle_id);
-        }
-
-        self.circles(circle_id).set(circle);
-
-        // Émettre événement
-        self.funds_distributed_event(
-            circle_id,
-            &beneficiary,
-            &amount_to_distribute,
-            &protocol_fee,
+        // Seuls les membres ou le créateur peuvent distribuer
+        require!(
+            self.is_member(circle_id, &caller) || caller == circle.creator,
+            "Only members or creator can distribute funds"
         );
-    }
 
-    // ========== VIEW FUNCTIONS (Lecture seule) ==========
+        require!(circle.is_active, "Circle is not active");
+        require!(current_time >= circle.next_distribution_time, "Distribution time not reached");
+
+        // Appeler la logique interne de distribution
+        self.internal_distribute(circle_id);
+    }
 
     /// Récupère les informations d'un cercle
     #[view(getCircle)]
-    fn get_circle(&self, circle_id: u64) -> Circle<Self::Api> {
-        require!(!self.circles(circle_id).is_empty(), "Circle does not exist");
-        self.circles(circle_id).get()
+    fn get_circle(&self, circle_id: u64) -> OptionalValue<Circle<Self::Api>> {
+        if self.circles(circle_id).is_empty() {
+            OptionalValue::None
+        } else {
+            OptionalValue::Some(self.circles(circle_id).get())
+        }
     }
 
-    /// Récupère le prochain ID de cercle
-    #[view(getNextCircleId)]
-    fn get_next_circle_id(&self) -> u64 {
-        self.next_circle_id().get()
+    /// Récupère le nombre total de cercles
+    #[view(getCircleCount)]
+    fn get_circle_count(&self) -> u64 {
+        self.circle_count().get()
     }
 
-    /// Récupère le solde de la trésorerie
+    /// Récupère les membres d'un cercle
+    #[view(getCircleMembers)]
+    fn get_circle_members(&self, circle_id: u64) -> ManagedVec<ManagedAddress> {
+        self.circle_members(circle_id).iter().collect()
+    }
+
+    /// Vérifie si une adresse est membre d'un cercle
+    #[view(isMember)]
+    fn is_member(&self, circle_id: u64, address: &ManagedAddress) -> bool {
+        self.circle_members(circle_id).contains(address)
+    }
+
+    /// Récupère le solde de la treasury
     #[view(getTreasuryBalance)]
     fn get_treasury_balance(&self) -> BigUint {
         self.treasury_balance().get()
     }
 
-    /// Récupère le pourcentage de frais du protocole
-    #[view(getProtocolFee)]
-    fn get_protocol_fee(&self) -> u64 {
-        self.protocol_fee_percentage().get()
+    /// Récupère les demandes d'adhésion en attente pour un cercle
+    #[view(getPendingRequests)]
+    fn get_pending_requests(&self, circle_id: u64) -> ManagedVec<ManagedAddress> {
+        self.pending_requests(circle_id).iter().collect()
     }
 
-    // ========== STORAGE ==========
+    /// Récupère le créateur d'un cercle
+    #[view(getCircleCreator)]
+    fn get_circle_creator(&self, circle_id: u64) -> OptionalValue<ManagedAddress> {
+        if self.circles(circle_id).is_empty() {
+            OptionalValue::None
+        } else {
+            OptionalValue::Some(self.circles(circle_id).get().creator)
+        }
+    }
 
-    /// Mappage des cercles par ID
-    #[view]
-    #[storage_mapper("circles")]
-    fn circles(&self, circle_id: u64) -> SingleValueMapper<Circle<Self::Api>>;
+    /// Vérifie si une adresse a une demande en attente
+    #[view(hasPendingRequest)]
+    fn has_pending_request_view(&self, circle_id: u64, address: ManagedAddress) -> bool {
+        self.pending_requests(circle_id).contains(&address)
+    }
 
-    /// Prochain ID de cercle disponible
-    #[view]
-    #[storage_mapper("nextCircleId")]
-    fn next_circle_id(&self) -> SingleValueMapper<u64>;
+    /// Vérifie si un membre a déjà voté pour un candidat
+    #[view(hasVoted)]
+    fn has_voted(&self, circle_id: u64, candidate: ManagedAddress, voter: ManagedAddress) -> bool {
+        let vote_key = self.get_vote_key(circle_id, &candidate, &voter);
+        !self.votes(&vote_key).is_empty()
+    }
 
-    /// Demandes d'adhésion en attente
-    #[view]
-    #[storage_mapper("membershipRequests")]
-    fn membership_requests(
-        &self,
-        key: &(u64, ManagedAddress),
-    ) -> SingleValueMapper<MembershipRequest<Self::Api>>;
+    /// Vérifie si un membre a contribué pour le cycle en cours
+    #[view(hasContributed)]
+    fn has_contributed_view(&self, circle_id: u64, member: ManagedAddress) -> bool {
+        if self.circles(circle_id).is_empty() {
+            return false;
+        }
+        let circle = self.circles(circle_id).get();
+        self.has_contributed(circle_id, circle.current_cycle, &member)
+    }
 
-    /// Solde de la trésorerie du protocole
-    #[view]
-    #[storage_mapper("treasuryBalance")]
-    fn treasury_balance(&self) -> SingleValueMapper<BigUint>;
+    /// Récupère la liste des contributeurs pour le cycle en cours
+    #[view(getCycleContributors)]
+    fn get_cycle_contributors(&self, circle_id: u64) -> ManagedVec<ManagedAddress> {
+        let mut contributors = ManagedVec::new();
 
-    /// Pourcentage de frais (en basis points, 300 = 3%)
-    #[view]
-    #[storage_mapper("protocolFeePercentage")]
-    fn protocol_fee_percentage(&self) -> SingleValueMapper<u64>;
+        if self.circles(circle_id).is_empty() {
+            return contributors;
+        }
 
-    // ========== EVENTS ==========
+        let circle = self.circles(circle_id).get();
+        let members = self.get_circle_members(circle_id);
+
+        for member in &members {
+            if self.has_contributed(circle_id, circle.current_cycle, &member) {
+                contributors.push(member.clone());
+            }
+        }
+
+        contributors
+    }
+
+    /// Récupère le nombre de contributeurs pour le cycle en cours
+    #[view(getCycleContributorCount)]
+    fn get_cycle_contributor_count(&self, circle_id: u64) -> u32 {
+        if self.circles(circle_id).is_empty() {
+            return 0;
+        }
+
+        let circle = self.circles(circle_id).get();
+        let members = self.get_circle_members(circle_id);
+        let mut count = 0u32;
+
+        for member in &members {
+            if self.has_contributed(circle_id, circle.current_cycle, &member) {
+                count += 1;
+            }
+        }
+
+        count
+    }
+
+    // ========== Fonctions privées ==========
+
+    /// Logique interne de distribution des fonds
+    fn internal_distribute(&self, circle_id: u64) {
+        let mut circle = self.circles(circle_id).get();
+        let current_time = self.blockchain().get_block_timestamp();
+
+        // Vérifier que tous les membres ont contribué
+        let members = self.get_circle_members(circle_id);
+        let mut total_collected = BigUint::zero();
+
+        for member in &members {
+            require!(self.has_contributed(circle_id, circle.current_cycle, &member), "Not all members have contributed");
+            let contribution = self.contributions(circle_id, circle.current_cycle, &member).get();
+            total_collected += contribution;
+        }
+
+        // Calculer les frais (2-5% selon whitepaper, ici 3%)
+        let fee_percentage = BigUint::from(3u32);
+        let fee = (&total_collected * &fee_percentage) / BigUint::from(100u32);
+        let amount_to_distribute = total_collected - &fee;
+
+        // Déterminer le bénéficiaire (rotation simple)
+        let beneficiary_index = (circle.current_cycle as usize) % members.len();
+        let beneficiary = members.get(beneficiary_index);
+
+        // Transférer les fonds au bénéficiaire
+        self.send().direct_egld(&beneficiary, &amount_to_distribute);
+
+        // Stocker les frais pour la treasury
+        let current_treasury = self.treasury_balance().get();
+        self.treasury_balance().set(current_treasury + fee);
+
+        // Passer au cycle suivant
+        circle.current_cycle += 1;
+        circle.next_distribution_time = current_time + circle.cycle_duration;
+
+        // Si tous les membres ont reçu, terminer le cercle
+        if circle.current_cycle >= circle.member_count {
+            circle.is_active = false;
+        }
+
+        self.circles(circle_id).set(circle.clone());
+
+        self.funds_distributed_event(
+            circle_id,
+            circle.current_cycle - 1,
+            &beneficiary,
+            &amount_to_distribute,
+        );
+    }
+
+    fn add_member_to_circle(&self, circle_id: u64, member: &ManagedAddress) {
+        self.circle_members(circle_id).insert(member.clone());
+
+        let mut circle = self.circles(circle_id).get();
+        circle.member_count += 1;
+        self.circles(circle_id).set(circle);
+    }
+
+    fn has_pending_request(&self, circle_id: u64, address: &ManagedAddress) -> bool {
+        self.pending_requests(circle_id).contains(address)
+    }
+
+    fn has_contributed(&self, circle_id: u64, cycle: u32, member: &ManagedAddress) -> bool {
+        !self.contributions(circle_id, cycle, member).is_empty()
+    }
+
+    fn get_vote_key(&self, circle_id: u64, candidate: &ManagedAddress, voter: &ManagedAddress) -> ManagedBuffer {
+        let mut key = ManagedBuffer::new();
+        key.append(&ManagedBuffer::from(circle_id.to_be_bytes().as_ref()));
+        key.append(&candidate.as_managed_buffer());
+        key.append(&voter.as_managed_buffer());
+        key
+    }
+
+    fn count_votes(&self, circle_id: u64, candidate: &ManagedAddress) -> (usize, usize) {
+        let members = self.get_circle_members(circle_id);
+        let mut yes_votes = 0;
+        let mut total_votes = 0;
+
+        for member in &members {
+            let vote_key = self.get_vote_key(circle_id, candidate, &member);
+            if !self.votes(&vote_key).is_empty() {
+                total_votes += 1;
+                if self.votes(&vote_key).get() {
+                    yes_votes += 1;
+                }
+            }
+        }
+
+        (yes_votes, total_votes)
+    }
+
+    // ========== Events ==========
 
     #[event("circleCreated")]
     fn circle_created_event(
         &self,
         #[indexed] circle_id: u64,
         #[indexed] creator: &ManagedAddress,
-        contribution_amount: &BigUint,
-        cycle_duration: u64,
-        max_members: u32,
+        #[indexed] contribution_amount: &BigUint,
     );
 
     #[event("membershipRequested")]
@@ -480,15 +415,6 @@ pub trait CircleManagerContract {
         &self,
         #[indexed] circle_id: u64,
         #[indexed] candidate: &ManagedAddress,
-    );
-
-    #[event("voteCast")]
-    fn vote_cast_event(
-        &self,
-        #[indexed] circle_id: u64,
-        #[indexed] voter: &ManagedAddress,
-        #[indexed] candidate: &ManagedAddress,
-        approve: bool,
     );
 
     #[event("memberApproved")]
@@ -505,14 +431,12 @@ pub trait CircleManagerContract {
         #[indexed] candidate: &ManagedAddress,
     );
 
-    #[event("circleStarted")]
-    fn circle_started_event(&self, #[indexed] circle_id: u64);
-
     #[event("contributionMade")]
     fn contribution_made_event(
         &self,
         #[indexed] circle_id: u64,
-        #[indexed] contributor: &ManagedAddress,
+        #[indexed] cycle: u32,
+        #[indexed] member: &ManagedAddress,
         amount: &BigUint,
     );
 
@@ -520,11 +444,48 @@ pub trait CircleManagerContract {
     fn funds_distributed_event(
         &self,
         #[indexed] circle_id: u64,
+        #[indexed] cycle: u32,
         #[indexed] beneficiary: &ManagedAddress,
         amount: &BigUint,
-        protocol_fee: &BigUint,
     );
 
-    #[event("circleCompleted")]
-    fn circle_completed_event(&self, #[indexed] circle_id: u64);
+    // ========== Storage ==========
+
+    #[storage_mapper("circle_count")]
+    fn circle_count(&self) -> SingleValueMapper<u64>;
+
+    #[storage_mapper("circles")]
+    fn circles(&self, circle_id: u64) -> SingleValueMapper<Circle<Self::Api>>;
+
+    #[storage_mapper("circle_members")]
+    fn circle_members(&self, circle_id: u64) -> UnorderedSetMapper<ManagedAddress>;
+
+    #[storage_mapper("pending_requests")]
+    fn pending_requests(&self, circle_id: u64) -> UnorderedSetMapper<ManagedAddress>;
+
+    #[storage_mapper("contributions")]
+    fn contributions(&self, circle_id: u64, cycle: u32, member: &ManagedAddress) -> SingleValueMapper<BigUint>;
+
+    #[storage_mapper("votes")]
+    fn votes(&self, vote_key: &ManagedBuffer) -> SingleValueMapper<bool>;
+
+    #[storage_mapper("treasury_balance")]
+    fn treasury_balance(&self) -> SingleValueMapper<BigUint>;
+}
+
+/// Structure représentant un cercle de tontine
+#[type_abi]
+#[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, Clone)]
+pub struct Circle<M: ManagedTypeApi> {
+    pub id: u64,
+    pub creator: ManagedAddress<M>,
+    pub name: ManagedBuffer<M>,
+    pub contribution_amount: BigUint<M>,
+    pub cycle_duration: u64,
+    pub max_members: u32,
+    pub current_cycle: u32,
+    pub member_count: u32,
+    pub is_active: bool,
+    pub created_at: u64,
+    pub next_distribution_time: u64,
 }

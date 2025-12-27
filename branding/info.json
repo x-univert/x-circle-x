@@ -1,0 +1,15 @@
+{
+  "website": "https://xcirclex.io",
+  "description": "X-CIRCLE-X DAO - Decentralized Circle of Life on MultiversX. A revolutionary ROSCA (Rotating Savings and Credit Association) protocol with daily circular token flow, evolutionary NFTs, and Pi-based tokenomics.",
+  "social": {
+    "twitter": "https://twitter.com/xcirclex",
+    "telegram": "https://t.me/xcirclex",
+    "discord": "https://discord.gg/xcirclex",
+    "blog": "https://medium.com/@xcirclex"
+  },
+  "status": "active",
+  "pngUrl": "https://raw.githubusercontent.com/xcirclex/assets/main/logo.png",
+  "svgUrl": "https://raw.githubusercontent.com/xcirclex/assets/main/logo.svg",
+  "lockedAccounts": {},
+  "extraTokens": []
+}

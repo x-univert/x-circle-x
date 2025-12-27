@@ -1,6 +1,0 @@
-[settings]
-main = "circle-manager"
-
-[contracts.circle-manager]
-name = "Circle Manager"
-add-unlabelled = true

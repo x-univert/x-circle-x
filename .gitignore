@@ -172,8 +172,40 @@ deployer.pem
 .github/workflows/*.secret
 .gitlab-ci-local/
 
-# === Custom ===
-# Ajoutez vos exclusions personnalisées ici
+# === Custom X-CIRCLE-X ===
 TODO.txt
 NOTES.md
 scratch/
+
+# Dossier wallets MultiversX - CRITIQUE!
+multiversx-wallets/
+multiversx-wallets/*.pem
+wallet-*.pem
+
+# Fichiers de déploiement avec données sensibles
+deploy-output.json
+test-deploy-output.json
+circle-manager-v1-deploy.json
+
+# Fichiers temporaires du projet
+nul
+get-pip.py
+
+# Build outputs des smart contracts (garder le code source, pas les builds)
+contracts/*/output/
+contracts/*/wasm/target/
+
+# Frontend build
+frontend/build/
+frontend/node_modules/
+frontend/.env.local
+
+# Branding (optionnel - décommenter si vous voulez garder privé)
+# branding/
+
+# mx-assets submission (local only)
+mx-assets-submission/
+
+# Scripts locaux
+*.bat
+deploy-*.bat

@@ -1,0 +1,4 @@
+[settings]
+
+[[proxy]]
+path = "src/test_adder_proxy.rs"

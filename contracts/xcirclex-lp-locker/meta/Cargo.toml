@@ -1,0 +1,11 @@
+[package]
+name = "xcirclex-lp-locker-meta"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies.xcirclex-lp-locker]
+path = ".."
+
+[dependencies.multiversx-sc-meta-lib]
+version = "0.53.2"

@@ -1,0 +1,839 @@
+@import 'tailwindcss';
+
+@theme {
+  --breakpoint-xs: 30rem; /* 480px */
+  --background-image-dark-theme: url('/dark-theme-bg.png');
+  --background-image-vibe-theme: url('/vibe-theme-bg.png');
+  --background-image-light-theme: url('/light-theme-bg.png');
+  --background-image-xcirclex: linear-gradient(135deg, #1e3a8a 0%, #581c87 50%, #831843 100%);
+  --background-color-primary: var(--mvx-bg-color-primary);
+  --background-color-secondary: var(--mvx-bg-color-secondary);
+  --background-color-tertiary: var(--mvx-hover-bg-primary);
+  --background-color-accent: var(--mvx-bg-accent-color);
+  --background-color-btn-primary: var(--mvx-button-bg-primary);
+  --background-color-btn-secondary: var(--mvx-button-bg-secondary);
+  --background-color-btn-tertiary: var(--mvx-button-bg-secondary);
+  --background-color-btn-variant: var(--mvx-button-bg-variant);
+  --background-color-btn-hover: var(--mvx-hover-color-primary);
+  --background-color-logo-primary: var(--mvx-text-color-primary);
+  --background-color-icon: var(--mvx-link-color);
+  --color-primary: var(--mvx-text-color-primary);
+  --color-secondary: var(--mvx-text-color-secondary);
+  --color-tertiary: var(--mvx-text-color-tertiary);
+  --color-accent: var(--mvx-text-accent-color);
+  --color-btn-primary: var(--mvx-button-text-primary);
+  --color-btn-secondary: var(--mvx-button-text-secondary);
+  --color-link: var(--mvx-link-color);
+  --color-success: var(--mvx-success-color);
+  --color-error: var(--mvx-error-color);
+  --color-warning: var(--mvx-warning-color);
+  --background-color-success: var(--mvx-success-color);
+  --background-color-error: var(--mvx-error-color);
+  --background-color-warning: var(--mvx-warning-color);
+  --border-color-secondary: var(--mvx-border-color-secondary);
+  --border-color-logo: var(--mvx-text-color-primary);
+}
+
+:root {
+  --mvx-slate-75: #f8f8ff;
+  --mvx-fuchsia-550: #f04dff;
+  --mvx-purple-150: #e8dde6; /* Lightened for WCAG AA contrast (was #ddcedb) */
+  --mvx-purple-350: #b5a0b9;
+  --mvx-purple-850: #431c4e;
+  --mvx-purple-875: #471150;
+  --mvx-purple-925: #3c1543;
+  --mvx-purple-975: #310339;
+
+  /* Couleurs de status */
+  --mvx-success-color: #10b981;
+  --mvx-error-color: #ef4444;
+  --mvx-warning-color: #f59e0b;
+}
+
+/* Override text-secondary for ALL themes to ensure WCAG AA contrast */
+:root[data-mvx-theme='mvx:dark-theme'],
+[data-mvx-theme='mvx:dark-theme'] {
+  --mvx-text-color-secondary: #d1d5db; /* gray-300 - 8.3:1 contrast on dark bg */
+}
+
+:root[data-mvx-theme='mvx:light-theme'],
+[data-mvx-theme='mvx:light-theme'] {
+  --mvx-text-color-secondary: #4b5563; /* gray-600 - 5.7:1 contrast on white bg */
+}
+
+:root[data-mvx-theme='mvx:vibe-theme'],
+[data-mvx-theme='mvx:vibe-theme'] {
+  --mvx-bg-color-primary: var(--mvx-purple-925);
+  --mvx-bg-color-secondary: var(--mvx-purple-875);
+  --mvx-bg-accent-color: var(--mvx-purple-975);
+  --mvx-bg-accent-variant-color: var(--mvx-purple-925);
+  --mvx-hover-color-primary: var(--mvx-purple-850);
+  --mvx-text-color-primary: var(--mvx-white);
+  --mvx-text-color-secondary: var(--mvx-purple-150); /* Changed from purple-350 to purple-150 for better contrast (WCAG AA) */
+  --mvx-text-color-tertiary: var(--mvx-slate-75);
+  --mvx-text-accent-color: var(--mvx-fuchsia-550);
+  --mvx-link-color: var(--mvx-purple-150);
+  --mvx-label-color: var(--mvx-purple-150);
+  --mvx-icon-bg: var(--mvx-purple-925);
+  --mvx-button-bg-primary: var(--mvx-fuchsia-550);
+  --mvx-button-bg-secondary: var(--mvx-purple-875);
+  --mvx-button-bg-variant: var(--mvx-purple-875);
+  --mvx-button-text-primary: var(--mvx-black);
+  --mvx-button-text-secondary: var(--mvx-neutral-225);
+  --mvx-border-color-secondary: var(--mvx-purple-850);
+  --mvx-scrollbar-thumb: var(--mvx-purple-925);
+}
+
+/* ========================================
+   X-CIRCLE-X THEME
+   Thème personnalisé avec dégradé violet/pourpre/rose
+   ======================================== */
+:root[data-mvx-theme='xcirclex'],
+[data-mvx-theme='xcirclex'] {
+  /* Couleurs de base X-CIRCLE-X */
+  --xcircle-blue-900: #1e3a8a;
+  --xcircle-purple-900: #581c87;
+  --xcircle-pink-900: #831843;
+  --xcircle-purple-700: #7c3aed;
+  --xcircle-pink-500: #ec4899;
+  --xcircle-orange-400: #f59e0b;
+
+  /* Background avec dégradé */
+  --mvx-bg-color-primary: #1a1033;
+  --mvx-bg-color-secondary: #2d1f4e;
+  --mvx-bg-accent-color: #0f0720;
+  --mvx-bg-accent-variant-color: #1a1033;
+  --mvx-hover-color-primary: #3d2a6b;
+  --mvx-hover-bg-primary: #3d2a6b;
+
+  /* Couleurs de texte */
+  --mvx-text-color-primary: #ffffff;
+  --mvx-text-color-secondary: #e9d5ff;
+  --mvx-text-color-tertiary: #f3e8ff;
+  --mvx-text-accent-color: #ec4899;
+
+  /* Liens et labels */
+  --mvx-link-color: #c084fc;
+  --mvx-label-color: #e9d5ff;
+  --mvx-icon-bg: #2d1f4e;
+
+  /* Boutons */
+  --mvx-button-bg-primary: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+  --mvx-button-bg-secondary: #3d2a6b;
+  --mvx-button-bg-variant: #2d1f4e;
+  --mvx-button-text-primary: #ffffff;
+  --mvx-button-text-secondary: #e9d5ff;
+
+  /* Bordures */
+  --mvx-border-color-secondary: #7c3aed;
+
+  /* Scrollbar */
+  --mvx-scrollbar-thumb: #7c3aed;
+}
+
+/* Background gradient for X-CIRCLE-X theme */
+[data-mvx-theme='xcirclex'] body,
+[data-mvx-theme='xcirclex'] #root {
+  background: linear-gradient(135deg, #1e3a8a 0%, #581c87 50%, #831843 100%) !important;
+  min-height: 100vh;
+}
+
+/* Pages avec background transparent pour utiliser le thème global */
+[data-mvx-theme='xcirclex'] .page-container,
+[data-mvx-theme='xcirclex'] .min-h-screen {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+/* Fallback background pour les thèmes MVX quand les pages n'ont pas de bg spécifique */
+[data-mvx-theme='mvx:dark-theme'] .min-h-screen,
+[data-mvx-theme='mvx:vibe-theme'] .min-h-screen,
+[data-mvx-theme='mvx:light-theme'] .min-h-screen {
+  background: var(--mvx-bg-color-primary);
+}
+
+
+/* Bordures avec effet glow pour X-CIRCLE-X */
+[data-mvx-theme='xcirclex'] .vibe-border {
+  border-color: #7c3aed !important;
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.3);
+}
+
+/* Boutons X-CIRCLE-X avec dégradé */
+[data-mvx-theme='xcirclex'] .bg-btn-primary {
+  background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%) !important;
+  border: none !important;
+}
+
+[data-mvx-theme='xcirclex'] .bg-btn-primary:hover {
+  background: linear-gradient(135deg, #8b5cf6 0%, #f472b6 100%) !important;
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.4);
+}
+
+/* Cards avec effet glassmorphism */
+[data-mvx-theme='xcirclex'] .bg-secondary {
+  background: rgba(45, 31, 78, 0.8) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+}
+
+[data-mvx-theme='xcirclex'] .bg-primary {
+  background: rgba(26, 16, 51, 0.9) !important;
+}
+
+/* Accent colors */
+[data-mvx-theme='xcirclex'] .text-accent {
+  background: linear-gradient(135deg, #c084fc 0%, #f472b6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animations spéciales X-CIRCLE-X */
+@keyframes xcircleGlow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(124, 58, 237, 0.5), 0 0 10px rgba(236, 72, 153, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(124, 58, 237, 0.8), 0 0 25px rgba(236, 72, 153, 0.5);
+  }
+}
+
+[data-mvx-theme='xcirclex'] .xcircle-glow {
+  animation: xcircleGlow 2s ease-in-out infinite;
+}
+
+/* Logo animé pour X-CIRCLE-X */
+@keyframes xcircleRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+[data-mvx-theme='xcirclex'] .xcircle-logo-animate {
+  animation: xcircleRotate 20s linear infinite;
+}
+
+/* Status badges X-CIRCLE-X */
+[data-mvx-theme='xcirclex'] .election-status-badge {
+  color: #ffffff !important;
+}
+
+/* Candidat cartes */
+[data-mvx-theme='xcirclex'] .candidate-name {
+  color: #ffffff;
+}
+
+[data-mvx-theme='xcirclex'] .candidate-card:hover .candidate-name {
+  color: #ec4899;
+}
+
+[data-mvx-theme='xcirclex'] .candidate-selected .candidate-name {
+  color: #ec4899;
+}
+
+/* Links */
+[data-mvx-theme='xcirclex'] .candidate-link-selected {
+  color: #ffffff !important;
+  border-color: #ec4899 !important;
+}
+
+[data-mvx-theme='xcirclex'] .candidate-bio-selected {
+  color: #ffffff !important;
+}
+
+/* Vote buttons */
+[data-mvx-theme='xcirclex'] .btn-confirm-vote:hover {
+  color: #ec4899 !important;
+}
+
+[data-mvx-theme='xcirclex'] .btn-create-election:hover {
+  color: #ec4899 !important;
+}
+
+[data-mvx-theme='xcirclex'] .btn-vote:hover {
+  color: #ec4899 !important;
+}
+
+/* Vote warning text */
+[data-mvx-theme='xcirclex'] .vote-warning-text {
+  color: #ffffff !important;
+}
+
+/* Vote button disabled */
+[data-mvx-theme='xcirclex'] .vote-button-disabled {
+  color: #ffffff !important;
+  opacity: 0.5;
+}
+
+/* Private vote modal */
+[data-mvx-theme='xcirclex'] .private-vote-modal-text {
+  color: #ffffff !important;
+}
+
+[data-mvx-theme='xcirclex'] .private-vote-modal-button {
+  color: #ffffff !important;
+}
+
+/* Header X-CIRCLE-X */
+[data-mvx-theme='xcirclex'] header,
+[data-mvx-theme='xcirclex'] .header {
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.95) 0%, rgba(88, 28, 135, 0.95) 50%, rgba(131, 24, 67, 0.95) 100%) !important;
+  border-bottom: 2px solid rgba(124, 58, 237, 0.5) !important;
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+[data-mvx-theme='xcirclex'] .header .bg-secondary,
+[data-mvx-theme='xcirclex'] header .bg-secondary {
+  background: rgba(45, 31, 78, 0.9) !important;
+  border-color: rgba(124, 58, 237, 0.5) !important;
+}
+
+[data-mvx-theme='xcirclex'] .header .bg-tertiary,
+[data-mvx-theme='xcirclex'] header .bg-tertiary,
+[data-mvx-theme='xcirclex'] .header .hover\:bg-tertiary:hover,
+[data-mvx-theme='xcirclex'] header .hover\:bg-tertiary:hover {
+  background: rgba(61, 42, 107, 0.9) !important;
+}
+
+/* Navigation buttons in header */
+[data-mvx-theme='xcirclex'] .header-navigation-button,
+[data-mvx-theme='xcirclex'] header button {
+  color: #ffffff;
+}
+
+[data-mvx-theme='xcirclex'] .header-navigation-button:hover,
+[data-mvx-theme='xcirclex'] header button:hover {
+  color: #ec4899;
+}
+
+/* Menu dropdown X-CIRCLE-X */
+[data-mvx-theme='xcirclex'] .header .animate-fadeIn,
+[data-mvx-theme='xcirclex'] header .animate-fadeIn {
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.98) 0%, rgba(88, 28, 135, 0.98) 100%) !important;
+  border: 1px solid rgba(124, 58, 237, 0.5) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(124, 58, 237, 0.3);
+}
+
+/* Active menu item */
+[data-mvx-theme='xcirclex'] .bg-btn-primary {
+  background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%) !important;
+}
+
+/* Logo text gradient for X-CIRCLE-X theme */
+[data-mvx-theme='xcirclex'] .logo-text {
+  background: linear-gradient(135deg, #c084fc 0%, #f472b6 50%, #fb923c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Wallet address area */
+[data-mvx-theme='xcirclex'] .header-navigation-address {
+  background: rgba(45, 31, 78, 0.6) !important;
+  border-color: rgba(124, 58, 237, 0.4) !important;
+}
+
+[data-mvx-theme='xcirclex'] .header-navigation-address a {
+  color: #e9d5ff !important;
+}
+
+[data-mvx-theme='xcirclex'] .header-navigation-address a:hover {
+  color: #f472b6 !important;
+}
+
+/* Icons in header */
+[data-mvx-theme='xcirclex'] .header-navigation-button-icon,
+[data-mvx-theme='xcirclex'] .header-navigation-address-wallet {
+  color: #c084fc !important;
+}
+
+[data-mvx-theme='xcirclex'] .header-navigation-address-logout {
+  color: #e9d5ff !important;
+}
+
+[data-mvx-theme='xcirclex'] .header-navigation-address-logout:hover {
+  color: #ec4899 !important;
+}
+
+
+
+/* Classes personnalisées DEMOCRATIX */
+
+/* Badge "Terminée" - noir pour dark themes, blanc pour light theme */
+.finished-badge {
+  color: #000000;
+}
+
+[data-mvx-theme='mvx:light-theme'] .finished-badge {
+  color: #ffffff;
+}
+
+/* Badge "Fermée" - adapté à chaque thème */
+.closed-badge {
+  color: #000000; /* Noir par défaut (dark-theme et vibe-theme) */
+}
+
+[data-mvx-theme='mvx:light-theme'] .closed-badge {
+  color: #ffffff; /* Blanc pour light theme */
+}
+
+/* Bordures claires pour VibeMode uniquement */
+[data-mvx-theme='mvx:vibe-theme'] .vibe-border {
+  border-color: var(--mvx-purple-150) !important;
+}
+
+/* Barre de progression - fond pour BrightLight */
+[data-mvx-theme='mvx:light-theme'] .progress-bar-bg {
+  background-color: #e5e7eb !important;
+}
+
+/* Boutons spécifiques TealLab */
+/* Bouton "Créer une élection" - texte turquoise au hover */
+[data-mvx-theme='mvx:dark-theme'] .btn-create-election:hover {
+  color: var(--mvx-button-bg-primary) !important;
+}
+
+/* Bouton "Détails" - texte noir au hover */
+[data-mvx-theme='mvx:dark-theme'] .btn-details:hover {
+  color: #000000 !important;
+}
+
+/* Bouton "Voter" - texte turquoise au hover */
+[data-mvx-theme='mvx:dark-theme'] .btn-vote:hover {
+  color: var(--mvx-button-bg-primary) !important;
+}
+
+/* Bouton "Voir les résultats" - texte gris foncé au hover */
+[data-mvx-theme='mvx:dark-theme'] .btn-results:hover {
+  color: #4b5563 !important;
+}
+
+/* Boutons spécifiques VibeMode */
+/* Bouton "Créer une élection" - texte fuchsia au hover */
+[data-mvx-theme='mvx:vibe-theme'] .btn-create-election:hover {
+  color: var(--mvx-fuchsia-550) !important;
+}
+
+/* Bouton "Détails" - texte noir au hover */
+[data-mvx-theme='mvx:vibe-theme'] .btn-details:hover {
+  color: #000000 !important;
+}
+
+/* Bouton "Voter" - texte fuchsia au hover */
+[data-mvx-theme='mvx:vibe-theme'] .btn-vote:hover {
+  color: var(--mvx-fuchsia-550) !important;
+}
+
+/* Bouton "Voir les résultats" - texte purple clair au hover */
+[data-mvx-theme='mvx:vibe-theme'] .btn-results:hover {
+  color: var(--mvx-purple-350) !important;
+}
+
+/* Bouton "Confirmer mon vote" pour tous les themes */
+/* TealLab - texte turquoise au hover */
+[data-mvx-theme='mvx:dark-theme'] .btn-confirm-vote:hover {
+  color: var(--mvx-button-bg-primary) !important;
+}
+
+/* VibeMode - texte fuchsia au hover */
+[data-mvx-theme='mvx:vibe-theme'] .btn-confirm-vote:hover {
+  color: var(--mvx-fuchsia-550) !important;
+}
+
+/* BrightLight - texte bleu au hover */
+[data-mvx-theme='mvx:light-theme'] .btn-confirm-vote:hover {
+  color: var(--mvx-button-bg-primary) !important;
+}
+
+/* Candidats sur page Vote - visibilité du nom */
+
+/* TealLab - nom du candidat */
+[data-mvx-theme='mvx:dark-theme'] .candidate-name {
+  color: var(--mvx-text-color-primary);
+}
+
+[data-mvx-theme='mvx:dark-theme'] .candidate-card:hover .candidate-name {
+  color: var(--mvx-text-accent-color);
+}
+
+[data-mvx-theme='mvx:dark-theme'] .candidate-selected .candidate-name {
+  color: var(--mvx-text-accent-color);
+}
+
+/* VibeMode - nom du candidat */
+[data-mvx-theme='mvx:vibe-theme'] .candidate-name {
+  color: var(--mvx-white);
+}
+
+[data-mvx-theme='mvx:vibe-theme'] .candidate-card:hover .candidate-name {
+  color: var(--mvx-fuchsia-550);
+}
+
+[data-mvx-theme='mvx:vibe-theme'] .candidate-selected .candidate-name {
+  color: var(--mvx-fuchsia-550);
+}
+
+/* BrightLight - nom du candidat avec texte qui s'adapte au fond */
+[data-mvx-theme='mvx:light-theme'] .candidate-name {
+  color: #1f2937;
+}
+
+[data-mvx-theme='mvx:light-theme'] .candidate-card:hover .candidate-name {
+  color: #ffffff;
+}
+
+[data-mvx-theme='mvx:light-theme'] .candidate-selected .candidate-name {
+  color: #ffffff;
+}
+
+/* Animations pour les barres de progression des résultats */
+@keyframes slideIn {
+  from {
+    width: 0%;
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Animation pour le modal de paramètres */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Animation pour scale-in (succès/erreur) */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.3s ease-out;
+}
+
+/* ========================================
+   ANIMATIONS UI/UX IMPROVEMENTS
+   ======================================== */
+
+/* Page fade-in (pour transitions entre pages) */
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.page-transition {
+  animation: pageFadeIn 0.3s ease-in-out;
+}
+
+/* Slide up (pour modals, toasts) */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideUp {
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Scale bounce (pour boutons, cartes au hover) */
+@keyframes scaleBounce {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-bounce-scale {
+  animation: scaleBounce 0.4s ease-in-out;
+}
+
+/* Shake (pour erreurs) */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Loading shimmer (pour skeletons) */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+/* Hover lift effect */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* Button press effect */
+.btn-press {
+  transition: transform 0.1s ease;
+}
+
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+/* Fade-in stagger (pour listes) */
+@keyframes fadeInStagger {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-stagger {
+  animation: fadeInStagger 0.4s ease-out;
+}
+
+/* Smooth transitions globales */
+* {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Loading dots animation */
+@keyframes loadingDots {
+  0%, 20% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.loading-dot {
+  animation: loadingDots 1.4s infinite;
+}
+
+.loading-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Fix form labels visibility on dark themes */
+[data-mvx-theme='mvx:dark-theme'] label,
+[data-mvx-theme='mvx:vibe-theme'] label {
+  color: var(--mvx-text-color-primary) !important;
+}
+
+[data-mvx-theme='mvx:light-theme'] label {
+  color: var(--mvx-text-color-primary) !important;
+}
+
+/* Fix file input button text color on BrightLight theme */
+[data-mvx-theme='mvx:light-theme'] input[type="file"]::file-selector-button {
+  color: #ffffff !important;
+  background-color: var(--mvx-button-bg-primary) !important;
+}
+
+/* Ensure file button styling works across browsers */
+[data-mvx-theme='mvx:light-theme'] input[type="file"]::-webkit-file-upload-button {
+  color: #ffffff !important;
+  background-color: var(--mvx-button-bg-primary) !important;
+}
+
+/* Vote page - Candidat sélectionné - liens en noir pour TealLab et VibeMode */
+[data-mvx-theme='mvx:dark-theme'] .candidate-link-selected {
+  color: #000000 !important;
+  border-color: #000000 !important;
+}
+
+[data-mvx-theme='mvx:vibe-theme'] .candidate-link-selected {
+  color: #000000 !important;
+  border-color: #000000 !important;
+}
+
+/* BrightLight - liens en blanc (par défaut) */
+[data-mvx-theme='mvx:light-theme'] .candidate-link-selected {
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+/* Vote page - Candidat sélectionné - biographie en noir pour TealLab et VibeMode */
+[data-mvx-theme='mvx:dark-theme'] .candidate-bio-selected {
+  color: #000000 !important;
+}
+
+[data-mvx-theme='mvx:vibe-theme'] .candidate-bio-selected {
+  color: #000000 !important;
+}
+
+/* BrightLight - biographie en blanc */
+[data-mvx-theme='mvx:light-theme'] .candidate-bio-selected {
+  color: #ffffff !important;
+}
+
+/* Vote page - Texte d'avertissement */
+/* TealLab et VibeMode - texte blanc */
+[data-mvx-theme='mvx:dark-theme'] .vote-warning-text {
+  color: #ffffff !important;
+}
+
+[data-mvx-theme='mvx:vibe-theme'] .vote-warning-text {
+  color: #ffffff !important;
+}
+
+/* BrightLight - texte noir */
+[data-mvx-theme='mvx:light-theme'] .vote-warning-text {
+  color: #000000 !important;
+}
+
+/* Vote page - Boutons de vote désactivés (quand aucun candidat sélectionné) */
+/* TealLab - texte noir */
+[data-mvx-theme='mvx:dark-theme'] .vote-button-disabled {
+  color: #000000 !important;
+}
+
+/* VibeMode - texte noir */
+[data-mvx-theme='mvx:vibe-theme'] .vote-button-disabled {
+  color: #000000 !important;
+}
+
+/* BrightLight - texte blanc */
+[data-mvx-theme='mvx:light-theme'] .vote-button-disabled {
+  color: #ffffff !important;
+}
+
+/* Private Vote Modal - Texte des modales de vote privé */
+/* TealLab et VibeMode - texte blanc */
+[data-mvx-theme='mvx:dark-theme'] .private-vote-modal-text {
+  color: #ffffff !important;
+}
+
+[data-mvx-theme='mvx:vibe-theme'] .private-vote-modal-text {
+  color: #ffffff !important;
+}
+
+/* BrightLight - texte noir */
+[data-mvx-theme='mvx:light-theme'] .private-vote-modal-text {
+  color: #000000 !important;
+}
+
+/* Private Vote Modal - Bouton */
+/* TealLab et VibeMode - texte blanc */
+[data-mvx-theme='mvx:dark-theme'] .private-vote-modal-button {
+  color: #ffffff !important;
+}
+
+[data-mvx-theme='mvx:vibe-theme'] .private-vote-modal-button {
+  color: #ffffff !important;
+}
+
+/* BrightLight - texte noir */
+[data-mvx-theme='mvx:light-theme'] .private-vote-modal-button {
+  color: #000000 !important;
+}
+
+/* Election Detail - Badges de statut */
+/* TealLab et VibeMode - texte noir pour En cours, En attente */
+[data-mvx-theme='mvx:dark-theme'] .election-status-badge {
+  color: #000000 !important;
+}
+
+[data-mvx-theme='mvx:vibe-theme'] .election-status-badge {
+  color: #000000 !important;
+}
+
+/* BrightLight - texte selon le badge */
+[data-mvx-theme='mvx:light-theme'] .election-status-badge {
+  /* Par défaut noir pour En cours, En attente */
+  color: #000000 !important;
+}
+
+/* Exception pour le badge "Fermée" en BrightLight - texte blanc */
+[data-mvx-theme='mvx:light-theme'] .bg-tertiary.election-status-badge {
+  color: #ffffff !important;
+}
+
+/* Election Detail - Texte section temps restant/progression */
+/* Texte noir pour tous les thèmes */
+.election-time-text {
+  color: #000000 !important;
+}

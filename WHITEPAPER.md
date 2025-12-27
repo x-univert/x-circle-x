@@ -1,6 +1,6 @@
-# xCircle DAO - Whitepaper
+# X-CIRCLE-X DAO - Whitepaper
 
-## Version 1.0 - Octobre 2025
+## Version 2.1 - Décembre 2025
 
 ---
 
@@ -9,35 +9,47 @@
 1. [Résumé exécutif](#1-résumé-exécutif)
 2. [Vision et mission](#2-vision-et-mission)
 3. [Problème et opportunité](#3-problème-et-opportunité)
-4. [Solution : xCircle DAO](#4-solution-xcircle-dao)
-5. [Architecture technique](#5-architecture-technique)
-6. [Tokenomics](#6-tokenomics)
-7. [Gouvernance](#7-gouvernance)
-8. [Roadmap](#8-roadmap)
-9. [Équipe et partenaires](#9-équipe-et-partenaires)
-10. [Aspects légaux et compliance](#10-aspects-légaux-et-compliance)
-11. [Risques et mitigation](#11-risques-et-mitigation)
+4. [Solution : X-CIRCLE-X DAO](#4-solution-x-circle-x-dao)
+5. [Le Cercle de Vie](#5-le-cercle-de-vie)
+6. [Architecture technique](#6-architecture-technique)
+7. [Tokenomics $XCIRCLEXX](#7-tokenomics-xcirclex)
+8. [Système de Staking Circulaire (360°)](#8-système-de-staking-circulaire-360)
+9. [NFT Évolutif - Cercle de Réputation](#9-nft-évolutif---cercle-de-réputation)
+10. [Pool de Liquidité EGLD/XCIRCLEX](#10-pool-de-liquidité-egldxcirclex)
+11. [Gouvernance DAO](#11-gouvernance-dao)
+12. [Roadmap](#12-roadmap)
+13. [Équipe et partenaires](#13-équipe-et-partenaires)
+14. [Aspects légaux et compliance](#14-aspects-légaux-et-compliance)
+15. [Risques et mitigation](#15-risques-et-mitigation)
+16. [Idées et Recommandations Futures](#16-idées-et-recommandations-futures)
 
 ---
 
 ## 1. Résumé exécutif
 
-**xCircle DAO** est une plateforme décentralisée de solidarité financière qui réinvente les **tontines traditionnelles** (ROSCA - Rotating Savings and Credit Association) en les rendant transparentes, sécurisées et programmables grâce à la blockchain MultiversX.
+**X-CIRCLE-X DAO** est une plateforme décentralisée de solidarité financière qui réinvente les **tontines traditionnelles** (ROSCA - Rotating Savings and Credit Association) en les rendant transparentes, sécurisées et programmables grâce à la blockchain MultiversX.
+
+Au cœur de l'écosystème se trouve le **Cercle de Vie** : un système innovant de smart contracts interconnectés formant un cercle autour d'un contrat central (SC0), où les tokens circulent quotidiennement entre tous les participants actifs.
 
 ### Glossaire des termes techniques :
 
 - **DAO** (Decentralized Autonomous Organization) = Organisation autonome décentralisée
 - **ROSCA** (Rotating Savings and Credit Association) = Association d'épargne et de crédit rotative
-- **Smart Contract** = Contrat intelligent (programme auto-exécutable)
+- **Smart Contract (SC)** = Contrat intelligent (programme auto-exécutable)
 - **Staking** = Blocage de tokens pour obtenir des récompenses
 - **NFT** (Non-Fungible Token) = Jeton non-fongible (actif numérique unique)
+- **Cercle de Vie** = Écosystème de smart contracts interconnectés en cercle
+- **SC0** = Smart Contract central (maître du Cercle de Vie)
+- **SC Périphérique** = Smart contract créé par un utilisateur sur le cercle
 
 ### Points clés :
 
 - 🌍 **Marché cible** : 1+ milliard de personnes utilisant des tontines informelles
 - 💰 **Volume estimé** : 500+ milliards USD en épargne rotative mondiale
-- 🔒 **Innovation** : Première ROSCA totalement on-chain et transparente
+- 🔒 **Innovation** : Première ROSCA totalement on-chain avec Cercle de Vie
 - 🚀 **Blockchain** : MultiversX (vitesse, coûts faibles, sécurité)
+- 🔄 **Cercle de Vie** : Système de circulation quotidienne entre smart contracts
+- 🪙 **Supply Pi** : 314,159,265 $XCIRCLEXX (π × 10⁸) - symbolique mathématique
 
 ---
 
@@ -85,11 +97,41 @@ La blockchain MultiversX permet de résoudre ces problèmes grâce à :
 
 ---
 
-## 4. Solution : xCircle DAO
+## 3.3 Analyse Concurrentielle
+
+### Projets Existants vs X-CIRCLE-X
+
+| Critère | WeTrust (2017) | Aave (Lending) | PoolTogether | **X-CIRCLE-X** |
+|---------|----------------|----------------|--------------|----------------|
+| **Type** | ROSCA on-chain | Prêt P2P | Loterie épargne | ROSCA + Cercle de Vie |
+| **Blockchain** | Ethereum (coûteux) | Multi-chain | Ethereum/Polygon | **MultiversX (rapide, pas cher)** |
+| **Innovation** | Tontine basique | Flash loans | No-loss lottery | **Circulation quotidienne unique** |
+| **NFT Réputation** | ❌ Non | ❌ Non | ❌ Non | **✅ NFT évolutif 12 niveaux** |
+| **Tokenomics** | Basique | Governance | Basique | **π × 10⁸ + Halving 360** |
+| **Statut** | Abandonné | Actif | Actif | **En développement actif** |
+| **Burn mechanism** | ❌ | ❌ | ❌ | **✅ Burn conditionnel** |
+
+### Avantages Compétitifs Uniques
+
+1. **Cercle de Vie** : Aucun concurrent n'a ce système de circulation quotidienne obligatoire
+2. **MultiversX** : Frais ~$0.001-0.01 vs $5-50 sur Ethereum
+3. **NFT Évolutif** : Réputation on-chain visible et transférable
+4. **Symbolique Pi (π)** : Branding mathématique unique et mémorable
+5. **Halving 360 cycles** : Mécanisme de rareté progressif
+
+### Barrières à l'Entrée
+
+- **Code open-source** : Peut être forké, mais la communauté fait la différence
+- **First-mover** sur MultiversX pour les ROSCA
+- **Effet réseau** : Plus il y a de SC, plus les récompenses sont intéressantes
+
+---
+
+## 4. Solution : X-CIRCLE-X DAO
 
 ### 4.1 Concept de base
 
-xCircle DAO transforme la tontine traditionnelle en **système décentralisé** :
+X-CIRCLE-X DAO transforme la tontine traditionnelle en **système décentralisé** enrichi par le **Cercle de Vie** :
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -130,7 +172,7 @@ Smart contract qui gère :
 - Ordonnancement des tours
 - Distribution automatique des fonds
 
-#### 🔷 2. Token $XCIRCLE
+#### 🔷 2. Token $XCIRCLEX
 
 Token de gouvernance et d'utilité :
 
@@ -189,9 +231,265 @@ Utilisateur
 
 ---
 
-## 5. Architecture technique
+## 4.4 Cas d'Usage Concrets
 
-### 5.1 Stack technologique
+### Cas 1 : Marie, commerçante au Sénégal 🌍
+
+**Situation** : Marie veut acheter un réfrigérateur pour son commerce (500€) mais n'a pas accès au crédit bancaire.
+
+**Solution traditionnelle (Tontine)** :
+- Rejoint une tontine de quartier avec 9 autres femmes
+- Cotise 50€/mois
+- Attend 5 mois en moyenne pour recevoir la cagnotte
+- **Risques** : Membres qui disparaissent, gestionnaire malhonnête
+
+**Solution X-CIRCLE-X** :
+```
+1. Marie crée un SC périphérique (coût: 1 EGLD ≈ 40€)
+2. Participe aux cycles quotidiens depuis son téléphone
+3. Gagne des $XCIRCLEX chaque jour (~1,700 XCX/cycle)
+4. Après 30 cycles, son NFT atteint niveau 1
+5. Elle peut revendre ses XCX ou les staker pour 5-42% APY
+6. Sa réputation on-chain lui ouvre des cercles premium
+```
+**Avantages** : Transparent, automatique, réputation portable, gains passifs
+
+---
+
+### Cas 2 : Ahmed, développeur freelance en Tunisie 💻
+
+**Situation** : Ahmed gagne en crypto et veut épargner de manière productive.
+
+**Utilisation X-CIRCLE-X** :
+```
+1. Stake 100,000 XCX au niveau 6 (180 jours)
+2. Gagne 22% APY = 22,000 XCX/an
+3. Participe au Cercle de Vie pour bonus quotidiens
+4. Vote dans la DAO avec son pouvoir de vote 1.5x
+5. Son NFT niveau 6 lui donne +15% bonus staking
+```
+**Résultat** : Épargne productive + gouvernance + réputation
+
+---
+
+### Cas 3 : Association "Les Amis de Lyon" 🤝
+
+**Situation** : 15 amis veulent épargner ensemble pour un voyage annuel.
+
+**Solution X-CIRCLE-X** :
+```
+1. Chacun crée un SC périphérique (1 EGLD)
+2. L'association reçoit des XCX à chaque cycle réussi
+3. Après 6 mois, les XCX accumulés financent le voyage
+4. Les membres gardent leur NFT de réputation
+5. L'année suivante, ils ont accès à des cercles VIP
+```
+**Avantage** : Plus de trésorier humain, tout est on-chain et transparent
+
+---
+
+### Cas 4 : Pierre, investisseur DeFi en France 📈
+
+**Situation** : Pierre cherche du yield dans un projet innovant.
+
+**Stratégie X-CIRCLE-X** :
+```
+1. Achète 500,000 XCX sur xExchange
+2. Stake au niveau 12 (360 jours) = 42% APY
+3. Fournit liquidité EGLD/XCX = +fees LP
+4. Participe au Cercle de Vie = bonus quotidiens
+5. NFT Cercle Parfait = +50% bonus + 3x vote DAO
+```
+**Yield total estimé** : 50-80% APY combiné
+
+---
+
+## 5. Le Cercle de Vie
+
+### 5.1 Vision du Cercle de Vie
+
+Le **Cercle de Vie** est le cœur battant de X-CIRCLE-X. C'est un écosystème de smart contracts interconnectés formant un cercle autour d'un smart contract central (SC0). Les tokens transitent quotidiennement de manière circulaire entre tous les smart contracts actifs, créant un flux perpétuel qui nécessite la participation active de tous les membres.
+
+```
+                    ┌─────────┐
+                    │   SC3   │
+                   /│ Owner:  │\
+                  / │ SC0+U3  │ \
+                 /  └────┬────┘  \
+                ↓        │        ↑
+         ┌─────────┐     │     ┌─────────┐
+         │   SC2   │     │     │   SC4   │
+         │ Owner:  │     │     │ Owner:  │
+         │ SC0+U2  │     │     │ SC0+U4  │
+         └────┬────┘     │     └────┬────┘
+              ↓          │          ↑
+               \    ┌────┴────┐    /
+                \   │   SC0   │   /
+                 \  │ CENTRAL │  /
+                  \ │ Master  │ /
+                   \└────┬────┘/
+                    ↓    │    ↑
+              ┌─────────┐│┌─────────┐
+              │   SC1   │││   SC5   │
+              │ Owner:  │││ Owner:  │
+              │ SC0+U1  │││ SC0+U5  │
+              └─────────┘│└─────────┘
+                         │
+            FLUX CIRCULAIRE QUOTIDIEN:
+         SC0 → SC1 → SC2 → SC3 → SC4 → SC5 → SC0
+```
+
+### 5.2 Smart Contract Central (SC0)
+
+SC0 est le **cœur du système**, le smart contract "maître" qui :
+
+- **Crée** tous les autres smart contracts à la demande des utilisateurs
+- **Co-propriétaire** de tous les smart contracts créés (multi-signature 2/2)
+- **Orchestre** et signe toutes les transactions circulaires
+- **Vérifie** que les fonds transitent uniquement vers des smart contracts autorisés
+- **Collecte** les frais de création (1 EGLD) pour alimenter la pool de liquidité
+- **Distribue** les récompenses $XCIRCLEX aux participants actifs
+
+### 5.3 Smart Contracts Périphériques (SC1, SC2, SC3...)
+
+Chaque SC périphérique est un "point" sur le cercle qui :
+
+- A **2 propriétaires** : SC0 (toujours) + l'utilisateur créateur
+- Reçoit et transmet les fonds dans le cycle circulaire
+- Peut effectuer des actions avec **quorum des 2 owners**
+- Reçoit les **récompenses $XCIRCLEX** pour chaque cycle réussi
+
+### 5.4 Cycle Quotidien et Récompenses
+
+#### Flux de Transaction Circulaire
+
+```
+JOUR 1 - Cycle complet:
+═══════════════════════════════════════════════════════════════
+
+1. [SC0] startDailyCycle()
+   └── Initie le cycle, attend les signatures
+
+2. [User1] signTransaction()
+   └── SC1 signe et autorise le transfert vers SC2
+
+3. [User2] signTransaction()
+   └── SC2 signe et autorise le transfert vers SC3
+
+4. [User3] signTransaction()
+   └── SC3 signe et autorise le transfert vers SC0
+
+═══════════════════════════════════════════════════════════════
+✅ CYCLE RÉUSSI ! Tous les membres ont participé.
+   → Récompenses $XCIRCLEX distribuées selon Option F (36,000/2^era)
+   → Bonus π% (3.14%) si c'est le cycle #360, #720, #1080...
+   → Tokens $XCIRCLEX BRÛLÉS (mécanisme déflationniste)
+═══════════════════════════════════════════════════════════════
+```
+
+#### Système de Récompenses Hebdomadaires
+
+| Jour               | Action            | Récompenses                                          |
+| ------------------ | ----------------- | ----------------------------------------------------- |
+| Lundi → Samedi    | Cycles quotidiens | Tokens accumulés temporairement dans chaque SC       |
+| **Dimanche** | Distribution      | Les tokens sont récupérables par les propriétaires |
+
+#### Règles des Récompenses
+
+1. **Cycle Réussi** (tous ont signé) :
+
+   - Récompense calculée selon **Option F** : `36,000 XCX / 2^era` où era = cycles / 360
+   - Chaque SC actif reçoit sa part de récompenses $XCIRCLEX (divisé équitablement)
+   - **Bonus π% (3.14%)** pour celui qui complète un cycle cercle complet (#360, #720...)
+   - Les tokens sont **BRÛLÉS** (mécanisme déflationniste)
+   - Les récompenses restent dans le SC jusqu'au dimanche
+2. **Cycle Échoué** (un SC n'a pas signé à minuit) :
+
+   - Le SC défaillant **ne reçoit PAS** de récompenses
+   - Ses tokens potentiels sont **redistribués équitablement** aux SC qui ont signé
+   - Les tokens ne sont **PAS BRÛLÉS** (pas de burn en cas d'échec)
+   - Le SC défaillant est **BANNI** selon le système progressif (30j × nombre d'infractions)
+3. **Récupération Dimanche** :
+
+   - Chaque dimanche, les propriétaires peuvent claim leurs $XCIRCLEX
+   - Les tokens accumulés pendant la semaine sont transférés au wallet
+
+### 5.5 Système de Ban Progressif
+
+Le système de ban utilise une **pénalité progressive** qui s'aggrave à chaque infraction, encourageant une participation régulière et responsable :
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 SYSTÈME DE BAN PROGRESSIF                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1ère infraction  →  30 jours de ban                       │
+│  2ème infraction  →  60 jours de ban                       │
+│  3ème infraction  →  90 jours de ban                       │
+│  4ème infraction  →  120 jours de ban                      │
+│  ...                                                        │
+│  Nème infraction  →  N × 30 jours de ban                   │
+│                                                             │
+│  📌 RÉINITIALISATION :                                      │
+│     Après 360 jours CONSÉCUTIFS sans infraction,           │
+│     le compteur d'infractions est remis à zéro.            │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+| Infraction               | Conséquence              | Durée                            |
+| ------------------------ | ------------------------- | --------------------------------- |
+| Non-signature à minuit (1ère fois) | Ban automatique | 30 jours                         |
+| Non-signature à minuit (2ème fois) | Ban automatique | 60 jours                         |
+| Non-signature à minuit (3ème fois) | Ban automatique | 90 jours                         |
+| Non-signature à minuit (Nème fois) | Ban automatique | N × 30 jours                    |
+| Inactivité prolongée   | Vote d'éjection possible | Permanent                         |
+| Comportement malveillant | Éjection par vote DAO    | Permanent                         |
+
+Pendant la période de ban :
+
+- ❌ Impossible de participer aux cycles
+- ❌ Impossible de réactiver son SC
+- ❌ Pas de récompenses
+- ❌ Le compteur d'infractions est conservé
+- ✅ Après la durée de ban, réactivation possible
+- ✅ Après 360 jours sans infraction, compteur remis à zéro
+
+### 5.6 Statuts des Membres
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    STATUTS DES MEMBRES                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  🟢 ACTIF                                                   │
+│     ├─ Participe aux cycles quotidiens                     │
+│     ├─ Reçoit les récompenses $XCIRCLEX                     │
+│     └─ Peut voter dans la DAO                              │
+│                                                             │
+│  🟡 INACTIF (volontaire)                                   │
+│     ├─ Ne participe plus aux cycles                        │
+│     ├─ Peut se réactiver à tout moment                     │
+│     └─ Garde son SC et ses tokens                          │
+│                                                             │
+│  🔴 BANNI                                                   │
+│     ├─ Exclu des cycles (30j × nombre d'infractions)       │
+│     ├─ Pas de récompenses                                  │
+│     └─ Réactivation possible après la durée de ban         │
+│                                                             │
+│  ⚫ ÉJECTÉ                                                  │
+│     ├─ Perd son smart contract définitivement              │
+│     ├─ Doit payer à nouveau 1 EGLD pour rejoindre          │
+│     └─ Résultat d'un vote DAO                              │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 6. Architecture technique
+
+### 6.1 Stack technologique
 
 #### Smart Contracts (Rust)
 
@@ -230,7 +528,7 @@ pub struct Circle {
 - **Redis** : Cache
 - **MultiversX API** : Indexation blockchain
 
-### 5.2 Smart Contracts détaillés
+### 6.2 Smart Contracts détaillés
 
 #### 📜 1. CircleManager.rs
 
@@ -300,7 +598,7 @@ Gestion de la trésorerie :
 - Réserve d'urgence (20% minimum)
 - Budget marketing (30% max)
 
-### 5.3 Sécurité
+### 6.3 Sécurité
 
 #### Mesures de sécurité :
 
@@ -313,81 +611,599 @@ Gestion de la trésorerie :
 
 ---
 
-## 6. Tokenomics
+## 7. Tokenomics $XCIRCLEXX
 
-### 6.1 Token $XCIRCLE
+### 7.1 Token $XCIRCLEX - Le Nombre Pi (π)
+
+Le token $XCIRCLEXX est basé sur le nombre **π (Pi)**, symbole mathématique universel du cercle. Cette référence n'est pas un hasard : le cercle est au cœur de notre écosystème.
 
 **Caractéristiques** :
 
 - **Type** : ESDT (MultiversX)
-- **Supply total** : 100,000,000 XCIRCLE
-- **Mécanisme** : Déflationniste (burn progressif)
+- **Supply total** : **314,159,265.358979323846264338** XCIRCLE (π × 10⁸ avec 18 décimales)
+- **Décimales** : 18
+- **Mécanisme** : Déflationniste (burn sur cycles réussis uniquement)
 
-### 6.2 Distribution
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    SYMBOLIQUE DU NOMBRE PI                   │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  π = 3.141592653589793238462643383...                       │
+│                                                             │
+│  Supply = π × 10⁸ = 314,159,265.358979323846264338 XCIRCLEX │
+│                                                             │
+│  Le cercle parfait : 360° = 12 niveaux × 30 jours          │
+│                                                             │
+│  "Le cercle est la forme parfaite,                         │
+│   π en est l'âme mathématique."                            │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
 
-| Allocation            | Pourcentage | Tokens | Vesting                    | Utilisation                            |
-| --------------------- | ----------- | ------ | -------------------------- | -------------------------------------- |
-| Communauté & Rewards | 30%         | 30M    | Progressive sur 4 ans      | Récompenses participation, staking    |
-| Vente publique (IDO)  | 20%         | 20M    | Immédiat                  | Liquidité initiale, décentralisation |
-| Équipe fondatrice    | 15%         | 15M    | 24 mois (cliff 6 mois)     | Motivation long-terme                  |
-| Trésorerie DAO       | 15%         | 15M    | Contrôlé par gouvernance | Développement, partenariats           |
-| Liquidité DEX        | 10%         | 10M    | Immédiat                  | xExchange, autres DEX                  |
-| Marketing & Growth    | 5%          | 5M     | 12 mois                    | Acquisition utilisateurs               |
-| Conseillers           | 5%          | 5M     | 12 mois (cliff 3 mois)     | Expertise stratégique                 |
+### 7.2 Distribution Initiale
 
-### 6.3 Utilité du token
+| Allocation                                | Pourcentage | Tokens | Vesting                     | Utilisation                               |
+| ----------------------------------------- | ----------- | ------ | --------------------------- | ----------------------------------------- |
+| **Récompenses Cercle de Vie**      | 35%         | ~110M  | Émission progressive 4 ans | Récompenses cycles quotidiens            |
+| **Pool de Liquidité EGLD/XCIRCLE** | 20%         | ~63M   | Immédiat                   | Alimentée par les 1 EGLD de création SC |
+| **Staking Rewards (360°)**         | 15%         | ~47M   | Décroissant sur 30 mois    | Rendement staking                         |
+| **Équipe fondatrice**              | 10%         | ~31M   | 24 mois (cliff 6 mois)      | Motivation long-terme                     |
+| **Trésorerie DAO**                 | 10%         | ~31M   | Contrôlé par gouvernance  | Développement, partenariats              |
+| **Marketing & Growth**              | 5%          | ~16M   | 12 mois                     | Acquisition utilisateurs                  |
+| **Conseillers**                     | 3%          | ~9M    | 12 mois (cliff 3 mois)      | Expertise stratégique                    |
+| **Airdrop initial**                 | 2%          | ~6M    | Immédiat                   | Early adopters                            |
 
-#### 1. Gouvernance 🗳️
+### 7.3 Mécanisme de Burn Circulaire 🔥
 
-- Vote sur paramètres (frais, durées de cycle, etc.)
-- Propositions de nouvelles fonctionnalités
-- Allocation du budget DAO
-- Pouvoir de vote : **1 token = 1 vote** (+ bonus réputation)
+Le burn est au cœur de la philosophie X-CIRCLE-X : seul l'engagement collectif permet la déflation.
 
-#### 2. Staking 💎
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    BURN CONDITIONNEL                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ✅ CYCLE RÉUSSI (100% signatures)                          │
+│     └── BURN de X tokens $XCIRCLEX                           │
+│         → Supply diminue                                    │
+│         → Valeur augmente pour tous                         │
+│                                                             │
+│  ❌ CYCLE ÉCHOUÉ (signature manquante)                      │
+│     └── PAS DE BURN                                         │
+│         → Tokens du défaillant redistribués                 │
+│         → Ban progressif (30j × N infractions)              │
+│                                                             │
+│  📌 PHILOSOPHIE:                                            │
+│     "Le cercle ne brûle que lorsqu'il est complet."        │
+│     La déflation est une récompense collective.             │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
 
-- **Blocage** : 30/90/180/365 jours
-- **APY** : 5-25% selon durée
-- **Récompenses** : Tokens + part des frais de service
+#### Calcul du Burn par Cycle
 
-#### 3. Accès premium 🌟
+| Nombre de SC actifs | Burn par cycle réussi | Burn mensuel (30 cycles) |
+| ------------------- | ---------------------- | ------------------------ |
+| 10 SC               | 10 XCIRCLE             | 300 XCIRCLE              |
+| 50 SC               | 50 XCIRCLE             | 1,500 XCIRCLE            |
+| 100 SC              | 100 XCIRCLE            | 3,000 XCIRCLE            |
+| 1,000 SC            | 1,000 XCIRCLE          | 30,000 XCIRCLE           |
+
+### 7.4 Récompenses du Cercle de Vie - Système π × 360
+
+Le système de récompenses du Cercle de Vie est basé sur une formule unique qui combine la symbolique du cercle (360°) et du nombre π, avec un mécanisme de halving inspiré de Bitcoin.
+
+#### Formule de Récompense π × 360
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              SYSTÈME DE RÉCOMPENSES π × 360                  │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  BASE_REWARD = 36,000 XCX par cycle (360 × 100)            │
+│                                                             │
+│  FORMULE:                                                   │
+│  ─────────                                                  │
+│  récompense = 36,000 / 2^era                               │
+│                                                             │
+│  où era = floor(cycles_complétés / 360)                    │
+│                                                             │
+│  HALVING: Tous les 360 cycles (1 cercle complet)           │
+│                                                             │
+│  BONUS π%: +3.14% pour celui qui complète les              │
+│            cycles #360, #720, #1080, #1440...              │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Table des Récompenses par Ère
+
+| Ère | Cycles | Récompense/Cycle | Total sur l'Ère | Durée (~1 cycle/jour) |
+| --- | ------ | ---------------- | --------------- | --------------------- |
+| 0   | 1-360  | 36,000 XCX       | 12,960,000 XCX  | ~1 an                 |
+| 1   | 361-720 | 18,000 XCX      | 6,480,000 XCX   | ~1 an                 |
+| 2   | 721-1080 | 9,000 XCX      | 3,240,000 XCX   | ~1 an                 |
+| 3   | 1081-1440 | 4,500 XCX     | 1,620,000 XCX   | ~1 an                 |
+| 4   | 1441-1800 | 2,250 XCX     | 810,000 XCX     | ~1 an                 |
+| 5   | 1801-2160 | 1,125 XCX     | 405,000 XCX     | ~1 an                 |
+| 6   | 2161-2520 | 562.5 XCX     | 202,500 XCX     | ~1 an                 |
+| 7   | 2521-2880 | 281.25 XCX    | 101,250 XCX     | ~1 an                 |
+| 8+ | 2881+ | ~140 XCX et -    | Décroissant     | Continu               |
+
+**Total distribué sur 8 ères (~8 ans)** : ~25,919,250 XCX
+
+#### Bonus π% - Cercle Complet
+
+Lorsqu'un cycle atteint un multiple de 360 (cercle complet), celui qui complète ce cycle reçoit un **bonus π% (3.14%)** de la récompense du cycle :
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    BONUS CERCLE COMPLET                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Cycle #360   → Bonus: 36,000 × 3.14% = 1,130.4 XCX        │
+│  Cycle #720   → Bonus: 18,000 × 3.14% = 565.2 XCX          │
+│  Cycle #1080  → Bonus: 9,000 × 3.14% = 282.6 XCX           │
+│  Cycle #1440  → Bonus: 4,500 × 3.14% = 141.3 XCX           │
+│  ...                                                        │
+│                                                             │
+│  "Compléter un cercle est récompensé par π"                │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Bonus Starter (Celui qui démarre le cycle)
+
+En plus du système π × 360, un **bonus starter** est distribué à celui qui démarre le cycle quotidien (`startDailyCycle`). Ce bonus est calculé comme **10% de la récompense par SC** (identique aux autres bonus), pas 10% du total.
+
+```
+Exemple avec 21 SC actifs et 36,000 XCX de récompense totale :
+─────────────────────────────────────────────────────────────
+Base par SC = 36,000 / 21 = 1,714.29 XCX
+Bonus Starter = 1,714.29 × 10% = 171.43 XCX (pas 3,600 XCX)
+```
+
+Ce calcul garantit une équité entre tous les bonus (Pioneer, Dépôt, Starter) qui sont tous basés sur la récompense par SC.
+
+#### Distribution Hebdomadaire
+
+Les récompenses $XCIRCLEX sont accumulées pendant la semaine et récupérables chaque **Dimanche** :
+
+```
+Lundi     → Cycle quotidien → Récompenses stockées dans SC
+Mardi     → Cycle quotidien → Récompenses stockées dans SC
+Mercredi  → Cycle quotidien → Récompenses stockées dans SC
+Jeudi     → Cycle quotidien → Récompenses stockées dans SC
+Vendredi  → Cycle quotidien → Récompenses stockées dans SC
+Samedi    → Cycle quotidien → Récompenses stockées dans SC
+DIMANCHE  → CLAIM DAY ! → Récupération des tokens vers wallet
+```
+
+#### Résumé des Récompenses
+
+| Type de Récompense | Formule | Bénéficiaire |
+| ------------------ | ------- | ------------ |
+| Récompense cycle | 36,000 / 2^era / nb_SC | Chaque SC actif |
+| Bonus Pioneer (3.14%) | (Récompense/nb_SC) × 3.14% | Premiers SC créés |
+| Bonus Dépôt (1%/EGLD) | (Récompense/nb_SC) × bonus% | SC avec dépôt EGLD |
+| Bonus Starter (10%) | (Récompense/nb_SC) × 10% | Celui qui démarre le cycle |
+| Bonus π% (cycle 360) | Récompense × 3.14% | Celui qui complète cycle #360, #720... |
+| Redistribution échec | 100% aux signataires | SC qui ont signé (en cas d'échec) |
+
+### 7.5 Utilité du Token
+
+#### 1. Gouvernance DAO 🗳️
+
+- Vote sur paramètres du Cercle de Vie
+- Propositions d'évolution du protocole
+- Allocation du budget trésorerie
+- Pouvoir de vote : **1 token = 1 vote** (+ bonus réputation NFT)
+
+#### 2. Staking Circulaire (360°) 💎
+
+- Rendement décroissant sur 30 mois
+- Inspiré par les 360° du cercle
+- Récompenses en $XCIRCLEX
+
+#### 3. Accès Premium 🌟
 
 - Cercles VIP (montants élevés)
-- Frais réduits
-- Support prioritaire
-- Early access nouvelles features
+- Frais réduits de création SC
+- Fonctionnalités avancées
 
-#### 4. Mécanisme déflationniste 🔥
+#### 4. NFT Évolutif 🎨
 
-- **Burn** : 0.5% par transaction
-- **Burn accéléré** : En cas de défaut d'un membre (ses tokens de garantie)
-- **Target** : Réduire supply de 50% sur 10 ans
-
-### 6.4 Frais et revenus
-
-#### Sources de revenus :
-
-1. **Frais de cycle** : 2-5% du montant distribué
-
-   - 50% → Trésorerie DAO
-   - 30% → Stakers $XCIRCLE
-   - 20% → Réserve d'urgence
-2. **Frais de création cercle** : 10-70 $XCIRCLE (brûlés à 100%)
-3. **Pénalités de retard** : 5-10% du montant dû
-
-   - 70% → Cercle (redistribué)
-   - 30% → Trésorerie DAO
-4. **NFT marketplace** : Royalties 5% sur reventes
+- Tokens requis pour certains NFT premium
+- Boost de rendement avec NFT rare
 
 ---
 
-## 7. Gouvernance
+## 8. Système de Staking Circulaire (360°)
 
-### 7.1 Structure DAO
+### 8.1 Concept des 360 Degrés
+
+Le staking X-CIRCLE-X est basé sur la symbolique du cercle parfait : **360 degrés = 12 niveaux de lock × 30 jours**.
+
+Chaque niveau représente 30 jours supplémentaires de lock, jusqu'à 360 jours (1 an complet = un cercle).
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              STAKING CIRCULAIRE - 360 DEGRÉS                │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  12 NIVEAUX DE LOCK = 12 × 30 JOURS = 360 JOURS            │
+│                                                             │
+│                          ●                                  │
+│                    12   /│\   1                             │
+│                   (360j) │  (30j)                           │
+│               11 ●───────┼───────● 2                        │
+│              (330j)      │      (60j)                       │
+│            10 ●──────────┼──────────● 3                     │
+│           (300j)         │         (90j)                    │
+│             9 ●──────────┼──────────● 4                     │
+│            (270j)        │        (120j)                    │
+│              8 ●─────────┼─────────● 5                      │
+│             (240j)       │       (150j)                     │
+│                7 ●───────┼───────● 6                        │
+│               (210j)     │     (180j)                       │
+│                          │                                  │
+│                                                             │
+│  Plus tu montes en niveau, plus l'APY est élevé !          │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 8.2 Les 12 Niveaux de Lock
+
+| Niveau       | Durée Lock         | Degrés         | APY de Base   | NFT Badge                |
+| ------------ | ------------------- | --------------- | ------------- | ------------------------ |
+| 1            | 30 jours            | 30°            | 5%            | -                        |
+| 2            | 60 jours            | 60°            | 8%            | -                        |
+| 3            | 90 jours            | 90°            | 12%           | Bronze                   |
+| 4            | 120 jours           | 120°           | 15%           | Bronze+                  |
+| 5            | 150 jours           | 150°           | 18%           | Argent                   |
+| 6            | 180 jours           | 180°           | 22%           | Argent+                  |
+| 7            | 210 jours           | 210°           | 25%           | Or                       |
+| 8            | 240 jours           | 240°           | 28%           | Or+                      |
+| 9            | 270 jours           | 270°           | 32%           | Platine                  |
+| 10           | 300 jours           | 300°           | 35%           | Platine+                 |
+| 11           | 330 jours           | 330°           | 38%           | Diamant                  |
+| **12** | **360 jours** | **360°** | **42%** | **Cercle Parfait** |
+
+### 8.3 Flexible Staking (Sans Lock)
+
+Pour ceux qui veulent rester flexibles :
+
+| Type     | APY | Avantages              | Inconvénients          |
+| -------- | --- | ---------------------- | ----------------------- |
+| Flexible | 3%  | Retrait à tout moment | APY minimal, pas de NFT |
+
+### 8.4 Source des Récompenses Staking
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              FLUX DES RÉCOMPENSES STAKING                   │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  PHASE 1 : Pool Initiale (15% supply = ~47M XCIRCLE)       │
+│  ────────────────────────────────────────────────────       │
+│  → Récompenses généreuses les premières années             │
+│  → Durée estimée : 3-5 ans selon participation             │
+│                                                             │
+│  PHASE 2 : Pool Épuisée → Sources Alternatives             │
+│  ────────────────────────────────────────────────────       │
+│  Quand la pool initiale est vide, les récompenses          │
+│  continuent via les revenus du protocole :                 │
+│                                                             │
+│  ┌─────────────────────────────────────────────┐           │
+│  │ Source                      │ % → Stakers  │           │
+│  ├─────────────────────────────────────────────┤           │
+│  │ Frais du Cercle de Vie      │     20%      │           │
+│  │ Pénalités SC bannis         │     50%      │           │
+│  │ Frais trading xExchange     │     30%      │           │
+│  │ Frais création SC (option)  │     10%      │           │
+│  └─────────────────────────────────────────────┘           │
+│                                                             │
+│  RÉSULTAT : APY réduit mais DURABLE                        │
+│  ────────────────────────────────────────────────────       │
+│  → Pas de mint de nouveaux tokens                          │
+│  → Token reste déflationniste                              │
+│  → APY basé sur activité réelle du protocole               │
+│  → Estimation Phase 2 : 5-15% APY selon activité           │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 8.5 Calcul des Récompenses en Phase 2
+
+Quand la pool initiale est épuisée :
+
+```
+APY Phase 2 = (Revenus annuels du protocole × 20%) / Total staké
+
+Exemple avec 1000 SC actifs :
+─────────────────────────────────
+Frais création : 1000 × 1 EGLD × 10% = 100 EGLD/an (en valeur XCIRCLE)
+Frais cycles : ~365 cycles × frais = Variable
+Pénalités : ~5% échecs × redistributions = Variable
+
+Si Total staké = 10M XCIRCLE
+Si Revenus stakers = 500,000 XCIRCLE/an
+→ APY = 500,000 / 10,000,000 = 5%
+```
+
+### 8.6 Avantages des Niveaux Élevés
+
+| Niveau       | Bonus Gouvernance | Accès Exclusif               |
+| ------------ | ----------------- | ----------------------------- |
+| 1-3          | 1x vote           | -                             |
+| 4-6          | 1.5x vote         | Canaux Discord privés        |
+| 7-9          | 2x vote           | Early access features         |
+| 10-11        | 2.5x vote         | Propositions prioritaires     |
+| **12** | **3x vote** | **Conseil des Stakers** |
+
+---
+
+## 9. NFT Évolutif - Cercle de Réputation
+
+### 9.1 Concept du NFT Cercle
+
+Chaque membre du Cercle de Vie possède un **NFT dynamique** qui évolue visuellement en fonction de ses cycles réussis. Le NFT représente un cercle central avec des points périphériques qui apparaissent progressivement.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                NFT ÉVOLUTIF - CERCLE DE VIE                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  NIVEAU 0 (0-29 cycles)         NIVEAU 1 (30+ cycles)      │
+│                                                             │
+│         ┌───┐                        ●                      │
+│         │ X │                    ┌───┐                      │
+│         └───┘                    │ X │                      │
+│                                  └───┘                      │
+│    Cercle central seul       + 1 point à 0°                │
+│                                                             │
+│  NIVEAU 2 (60+ cycles)        NIVEAU 3 (90+ cycles)        │
+│                                                             │
+│         ●                          ●                        │
+│        /                          /│                        │
+│    ┌───┐                      ┌───┐                         │
+│    │ X │                      │ X │                         │
+│    └───┘\                     └───┘\                        │
+│          ●                      ●   ●                       │
+│                                                             │
+│  + 2 points à 180° écart     + 3 points à 120° écart       │
+│                                                             │
+│  NIVEAU 6 (180+ cycles)       NIVEAU 12 (360+ cycles)      │
+│                                                             │
+│        ●   ●                    ● ● ● ●                     │
+│       /     \                  /│     │\                    │
+│    ●─┌───┐──●               ●─┌───┐──●                      │
+│      │ X │                    │ X │                         │
+│    ●─└───┘──●               ●─└───┘──●                      │
+│       \     /                  \│     │/                    │
+│        ●   ●                    ● ● ● ●                     │
+│                                                             │
+│  + 6 points à 60° écart      + 12 points à 30° écart       │
+│  (Hexagone parfait)          (Cercle complet !)            │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 9.2 Évolution du NFT
+
+| Cycles Réussis | Points Périphériques | Écart en Degrés | Rareté                  |
+| --------------- | ---------------------- | ----------------- | ------------------------ |
+| 0-29            | 0                      | -                 | Commun                   |
+| 30+             | 1                      | 360°             | Peu commun               |
+| 60+             | 2                      | 180°             | Peu commun               |
+| 90+             | 3                      | 120°             | Rare                     |
+| 120+            | 4                      | 90°              | Rare                     |
+| 150+            | 5                      | 72°              | Épique                  |
+| 180+            | 6                      | 60°              | Épique                  |
+| 210+            | 7                      | 51.4°            | Légendaire              |
+| 240+            | 8                      | 45°              | Légendaire              |
+| 270+            | 9                      | 40°              | Mythique                 |
+| 300+            | 10                     | 36°              | Mythique                 |
+| 330+            | 11                     | 32.7°            | Transcendant             |
+| **360+**  | **12**           | **30°**    | **CERCLE PARFAIT** |
+
+### 9.3 Design Visuel
+
+Le NFT est un cercle animé avec :
+
+- **Centre** : Logo X-CIRCLE-X avec effet de pulsation
+- **Points périphériques** : Apparaissent progressivement, espacés équitablement
+- **Couleur** : Évolue selon la rareté (Commun=Gris, Rare=Bleu, Épique=Violet, Légendaire=Or, Mythique=Arc-en-ciel)
+- **Animation** : Les points orbitent lentement autour du centre
+
+### 9.4 Bonus NFT
+
+| Niveau NFT               | Bonus Staking  | Bonus Vote DAO | Avantages Spéciaux              |
+| ------------------------ | -------------- | -------------- | -------------------------------- |
+| Commun                   | 0%             | 1x             | -                                |
+| Peu commun               | +5%            | 1.1x           | -                                |
+| Rare                     | +10%           | 1.25x          | Badge Discord                    |
+| Épique                  | +15%           | 1.5x           | Accès canaux privés            |
+| Légendaire              | +25%           | 2x             | Early access features            |
+| Mythique                 | +35%           | 2.5x           | Gouvernance VIP                  |
+| **CERCLE PARFAIT** | **+50%** | **3x**   | **Conseil des Fondateurs** |
+
+### 9.5 Marketplace NFT
+
+Les NFT peuvent être échangés sur le marketplace avec :
+
+- **Royalties** : 5% au protocole
+- **Historique** : Le NFT conserve ses stats même après vente
+- **Rareté fixe** : Le niveau de rareté est définitif au moment de la vente
+
+---
+
+## 10. Pool de Liquidité EGLD/XCIRCLEX
+
+### 10.1 Alimentation de la Pool
+
+La pool de liquidité est alimentée automatiquement par les **frais de création des SC périphériques** :
+
+```
+X┌─────────────────────────────────────────────────────────────┐
+│           FLUX VERS LA POOL DE LIQUIDITÉ                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Utilisateur                                                │
+│       │                                                     │
+│       │ Paie 1 EGLD pour créer un SC                       │
+│       ▼                                                     │
+│  ┌─────────┐                                               │
+│  │   SC0   │                                               │
+│  └────┬────┘                                               │
+│       │                                                     │
+│       │ Répartition automatique:                           │
+│       │                                                     │
+│       ├──────────► 70% → Pool EGLD/XCIRCLEX                 │
+│       │                 (0.7 EGLD)                         │
+│       │                                                     │
+│       ├──────────► 20% → Trésorerie DAO                    │
+│       │                 (0.2 EGLD)                         │
+│       │                                                     │
+│       └──────────► 10% → Réserve d'urgence                 │
+│                         (0.1 EGLD)                         │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 10.2 Croissance de la Pool
+
+| Nombre de SC créés | EGLD dans la pool | Équivalent USD (si EGLD=$50) |
+| -------------------- | ----------------- | ----------------------------- |
+| 100 SC               | 70 EGLD           | $3,500                        |
+| 500 SC               | 350 EGLD          | $17,500                       |
+| 1,000 SC             | 700 EGLD          | $35,000                       |
+| 5,000 SC             | 3,500 EGLD        | $175,000                      |
+| 10,000 SC            | 7,000 EGLD        | $350,000                      |
+
+### 10.3 Listing xExchange
+
+La pool sera déployée sur **xExchange** (DEX officiel MultiversX) avec :
+
+- **Paire** : EGLD/XCIRCLE
+- **Frais LP** : 0.3%
+- **Distribution frais** :
+  - 70% → Liquidity Providers
+  - 20% → Stakers $XCIRCLEX
+  - 10% → Trésorerie DAO
+
+### 10.4 Incitations LP
+
+| Durée LP | APY Bonus | NFT LP        |
+| --------- | --------- | ------------- |
+| 30 jours  | +5%       | Badge Bronze  |
+| 90 jours  | +15%      | Badge Argent  |
+| 180 jours | +30%      | Badge Or      |
+| 365 jours | +50%      | Badge Diamant |
+
+### 10.5 Stratégie IDO et Lancement
+
+#### Phase 1 : Seed Liquidity (Avant IDO)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              STRATÉGIE DE LANCEMENT LIQUIDITÉ               │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ÉTAPE 1 : Seed Pool (Équipe)                              │
+│  ─────────────────────────────────────────                  │
+│  • Dépôt initial : 5-10 EGLD + équivalent XCIRCLEX         │
+│  • Ratio recommandé : 1 EGLD = 1,000,000 XCIRCLEX          │
+│  • Objectif : Permettre les premiers échanges              │
+│  • Prix initial : ~$0.00005 par XCIRCLEX                   │
+│                                                             │
+│  ÉTAPE 2 : IDO sur xLaunchpad ou Launchpad Partenaire      │
+│  ─────────────────────────────────────────                  │
+│  • Allocation IDO : 2% du supply (~6.3M XCIRCLEX)          │
+│  • Prix IDO : Légèrement supérieur au seed (+20-50%)       │
+│  • Ratio IDO : 1 EGLD = 800,000 XCIRCLEX                   │
+│  • Fonds levés → 100% vers Pool de Liquidité               │
+│                                                             │
+│  ÉTAPE 3 : Ajout Progressif Post-IDO                       │
+│  ─────────────────────────────────────────                  │
+│  • Semaine 1-2 : Observer stabilité du prix                │
+│  • Semaine 3-4 : Ajouter 10% liquidité additionnelle       │
+│  • Mois 2-3 : Ajouter selon volume et demande              │
+│  • Règle : Ne jamais ajouter > 25% en une fois             │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Ratio EGLD/XCIRCLEX Recommandé
+
+| Phase        | Ratio                  | Prix XCIRCLEX (si EGLD=$50) | Justification                   |
+| ------------ | ---------------------- | ----------------------------- | -------------------------------- |
+| **Seed**     | 1 EGLD = 1,000,000 XCX | $0.00005                      | Prix attractif early adopters    |
+| **IDO**      | 1 EGLD = 800,000 XCX   | $0.0000625                    | +25% vs seed, reward IDO         |
+| **Listing**  | 1 EGLD = 600,000 XCX   | $0.0000833                    | +33% vs IDO, lancement réel    |
+| **Cible M6** | 1 EGLD = 100,000 XCX   | $0.0005                       | 10x depuis IDO si adoption OK    |
+
+#### Calcul de Liquidité Nécessaire
+
+```
+Pour un lancement sain sur xExchange :
+
+MINIMUM RECOMMANDÉ :
+• Pool initiale : 50 EGLD + 50M XCIRCLEX
+• Valeur totale : ~$5,000 (si EGLD=$50)
+• Slippage acceptable pour trades < 1 EGLD
+
+OBJECTIF PHASE 1 (3 mois) :
+• Pool cible : 500 EGLD + 300M XCIRCLEX
+• Valeur totale : ~$50,000
+• Slippage < 1% pour trades jusqu'à 10 EGLD
+
+OBJECTIF PHASE 2 (6 mois) :
+• Pool cible : 2,000 EGLD + 200M XCIRCLEX
+• Valeur totale : ~$200,000
+• Liquidité profonde pour trading actif
+```
+
+#### Sources de Liquidité
+
+| Source                           | Contribution | Timeline          |
+| -------------------------------- | ------------ | ------------------ |
+| Équipe fondatrice (seed)        | 10-20 EGLD   | Jour 1             |
+| IDO (fonds levés)               | 50-100 EGLD  | Semaine 1          |
+| Frais création SC (70%)         | Progressive  | Continu            |
+| Treasury DAO (gouvernance vote) | Variable     | Selon propositions |
+| LP Farming rewards               | Incentive    | Mois 2+            |
+
+#### Règles Anti-Dump
+
+```
+PROTECTION CONTRE LA MANIPULATION :
+
+1. Vesting Équipe : 24 mois avec cliff 6 mois
+   → Pas de dump de l'équipe
+
+2. LP Lock : Liquidité initiale lockée 12 mois minimum
+   → Confiance des investisseurs
+
+3. Anti-Whale : Limite 2% du supply par wallet
+   → Évite concentration excessive
+
+4. Sell Tax Progressive (optionnel via DAO) :
+   - Vente < 24h après achat : 10% tax → Trésorerie
+   - Vente < 7j après achat : 5% tax → Trésorerie
+   - Vente > 7j après achat : 0% tax
+```
+
+---
+
+## 11. Gouvernance DAO
+
+### 11.1 Structure DAO
 
 ```
 ┌────────────────────────────────────────────┐
-│           xCircle DAO Governance           │
+│          X-CIRCLE-X DAO Governance          │
 ├────────────────────────────────────────────┤
 │                                            │
 │  🏛️ Niveaux de gouvernance                │
@@ -415,7 +1231,7 @@ Gestion de la trésorerie :
 └────────────────────────────────────────────┘
 ```
 
-### 7.2 Processus de proposition
+### 11.2 Processus de proposition
 
 1. **Soumission** : Tout holder avec 10,000+ XCIRCLE
 2. **Discussion** : 7 jours sur forum (Discord/Forum dédié)
@@ -423,7 +1239,7 @@ Gestion de la trésorerie :
 4. **Timelock** : 48h avant exécution
 5. **Exécution** : Automatique par smart contract
 
-### 7.3 Types de propositions
+### 11.3 Types de propositions
 
 - **Paramètres** : Frais, durées, montants minimums
 - **Budget** : Allocation trésorerie
@@ -433,24 +1249,57 @@ Gestion de la trésorerie :
 
 ---
 
-## 8. Roadmap
+## 12. Roadmap
 
-### 🔵 Phase 1 : Fondations (Q1 2026)
+### ✅ Phase 0 : MVP Actuel (Décembre 2025) - COMPLÉTÉ
 
-**Objectif : MVP fonctionnel sur Devnet**
+**Statut : Prototype fonctionnel déployé sur Devnet MultiversX**
+
+#### Smart Contracts Déployés
+
+| Contrat | Adresse Devnet | Statut |
+|---------|----------------|--------|
+| **Token XCIRCLEX** | `XCIRCLEX-3b9d57` | ✅ Actif |
+| **Circle of Life (SC0)** | `erd1qqqqqqqqqqqqqpgqa6yjeghz6c38cdmk4z0xhsd2jdus0m74flfq0df5xn` | ✅ Actif |
+| **NFT Contract** | `erd1qqqqqqqqqqqqqpgqjwd6xwycht2hmm5h76qcgzdqdxnz8g9wflfqt5v6zc` | ✅ Actif |
+| **Staking 360°** | `erd1qqqqqqqqqqqqqpgqd5r76rsws9kvzcdsxqqgjlrjlw90x44uflfq386xhw` | ✅ Actif |
+| **DAO Governance** | `erd1qqqqqqqqqqqqqpgq35zrtzej655v2czk5plzaa6hp4wluun7flfql80l9d` | ✅ Actif |
+| **Vesting** | `erd1qqqqqqqqqqqqqpgqc00rmsjfsk6prqwpcjggxzmdeus0vwa0flfqhxgel0` | ✅ Actif |
+| **Token Protection** | `erd1qqqqqqqqqqqqqpgqescv0dcpdgu62sa7a89s3w2qdc9njsydflfqwfxdvx` | ✅ Actif |
+
+#### Fonctionnalités Opérationnelles
+
+- ✅ Création de SC périphériques (21 SC actifs)
+- ✅ Cycles quotidiens avec distribution de récompenses
+- ✅ Système de bonus (Pioneer 3.14%, Dépôt 1%/EGLD, Starter 10%)
+- ✅ NFT évolutif avec mise à jour dynamique
+- ✅ Staking 12 niveaux (30-360 jours)
+- ✅ DAO avec propositions et votes
+- ✅ Interface dApp React/TypeScript fonctionnelle
+
+#### Explorer Devnet
+
+🔗 **Voir en live** : https://devnet-explorer.multiversx.com/tokens/XCIRCLEX-3b9d57
+
+---
+
+### 🔵 Phase 1 : Stabilisation (Q1 2026)
+
+**Objectif : Audits et préparation Mainnet**
 
 - [X] Structure projet et architecture
-- [ ] Smart contracts core (CircleManager, Token)
-- [ ] Interface dApp basique
-- [ ] Tests automatisés complets
-- [ ] Documentation technique
-- [ ] Déploiement Devnet MultiversX
+- [X] Smart contracts core déployés
+- [X] Interface dApp fonctionnelle
+- [ ] Tests automatisés complets (coverage > 80%)
+- [ ] Documentation technique complète
+- [ ] Audit de sécurité interne
 
 **Deliverables** :
 
 - Code open-source sur GitHub
 - Tests coverage > 80%
 - Documentation complète
+- Rapport d'audit interne
 
 ### 🟢 Phase 2 : Beta (Q2 2026)
 
@@ -458,7 +1307,7 @@ Gestion de la trésorerie :
 
 - [ ] NFT de réputation
 - [ ] Système de gouvernance V1
-- [ ] Staking $XCIRCLE
+- [ ] Staking $XCIRCLEX
 - [ ] Programme ambassadeurs (50 early adopters)
 - [ ] Audit de sécurité interne
 - [ ] Déploiement Testnet
@@ -475,7 +1324,7 @@ Gestion de la trésorerie :
 
 - [ ] Audit externe professionnel (CertiK, Hacken ou équivalent)
 - [ ] Déploiement Mainnet MultiversX
-- [ ] IDO du token $XCIRCLE
+- [ ] IDO du token $XCIRCLEX
 - [ ] Listing xExchange (DEX MultiversX)
 - [ ] Campagne marketing massive
 - [ ] Partenariats stratégiques
@@ -515,29 +1364,95 @@ Gestion de la trésorerie :
 
 ---
 
-## 9. Équipe et partenaires
+## 13. Équipe et partenaires
 
-### 9.1 Équipe fondatrice (à constituer)
+### 13.1 Fondateur Solo - Approche Lean Startup
 
-**Rôles recherchés** :
+X-CIRCLE-X est développé selon le modèle **"Solo Founder + MVP First"**, une approche validée par de nombreux projets Web3 réussis :
 
-- 👨‍💻 **Lead Developer Rust/MultiversX** : Smart contracts
-- 👩‍💻 **Lead Frontend Developer** : dApp React
-- 🎨 **UI/UX Designer** : Expérience utilisateur
-- 📊 **Product Manager** : Vision produit
-- 🧪 **Security Auditor** : Tests et sécurité
-- 📢 **Community Manager** : Croissance communauté
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  STRATÉGIE DE DÉVELOPPEMENT                   │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  PHASE ACTUELLE : Fondateur Solo                            │
+│  ──────────────────────────────────                         │
+│  • Développement Smart Contracts (Rust/MultiversX)          │
+│  • Développement dApp (React/TypeScript)                    │
+│  • Architecture et tokenomics                               │
+│  • Tests et déploiement Devnet                              │
+│                                                             │
+│  AVANTAGES :                                                │
+│  ✅ Vision unifiée et cohérente                            │
+│  ✅ Exécution rapide sans bureaucratie                     │
+│  ✅ Coûts minimaux (pas de salaires)                       │
+│  ✅ MVP prouvé avant levée de fonds                        │
+│  ✅ Équité maximale pour futurs contributeurs              │
+│                                                             │
+│  PROJETS CÉLÈBRES AYANT COMMENCÉ SOLO :                     │
+│  • Ethereum (Vitalik Buterin)                               │
+│  • Uniswap (Hayden Adams)                                   │
+│  • Aave (Stani Kulechov)                                    │
+│  • Compound (Robert Leshner)                                │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
 
-### 9.2 Conseillers (à recruter)
+### 13.2 Plan de Recrutement Progressif
+
+| Phase | Timing | Recrutement | Financement |
+|-------|--------|-------------|-------------|
+| **MVP** | Q4 2025 ✅ | Solo | Bootstrap |
+| **Communauté** | Q1-Q2 2026 | 2-3 contributeurs bénévoles | Token allocation |
+| **Beta** | Q3 2026 | +1-2 développeurs | IDO / Grants |
+| **Mainnet** | Q4 2026 | Équipe complète (5-8) | Revenus protocole |
+
+### 13.3 Rôles Prioritaires à Recruter
+
+**Court terme (bénévoles/contributeurs)** :
+- 📢 **Community Manager** : Discord, Twitter, Telegram
+- 🧪 **Beta Testers** : Early adopters motivés
+- 🌍 **Traducteurs** : Internationalisation
+
+**Moyen terme (rémunérés)** :
+- 👨‍💻 **Smart Contract Auditor** : Revue de sécurité
+- 🎨 **UI/UX Designer** : Amélioration interface
+- 📊 **Growth Hacker** : Acquisition utilisateurs
+
+**Long terme (équipe core)** :
+- 👩‍💻 **Backend Developer** : Indexation, API
+- 📱 **Mobile Developer** : App iOS/Android
+- 🏛️ **Legal Advisor** : Compliance
+
+### 13.4 Programme Contributeurs
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              PROGRAMME DE CONTRIBUTION                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Contribuez et gagnez des $XCIRCLEX !                        │
+│                                                             │
+│  🐛 Bug Reports        : 1,000 - 50,000 XCX selon sévérité │
+│  💻 Pull Requests      : 5,000 - 100,000 XCX selon impact   │
+│  📝 Documentation      : 2,000 - 20,000 XCX                 │
+│  🌍 Traductions        : 5,000 - 30,000 XCX par langue      │
+│  📢 Création contenu   : 1,000 - 10,000 XCX                 │
+│  🎨 Design/UI          : 10,000 - 50,000 XCX                │
+│                                                             │
+│  → Contactez-nous pour rejoindre l'aventure !              │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 13.5 Conseillers Recherchés
 
 - Expert MultiversX blockchain
 - Expert DeFi/Tokenomics
-- Expert légal/compliance
+- Expert légal/compliance crypto
 - Expert marketing Web3
 
-### 9.3 Partenariats stratégiques
-
-**Ciblés** :
+### 13.6 Partenariats Stratégiques Ciblés
 
 - **MultiversX** : Support technique, grants
 - **xSafe** : Intégration multi-signature
@@ -547,9 +1462,9 @@ Gestion de la trésorerie :
 
 ---
 
-## 10. Aspects légaux et compliance
+## 14. Aspects légaux et compliance
 
-### 10.1 Structure juridique
+### 14.1 Structure juridique
 
 **Option 1 : DAO LLC (Wyoming, USA)**
 
@@ -563,9 +1478,9 @@ Gestion de la trésorerie :
 - Stabilité légale
 - Acceptation internationale
 
-### 10.2 Compliance réglementaire
+### 14.2 Compliance réglementaire
 
-#### Token $XCIRCLE : Security ou Utility ?
+#### Token $XCIRCLEX : Security ou Utility ?
 
 **Analyse Howey Test** :
 
@@ -584,7 +1499,7 @@ Gestion de la trésorerie :
 - **Tier 2** (1000-10,000 EUR) : KYC léger (email, téléphone)
 - **Tier 3** (> 10,000 EUR) : KYC complet via partenaire certifié
 
-### 10.3 Privacy & RGPD
+### 14.3 Privacy & RGPD
 
 **Données collectées (minimum)** :
 
@@ -600,9 +1515,9 @@ Gestion de la trésorerie :
 
 ---
 
-## 11. Risques et mitigation
+## 15. Risques et mitigation
 
-### 11.1 Risques techniques
+### 15.1 Risques techniques
 
 | Risque                  | Impact        | Probabilité | Mitigation                                     |
 | ----------------------- | ------------- | ------------ | ---------------------------------------------- |
@@ -610,7 +1525,7 @@ Gestion de la trésorerie :
 | Congestion blockchain   | ⚠️ Moyen    | Faible       | MultiversX haute performance                   |
 | Perte de clés privées | ⚠️ Élevé  | Moyen        | Formation utilisateurs, récupération sociale |
 
-### 11.2 Risques économiques
+### 15.2 Risques économiques
 
 | Risque               | Impact        | Probabilité | Mitigation                              |
 | -------------------- | ------------- | ------------ | --------------------------------------- |
@@ -618,7 +1533,7 @@ Gestion de la trésorerie :
 | Manque de liquidité | ⚠️ Moyen    | Moyen        | Market making, incitations LP           |
 | Death spiral token   | ⚠️ Critique | Faible       | Tokenomics robuste, utilité réelle    |
 
-### 11.3 Risques sociaux
+### 15.3 Risques sociaux
 
 | Risque                | Impact        | Probabilité | Mitigation                           |
 | --------------------- | ------------- | ------------ | ------------------------------------ |
@@ -626,7 +1541,7 @@ Gestion de la trésorerie :
 | Attaques Sybil        | ⚠️ Moyen    | Moyen        | KYC léger, coût d'entrée          |
 | Gouvernance capturée | ⚠️ Critique | Faible       | Distribution large, quadratic voting |
 
-### 11.4 Risques légaux
+### 15.4 Risques légaux
 
 | Risque                  | Impact        | Probabilité | Mitigation                            |
 | ----------------------- | ------------- | ------------ | ------------------------------------- |
@@ -636,18 +1551,87 @@ Gestion de la trésorerie :
 
 ---
 
+## 16. Idées et Recommandations Futures
+
+### 16.1 Extensions du Cercle de Vie
+
+#### Cercles Thématiques
+
+- **Cercle Épargne** : Objectif collectif d'épargne (ex: voyage, projet)
+- **Cercle Investissement** : Pool d'investissement DeFi collectif
+- **Cercle Solidarité** : Assistance mutuelle en cas de besoin urgent
+- **Cercle Projet** : Financement collaboratif de projets entrepreneurs
+
+#### Gamification Avancée
+
+- **Achievements** : Badges spéciaux pour accomplissements (100 cycles, 0 échec, etc.)
+- **Leaderboard** : Classement mensuel des meilleurs participants
+- **Saisons** : Événements spéciaux avec récompenses bonus
+- **Challenges** : Défis communautaires avec rewards exclusifs
+
+### 16.2 Intégrations Suggérées
+
+#### DeFi Composability
+
+- **Lending Protocol** : Utiliser les $XCIRCLEX comme collatéral
+- **Yield Farming** : LP tokens stakables pour double rewards
+- **Insurance** : Assurance décentralisée pour les cycles
+- **Derivatives** : Options sur le token $XCIRCLEX
+
+#### Social Features
+
+- **Profil Social** : Page profil publique avec historique
+- **Chat Intégré** : Communication entre membres du cercle
+- **Referral Program** : Récompenses pour invitations
+- **Guildes** : Regroupements de cercles par intérêt
+
+### 16.3 Évolutions Techniques
+
+#### Cross-Chain
+
+- **Bridge MultiversX ↔ Ethereum** : Interopérabilité
+- **Cercles Multi-Chain** : Participants sur différentes blockchains
+- **Wrapped XCIRCLE** : Token sur autres chains
+
+#### Mobile & UX
+
+- **App Native** : iOS et Android
+- **Notifications Push** : Rappels pour signer
+- **Widget** : Suivi rapide sur écran d'accueil
+- **Biométrie** : Signature par empreinte/Face ID
+
+### 16.4 Économie Circulaire
+
+#### Partenariats Commerce
+
+- **Cashback Cercle** : % des achats vers votre cercle
+- **Marchands Partenaires** : Paiement en $XCIRCLEX
+- **Carte de Débit** : Convertir et dépenser facilement
+
+#### Impact Social
+
+- **Cercles Caritatifs** : Dons à des associations
+- **Micro-crédit** : Prêts entre membres fiables
+- **Éducation Financière** : Cours et certifications
+
+---
+
 ## Conclusion
 
-xCircle DAO représente une **opportunité unique** de combiner :
+X-CIRCLE-X DAO représente une **opportunité unique** de combiner :
 
 - 🌍 Un besoin réel (1+ milliard d'utilisateurs de tontines)
-- 💡 Une innovation technologique (blockchain MultiversX)
+- 💡 Une innovation technologique (blockchain MultiversX + Cercle de Vie)
 - 🤝 Un impact social positif (inclusion financière)
-- 💰 Un modèle économique viable (frais de service, tokenomics)
+- 💰 Un modèle économique viable (tokenomics π, staking 360°)
+- 🔄 Un écosystème vivant (cycles quotidiens, NFT évolutifs)
+- 📐 Une symbolique forte (Pi, 360 degrés, cercle parfait)
 
-En transformant les tontines traditionnelles en **protocole décentralisé transparent**, nous créons un nouveau paradigme de solidarité financière globale.
+En transformant les tontines traditionnelles en **protocole décentralisé transparent** avec le **Cercle de Vie**, nous créons un nouveau paradigme de solidarité financière globale.
 
-**L'avenir de l'épargne collaborative est on-chain. L'avenir, c'est xCircle DAO.**
+Le cercle est la forme parfaite. π en est l'âme mathématique. **X-CIRCLE-X** en est la manifestation blockchain.
+
+**L'avenir de l'épargne collaborative est on-chain. L'avenir, c'est X-CIRCLE-X DAO.**
 
 ---
 
@@ -684,6 +1668,14 @@ En transformant les tontines traditionnelles en **protocole décentralisé trans
 
 ---
 
-**Document vivant - Dernière mise à jour : Octobre 2024**
+**Document vivant - Dernière mise à jour : Décembre 2025**
 
 *Ce whitepaper est un document évolutif qui sera mis à jour régulièrement par la communauté.*
+
+---
+
+**X-CIRCLE-X DAO** - *Le Cercle de Vie sur MultiversX*
+
+π × 10⁸ = 314,159,265.358979323846264338 $XCIRCLEX
+
+*"Le cercle est la forme parfaite, π en est l'âme mathématique."*
