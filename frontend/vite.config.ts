@@ -6,6 +6,8 @@ import svgrPlugin from 'vite-plugin-svgr'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { resolve } from 'path'
 
+import { existsSync } from 'fs'
+
 // Custom plugin to resolve @multiversx/sdk-dapp subpaths
 const multiversxResolverPlugin = () => ({
   name: 'multiversx-resolver',
@@ -13,10 +15,24 @@ const multiversxResolverPlugin = () => ({
     // Handle @multiversx/sdk-dapp/out/* imports
     if (source.startsWith('@multiversx/sdk-dapp/out/')) {
       const subpath = source.replace('@multiversx/sdk-dapp/out/', '')
-      // Try .mjs extension first
-      return {
-        id: resolve(__dirname, `node_modules/@multiversx/sdk-dapp/out/${subpath}.mjs`),
-        external: false
+      const basePath = resolve(__dirname, `node_modules/@multiversx/sdk-dapp/out/${subpath}`)
+
+      // Try different extensions
+      const extensions = ['.mjs', '.js', '.cjs', '']
+      for (const ext of extensions) {
+        const fullPath = `${basePath}${ext}`
+        if (existsSync(fullPath)) {
+          return { id: fullPath, external: false }
+        }
+      }
+
+      // If nothing found, try index files
+      const indexExtensions = ['/index.mjs', '/index.js', '/index.cjs']
+      for (const ext of indexExtensions) {
+        const fullPath = `${basePath}${ext}`
+        if (existsSync(fullPath)) {
+          return { id: fullPath, external: false }
+        }
       }
     }
     return null
