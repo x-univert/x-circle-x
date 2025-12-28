@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useGetAccountInfo, useGetIsLoggedIn } from 'lib'
+import { XCircleLogo } from '../Logo/Logo'
 import {
   XCIRCLEX_TOKEN_ID,
   XCIRCLEX_DECIMALS,
@@ -219,8 +220,8 @@ export function TokenTab() {
       <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-purple-500/30">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-3xl shadow-lg">
-              🪙
+            <div className="w-16 h-16 flex items-center justify-center shadow-lg">
+              <XCircleLogo size={64} animate={true} />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-white">{tokenInfo?.name || 'XCIRCLEX'}</h1>

@@ -40,24 +40,13 @@ export default defineConfig({
     dedupe: ['react', 'react-dom'],
   },
   optimizeDeps: {
-    include: [
-      'react',
-      'react-dom',
-    ],
-    esbuildOptions: {
-      target: 'esnext',
-    },
-  },
-  ssr: {
-    noExternal: [
-      '@multiversx/sdk-dapp',
-      '@multiversx/sdk-core',
-      '@multiversx/sdk-dapp-ui',
-      '@multiversx/sdk-dapp-utils',
-    ],
+    include: ['react', 'react-dom'],
   },
   build: {
     outDir: 'build',
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
     rollupOptions: {
       onwarn(warning, warn) {
         // Ignore "use client" directive warnings
@@ -65,7 +54,7 @@ export default defineConfig({
           return;
         }
         warn(warning);
-      }
+      },
     }
   },
   preview: {

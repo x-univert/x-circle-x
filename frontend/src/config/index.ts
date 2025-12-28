@@ -1,4 +1,4 @@
-import { EnvironmentsEnum } from '@multiversx/sdk-dapp';
+import { EnvironmentsEnum } from '@multiversx/sdk-dapp/out/types/enums.types';
 
 export * from './sharedConfig';
 

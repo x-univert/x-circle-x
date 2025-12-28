@@ -173,7 +173,11 @@
       "Bash(cmd.exe /c:*)",
       "Bash(powershell.exe -Command \"Get-ChildItem ''C:\\Users\\DEEPGAMING\\MultiversX\\X-CIRCLE-X\\mx-assets-submission\\tokens\\XCIRCLEX-3b9d57''\")",
       "Bash(git remote set-url:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: Major update - Complete X-CIRCLE-X ecosystem\n\nSmart Contracts:\n- Circle of Life Center (SC0) with daily cycles\n- Circle Peripheral contracts for members\n- XCIRCLEX Staking (12 levels, 30-360 days)\n- XCIRCLEX DAO with governance\n- XCIRCLEX Vesting for team/advisors\n- NFT contract with evolution system\n- Token Protection (anti-whale, sell tax)\n- LP Locker\n\nFrontend:\n- Complete React/TypeScript dApp\n- Circle of Life interface\n- Staking, DAO, NFT, Vesting pages\n- Responsive design\n\nBranding:\n- Logo SVG/PNG\n- Twitter banner\n- info.json for MultiversX assets\n\nDocumentation:\n- Updated Whitepaper v2.1\n- Contract addresses\n- Deployment guides\n\n🤖 Generated with Claude Code\nEOF\n)\")",
+      "Bash(git push:*)",
+      "Bash(node scripts/generate-static-logo-png.js:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

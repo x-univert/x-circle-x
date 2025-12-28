@@ -13,69 +13,107 @@ interface LogoPropsType {
   hideTextOnMobile?: boolean;
 }
 
-// Composant SVG du logo X-CIRCLE-X
-export const XCircleLogo = ({ size = 32, animate = false }: { size?: number; animate?: boolean }) => (
-  <svg
-    viewBox="0 0 100 100"
-    width={size}
-    height={size}
-    className={animate ? 'xcircle-logo-animate' : ''}
-  >
-    <defs>
-      <linearGradient id="xcircle-logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style={{stopColor:'#7C3AED'}} />
-        <stop offset="50%" style={{stopColor:'#EC4899'}} />
-        <stop offset="100%" style={{stopColor:'#F59E0B'}} />
-      </linearGradient>
-      <filter id="logo-glow">
-        <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-        <feMerge>
-          <feMergeNode in="coloredBlur"/>
-          <feMergeNode in="SourceGraphic"/>
-        </feMerge>
-      </filter>
-    </defs>
-    {/* Cercle extérieur */}
-    <circle
-      cx="50"
-      cy="50"
-      r="42"
-      fill="none"
-      stroke="url(#xcircle-logo-gradient)"
-      strokeWidth="5"
-      filter="url(#logo-glow)"
-    />
-    {/* X au centre */}
-    <line
-      x1="30"
-      y1="30"
-      x2="70"
-      y2="70"
-      stroke="url(#xcircle-logo-gradient)"
-      strokeWidth="7"
-      strokeLinecap="round"
-      filter="url(#logo-glow)"
-    />
-    <line
-      x1="70"
-      y1="30"
-      x2="30"
-      y2="70"
-      stroke="url(#xcircle-logo-gradient)"
-      strokeWidth="7"
-      strokeLinecap="round"
-      filter="url(#logo-glow)"
-    />
-    {/* Point central */}
-    <circle
-      cx="50"
-      cy="50"
-      r="5"
-      fill="url(#xcircle-logo-gradient)"
-      filter="url(#logo-glow)"
-    />
-  </svg>
-);
+// Composant SVG du logo X-CIRCLE-X (nouveau design branding)
+export const XCircleLogo = ({ size = 32, animate = true }: { size?: number; animate?: boolean }) => {
+  // Unique ID pour les gradients (éviter conflits si plusieurs logos)
+  const uniqueId = `xcircle-${Math.random().toString(36).substr(2, 9)}`;
+
+  return (
+    <svg
+      viewBox="0 0 200 200"
+      width={size}
+      height={size}
+      className={animate ? 'xcircle-logo-animate' : ''}
+    >
+      <defs>
+        {/* Gradient principal violet/rose */}
+        <linearGradient id={`mainGradient-${uniqueId}`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style={{stopColor:'#8B5CF6'}} />
+          <stop offset="50%" style={{stopColor:'#A855F7'}} />
+          <stop offset="100%" style={{stopColor:'#EC4899'}} />
+        </linearGradient>
+
+        {/* Gradient pour le X central */}
+        <linearGradient id={`xGradient-${uniqueId}`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style={{stopColor:'#F0ABFC'}} />
+          <stop offset="100%" style={{stopColor:'#FFFFFF'}} />
+        </linearGradient>
+
+        {/* Gradient pour les fleches rotatives */}
+        <linearGradient id={`arrowGradient-${uniqueId}`} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style={{stopColor:'#22D3EE'}} />
+          <stop offset="100%" style={{stopColor:'#A855F7'}} />
+        </linearGradient>
+
+        {/* Ombre portee */}
+        <filter id={`glow-${uniqueId}`} x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+
+      {/* Cercle externe avec bordure gradient */}
+      <circle cx="100" cy="100" r="90" fill="none" stroke={`url(#mainGradient-${uniqueId})`} strokeWidth="6" opacity="0.9"/>
+
+      {/* Cercle interne */}
+      <circle cx="100" cy="100" r="75" fill="none" stroke={`url(#mainGradient-${uniqueId})`} strokeWidth="2" opacity="0.5"/>
+
+      {/* Fleches de rotation autour du cercle (3 fleches a 120 degres) */}
+      {animate ? (
+        <>
+          {/* Fleche 1 - Haut */}
+          <path d="M100 18 L108 30 L100 26 L92 30 Z" fill={`url(#arrowGradient-${uniqueId})`} filter={`url(#glow-${uniqueId})`}>
+            <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="8s" repeatCount="indefinite"/>
+          </path>
+
+          {/* Fleche 2 - Bas gauche */}
+          <path d="M100 18 L108 30 L100 26 L92 30 Z" fill={`url(#arrowGradient-${uniqueId})`} filter={`url(#glow-${uniqueId})`} transform="rotate(120 100 100)">
+            <animateTransform attributeName="transform" type="rotate" from="120 100 100" to="480 100 100" dur="8s" repeatCount="indefinite"/>
+          </path>
+
+          {/* Fleche 3 - Bas droite */}
+          <path d="M100 18 L108 30 L100 26 L92 30 Z" fill={`url(#arrowGradient-${uniqueId})`} filter={`url(#glow-${uniqueId})`} transform="rotate(240 100 100)">
+            <animateTransform attributeName="transform" type="rotate" from="240 100 100" to="600 100 100" dur="8s" repeatCount="indefinite"/>
+          </path>
+
+          {/* Arc de cercle rotatif (trace de rotation) */}
+          <circle cx="100" cy="100" r="82" fill="none" stroke={`url(#arrowGradient-${uniqueId})`} strokeWidth="3" strokeDasharray="40 180" strokeLinecap="round" opacity="0.7">
+            <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="8s" repeatCount="indefinite"/>
+          </circle>
+        </>
+      ) : (
+        <>
+          {/* Version statique des fleches */}
+          <path d="M100 18 L108 30 L100 26 L92 30 Z" fill={`url(#arrowGradient-${uniqueId})`} filter={`url(#glow-${uniqueId})`}/>
+          <path d="M100 18 L108 30 L100 26 L92 30 Z" fill={`url(#arrowGradient-${uniqueId})`} filter={`url(#glow-${uniqueId})`} transform="rotate(120 100 100)"/>
+          <path d="M100 18 L108 30 L100 26 L92 30 Z" fill={`url(#arrowGradient-${uniqueId})`} filter={`url(#glow-${uniqueId})`} transform="rotate(240 100 100)"/>
+          <circle cx="100" cy="100" r="82" fill="none" stroke={`url(#arrowGradient-${uniqueId})`} strokeWidth="3" strokeDasharray="40 180" strokeLinecap="round" opacity="0.7"/>
+        </>
+      )}
+
+      {/* X Central */}
+      <g filter={`url(#glow-${uniqueId})`}>
+        {/* Premiere barre du X */}
+        <rect x="60" y="95" width="80" height="10" rx="5" fill={`url(#xGradient-${uniqueId})`} transform="rotate(45 100 100)"/>
+        {/* Deuxieme barre du X */}
+        <rect x="60" y="95" width="80" height="10" rx="5" fill={`url(#xGradient-${uniqueId})`} transform="rotate(-45 100 100)"/>
+      </g>
+
+      {/* Points decoratifs sur le cercle (representant les SC peripheriques) */}
+      <circle cx="100" cy="20" r="4" fill="#22D3EE"/>
+      <circle cx="169" cy="60" r="4" fill="#A855F7"/>
+      <circle cx="180" cy="100" r="4" fill="#EC4899"/>
+      <circle cx="169" cy="140" r="4" fill="#F472B6"/>
+      <circle cx="100" cy="180" r="4" fill="#22D3EE"/>
+      <circle cx="31" cy="140" r="4" fill="#A855F7"/>
+      <circle cx="20" cy="100" r="4" fill="#EC4899"/>
+      <circle cx="31" cy="60" r="4" fill="#F472B6"/>
+    </svg>
+  );
+};
 
 export const Logo = ({ hideTextOnMobile }: LogoPropsType) => {
   const [isXCircleTheme, setIsXCircleTheme] = useState(false);

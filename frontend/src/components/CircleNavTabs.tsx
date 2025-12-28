@@ -1,9 +1,12 @@
+import { XCircleLogo } from './Logo/Logo'
+
 export type TabId = 'circle' | 'sc-central' | 'my-sc' | 'staking' | 'nft' | 'token' | 'dao'
 
 interface Tab {
   id: TabId
   label: string
-  icon: string
+  icon: string | React.ReactNode
+  isLogoIcon?: boolean
 }
 
 const tabs: Tab[] = [
@@ -12,7 +15,7 @@ const tabs: Tab[] = [
   { id: 'my-sc', label: 'Mon SC Peripherique', icon: '📄' },
   { id: 'staking', label: 'Staking', icon: '💰' },
   { id: 'nft', label: 'Mon NFT', icon: '🎨' },
-  { id: 'token', label: 'Token X-CIRCLE-X', icon: '🪙' },
+  { id: 'token', label: 'Token X-CIRCLE-X', icon: '', isLogoIcon: true },
   { id: 'dao', label: 'DAO', icon: '🏛️' }
 ]
 
@@ -47,7 +50,7 @@ export function CircleNavTabs({ activeTab, onTabChange }: CircleNavTabsProps) {
               whiteSpace: 'nowrap'
             }}
           >
-            <span>{tab.icon}</span>
+            <span>{tab.isLogoIcon ? <XCircleLogo size={20} animate={activeTab === tab.id} /> : tab.icon}</span>
             <span>{tab.label}</span>
           </button>
         ))}
