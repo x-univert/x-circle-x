@@ -40,7 +40,21 @@ export default defineConfig({
     dedupe: ['react', 'react-dom'],
   },
   optimizeDeps: {
-    include: ['react', 'react-dom'],
+    include: [
+      'react',
+      'react-dom',
+    ],
+    esbuildOptions: {
+      target: 'esnext',
+    },
+  },
+  ssr: {
+    noExternal: [
+      '@multiversx/sdk-dapp',
+      '@multiversx/sdk-core',
+      '@multiversx/sdk-dapp-ui',
+      '@multiversx/sdk-dapp-utils',
+    ],
   },
   build: {
     outDir: 'build',
