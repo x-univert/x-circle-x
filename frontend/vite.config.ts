@@ -74,9 +74,12 @@ export default defineConfig({
   resolve: {
     dedupe: ['react', 'react-dom'],
     extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
+    alias: {
+      'protobufjs/minimal': resolve(__dirname, 'node_modules/protobufjs/minimal.js'),
+    },
   },
   optimizeDeps: {
-    include: ['react', 'react-dom'],
+    include: ['react', 'react-dom', 'protobufjs', 'protobufjs/minimal'],
     esbuildOptions: {
       resolveExtensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
     },
