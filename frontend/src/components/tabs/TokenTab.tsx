@@ -247,7 +247,12 @@ export function TokenTab() {
           <p className="text-2xl font-bold text-green-400">
             {isLoggedIn ? formatNumber(userBalance) : '-'}
           </p>
-          <p className="text-gray-500 text-xs mt-1">XCIRCLEX</p>
+          <p className="text-gray-500 text-xs">XCIRCLEX</p>
+          {isLoggedIn && tokenInfo?.price && parseFloat(userBalance) > 0 && (
+            <p className="text-green-300 text-sm mt-1 font-semibold">
+              ≈ ${((parseFloat(userBalance) / Math.pow(10, XCIRCLEX_DECIMALS)) * tokenInfo.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
+            </p>
+          )}
         </div>
 
         {/* Price */}
