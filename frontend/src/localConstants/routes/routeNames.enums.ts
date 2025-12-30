@@ -10,5 +10,7 @@ export enum RouteNamesEnum {
   ido = '/ido',
   vesting = '/vesting',
   unlock = '/unlock',
-  about = '/about'
+  about = '/about',
+  whitepaper = '/whitepaper',
+  disclaimer = '/disclaimer'
 }

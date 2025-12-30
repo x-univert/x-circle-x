@@ -9,6 +9,7 @@ import Staking from 'pages/Staking';
 import IDO from 'pages/IDO';
 import Vesting from 'pages/Vesting';
 import About from 'pages/About';
+import Whitepaper from 'pages/Whitepaper';
 import { Unlock } from 'pages/Unlock';
 
 export enum RouteNamesEnum {
@@ -22,7 +23,8 @@ export enum RouteNamesEnum {
   ido = '/ido',
   vesting = '/vesting',
   unlock = '/unlock',
-  about = '/about'
+  about = '/about',
+  whitepaper = '/whitepaper'
 }
 
 interface RouteWithTitleType extends RouteType {
@@ -84,5 +86,10 @@ export const routes: RouteWithTitleType[] = [
     path: RouteNamesEnum.about,
     title: 'About',
     component: About
+  },
+  {
+    path: RouteNamesEnum.whitepaper,
+    title: 'Whitepaper',
+    component: Whitepaper
   }
 ];

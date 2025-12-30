@@ -117,6 +117,12 @@ export const Footer = () => {
             >
               About
             </span>
+            <span
+              className={styles.footerLink}
+              onClick={() => navigate(RouteNamesEnum.whitepaper)}
+            >
+              Whitepaper
+            </span>
           </div>
         </div>
       </div>
