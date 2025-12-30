@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { MouseEvent, useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import classNames from 'classnames';
+import { useTranslation } from 'react-i18next';
 
 import { Logo, Tooltip, UserAvatar, NotificationCenter, SettingsModal } from 'components';
 import { GITHUB_REPO_URL } from 'config';
@@ -38,12 +39,13 @@ interface HeaderBrowseButtonType {
 }
 
 interface MenuItem {
-  label: string;
+  labelKey: string;
   route: string;
   icon: string;
 }
 
 export const Header = () => {
+  const { t } = useTranslation();
   const { network } = useGetNetworkConfig();
   const { address } = useGetAccount();
   const { unreadCount } = useNotifications();
@@ -137,12 +139,12 @@ export const Header = () => {
 
   // Structure de navigation simplifiée pour X-CIRCLE-X
   const navigationItems: MenuItem[] = [
-    { label: 'Cercle de Vie', route: RouteNamesEnum.home, icon: '🌀' },
-    { label: 'Dashboard', route: RouteNamesEnum.dashboard, icon: '📊' },
-    { label: 'Circles', route: RouteNamesEnum.circles, icon: '⭕' },
-    { label: 'Staking', route: RouteNamesEnum.staking, icon: '💰' },
-    { label: 'IDO', route: RouteNamesEnum.ido, icon: '🚀' },
-    { label: 'Vesting', route: RouteNamesEnum.vesting, icon: '🔒' }
+    { labelKey: 'header.circleOfLife', route: RouteNamesEnum.home, icon: '🌀' },
+    { labelKey: 'header.dashboard', route: RouteNamesEnum.dashboard, icon: '📊' },
+    { labelKey: 'home.circles', route: RouteNamesEnum.circles, icon: '⭕' },
+    { labelKey: 'header.staking', route: RouteNamesEnum.staking, icon: '💰' },
+    { labelKey: 'header.ido', route: RouteNamesEnum.ido, icon: '🚀' },
+    { labelKey: 'header.vesting', route: RouteNamesEnum.vesting, icon: '🔒' }
   ];
 
   const activeRoute = navigationItems.find(item =>
@@ -163,7 +165,7 @@ export const Header = () => {
             className="flex items-center gap-2 px-2 sm:px-4 py-2 bg-secondary border-2 border-secondary vibe-border rounded-lg hover:bg-tertiary transition-all font-medium text-primary"
           >
             <span className="text-lg">{activeRoute?.icon || '📋'}</span>
-            <span className="max-[639px]:hidden">{activeRoute?.label || 'Menu'}</span>
+            <span className="max-[639px]:hidden">{activeRoute ? t(activeRoute.labelKey) : 'Menu'}</span>
             <span className={`max-[639px]:hidden text-secondary transition-transform text-xs ${isMenuOpen ? 'rotate-180' : ''}`}>
               ▼
             </span>
@@ -185,7 +187,7 @@ export const Header = () => {
                   }`}
                 >
                   <span className="text-lg">{item.icon}</span>
-                  <span className="flex-1">{item.label}</span>
+                  <span className="flex-1">{t(item.labelKey)}</span>
                   {location.pathname === item.route && (
                     <span className="ml-auto">✓</span>
                   )}

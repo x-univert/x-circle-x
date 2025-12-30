@@ -1,22 +1,23 @@
+import { useTranslation } from 'react-i18next'
 import { XCircleLogo } from './Logo/Logo'
 
 export type TabId = 'circle' | 'sc-central' | 'my-sc' | 'staking' | 'nft' | 'token' | 'dao'
 
 interface Tab {
   id: TabId
-  label: string
+  labelKey: string
   icon: string | React.ReactNode
   isLogoIcon?: boolean
 }
 
 const tabs: Tab[] = [
-  { id: 'circle', label: 'Cercle de Vie', icon: '🌀' },
-  { id: 'sc-central', label: 'SC Central', icon: '🏠' },
-  { id: 'my-sc', label: 'Mon SC Peripherique', icon: '📄' },
-  { id: 'staking', label: 'Staking', icon: '💰' },
-  { id: 'nft', label: 'Mon NFT', icon: '🎨' },
-  { id: 'token', label: 'Token X-CIRCLE-X', icon: '', isLogoIcon: true },
-  { id: 'dao', label: 'DAO', icon: '🏛️' }
+  { id: 'circle', labelKey: 'circleOfLife.tabs.overview', icon: '🌀' },
+  { id: 'sc-central', labelKey: 'circleOfLife.scCentral', icon: '🏠' },
+  { id: 'my-sc', labelKey: 'circleOfLife.mySc', icon: '📄' },
+  { id: 'staking', labelKey: 'staking.title', icon: '💰' },
+  { id: 'nft', labelKey: 'nft.myNft', icon: '🎨' },
+  { id: 'token', labelKey: 'circleOfLife.tabs.token', icon: '', isLogoIcon: true },
+  { id: 'dao', labelKey: 'dao.title', icon: '🏛️' }
 ]
 
 interface CircleNavTabsProps {
@@ -25,6 +26,8 @@ interface CircleNavTabsProps {
 }
 
 export function CircleNavTabs({ activeTab, onTabChange }: CircleNavTabsProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="w-full mb-6">
       <div className="flex flex-wrap justify-center gap-2">
@@ -51,7 +54,7 @@ export function CircleNavTabs({ activeTab, onTabChange }: CircleNavTabsProps) {
             }}
           >
             <span>{tab.isLogoIcon ? <XCircleLogo size={20} animate={activeTab === tab.id} /> : tab.icon}</span>
-            <span>{tab.label}</span>
+            <span>{t(tab.labelKey)}</span>
           </button>
         ))}
       </div>

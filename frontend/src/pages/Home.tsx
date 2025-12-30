@@ -2,6 +2,7 @@ import { MouseEvent, FunctionComponent, SVGProps } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { faArrowRightLong } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useTranslation } from 'react-i18next';
 
 import { useGetIsLoggedIn, useGetAccountInfo, getAccountProvider, getNetworkConfig, BrowserEnum, getDetectedBrowser } from 'lib';
 import { RouteNamesEnum } from 'localConstants';
@@ -115,6 +116,7 @@ const ConnectCard = ({ icon: IconComponent, title, description, linkTitle, linkD
 );
 
 function Home() {
+  const { t } = useTranslation();
   const isLoggedIn = useGetIsLoggedIn();
   const { address, account } = useGetAccountInfo();
   const navigate = useNavigate();
@@ -193,23 +195,23 @@ function Home() {
           <div className="max-w-4xl mx-auto">
             <div className="bg-secondary border-2 border-secondary vibe-border rounded-2xl p-8 shadow-2xl">
               <h2 className="text-3xl font-semibold text-primary mb-6 text-center">
-                Bienvenue sur X-CIRCLE-X !
+                {t('home.welcome', 'Welcome to X-CIRCLE-X!')}
               </h2>
 
               {/* Wallet Info Card */}
               <div className="bg-accent/10 border-2 border-accent/30 rounded-lg p-6 mb-8">
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <div>
-                    <p className="text-secondary text-sm mb-1">Adresse Wallet</p>
+                    <p className="text-secondary text-sm mb-1">{t('home.walletAddress', 'Wallet Address')}</p>
                     <p className="text-primary font-mono text-lg">{formatAddress(address)}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-secondary text-sm mb-1">Solde</p>
+                    <p className="text-secondary text-sm mb-1">{t('home.balance', 'Balance')}</p>
                     <p className="text-primary font-bold text-2xl">{formatBalance(account.balance)} EGLD</p>
                   </div>
                 </div>
                 <div className="mt-4 flex gap-2 flex-wrap">
-                  <span className="bg-green-500/20 text-green-400 text-xs px-3 py-1 rounded-full">Connecte</span>
+                  <span className="bg-green-500/20 text-green-400 text-xs px-3 py-1 rounded-full">{t('home.connected', 'Connected')}</span>
                   <span className="bg-purple-500/20 text-purple-400 text-xs px-3 py-1 rounded-full">Devnet</span>
                 </div>
               </div>
@@ -220,9 +222,9 @@ function Home() {
                   onClick={() => navigate(RouteNamesEnum.circles)}
                 >
                   <div className="text-3xl mb-3">⭕</div>
-                  <h3 className="text-xl font-semibold text-primary mb-2">Cercles</h3>
-                  <p className="text-secondary text-sm">Creez ou rejoignez des cercles d'epargne</p>
-                  <p className="text-green-400 text-xs mt-3">Disponible</p>
+                  <h3 className="text-xl font-semibold text-primary mb-2">{t('home.circles', 'Circles')}</h3>
+                  <p className="text-secondary text-sm">{t('home.circlesDesc', 'Create or join savings circles')}</p>
+                  <p className="text-green-400 text-xs mt-3">{t('home.available', 'Available')}</p>
                 </div>
 
                 <div
@@ -230,9 +232,9 @@ function Home() {
                   onClick={() => navigate(RouteNamesEnum.dashboard)}
                 >
                   <div className="text-3xl mb-3">📊</div>
-                  <h3 className="text-xl font-semibold text-primary mb-2">Dashboard</h3>
-                  <p className="text-secondary text-sm">Suivez vos cercles et transactions</p>
-                  <p className="text-green-400 text-xs mt-3">Disponible</p>
+                  <h3 className="text-xl font-semibold text-primary mb-2">{t('header.dashboard', 'Dashboard')}</h3>
+                  <p className="text-secondary text-sm">{t('home.dashboardDesc', 'Track your circles and transactions')}</p>
+                  <p className="text-green-400 text-xs mt-3">{t('home.available', 'Available')}</p>
                 </div>
 
                 <div
@@ -240,9 +242,9 @@ function Home() {
                   onClick={() => navigate(RouteNamesEnum.about)}
                 >
                   <div className="text-3xl mb-3">📖</div>
-                  <h3 className="text-xl font-semibold text-primary mb-2">A propos</h3>
-                  <p className="text-secondary text-sm">Decouvrez X-CIRCLE-X</p>
-                  <p className="text-green-400 text-xs mt-3">Disponible</p>
+                  <h3 className="text-xl font-semibold text-primary mb-2">{t('header.about', 'About')}</h3>
+                  <p className="text-secondary text-sm">{t('home.aboutDesc', 'Discover X-CIRCLE-X')}</p>
+                  <p className="text-green-400 text-xs mt-3">{t('home.available', 'Available')}</p>
                 </div>
               </div>
 
@@ -251,7 +253,7 @@ function Home() {
                 className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2"
               >
                 <span>🚪</span>
-                Deconnexion
+                {t('common.disconnect', 'Disconnect')}
               </button>
             </div>
           </div>
@@ -274,37 +276,36 @@ function Home() {
               <span>X-CIRCLE-X</span>
             </span>
           </h1>
-          <p className={styles.heroSubtitle}>Tontines Decentralisees sur MultiversX</p>
+          <p className={styles.heroSubtitle}>{t('home.hero.subtitle', 'The Decentralized Circle of Life')}</p>
           <p className={styles.heroDescription}>
-            La premiere plateforme de tontine (ROSCA) 100% decentralisee.
-            Creez des cercles d'epargne, contribuez ensemble, et beneficiez de la confiance de la blockchain.
+            {t('home.hero.description', 'The first decentralized tontine platform on MultiversX. Join the Circle of Life and receive daily rewards in $XCIRCLEX.')}
           </p>
 
           <div className={styles.heroButtons}>
             <button onClick={handleLogin} className={styles.heroConnectButton}>
-              Connecter mon Wallet
+              {t('home.connectWallet', 'Connect Wallet')}
             </button>
             <button onClick={() => navigate(RouteNamesEnum.about)} className={styles.heroAboutButton}>
-              En savoir plus
+              {t('home.hero.learnMore', 'Learn More')}
             </button>
           </div>
 
           <div className={styles.heroFeatures}>
             <div className={styles.heroFeature}>
               <span>🔒</span>
-              <span>100% Securise</span>
+              <span>{t('home.features.secure', '100% Secure')}</span>
             </div>
             <div className={styles.heroFeature}>
               <span>⚡</span>
-              <span>Transactions Rapides</span>
+              <span>{t('home.features.fast', 'Fast Transactions')}</span>
             </div>
             <div className={styles.heroFeature}>
               <span>🌍</span>
-              <span>Accessible Partout</span>
+              <span>{t('home.features.global', 'Accessible Everywhere')}</span>
             </div>
             <div className={styles.heroFeature}>
               <span>👥</span>
-              <span>Gouvernance DAO</span>
+              <span>{t('home.features.dao', 'DAO Governance')}</span>
             </div>
           </div>
         </div>

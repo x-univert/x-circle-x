@@ -23,7 +23,8 @@
     "dashboard": "Dashboard",
     "settings": "Parametres",
     "about": "A propos",
-    "whitepaper": "Whitepaper"
+    "whitepaper": "Whitepaper",
+    "ido": "IDO"
   },
   "settings": {
     "title": "Parametres",
@@ -56,6 +57,22 @@
       "description": "La premiere plateforme de tontine decentralisee sur MultiversX. Participez au Cercle de Vie et recevez des recompenses quotidiennes en $XCIRCLEX.",
       "getStarted": "Rejoindre le Cercle",
       "learnMore": "En savoir plus"
+    },
+    "welcome": "Bienvenue sur X-CIRCLE-X !",
+    "walletAddress": "Adresse Wallet",
+    "balance": "Solde",
+    "connected": "Connecte",
+    "circles": "Cercles",
+    "circlesDesc": "Creez ou rejoignez des cercles d'epargne",
+    "dashboardDesc": "Suivez vos cercles et transactions",
+    "aboutDesc": "Decouvrez X-CIRCLE-X",
+    "available": "Disponible",
+    "connectWallet": "Connecter mon Wallet",
+    "features": {
+      "secure": "100% Securise",
+      "fast": "Transactions Rapides",
+      "global": "Accessible Partout",
+      "dao": "Gouvernance DAO"
     }
   },
   "circleOfLife": {
@@ -67,6 +84,8 @@
     "cyclesCompleted": "Cycles completes",
     "totalEarned": "Total gagne",
     "nextReward": "Prochaine recompense",
+    "scCentral": "SC Central",
+    "mySc": "Mon SC Peripherique",
     "status": {
       "active": "Actif",
       "inactive": "Inactif",
@@ -74,7 +93,7 @@
       "pending": "En attente"
     },
     "tabs": {
-      "overview": "Vue d'ensemble",
+      "overview": "Cercle de Vie",
       "members": "Membres",
       "rewards": "Recompenses",
       "token": "Token X-CIRCLE-X"
@@ -91,7 +110,26 @@
     "marketCap": "Capitalisation",
     "yourBalance": "Votre Balance",
     "holders": "Detenteurs",
-    "transactions": "Transactions"
+    "holdersLabel": "Detenteurs",
+    "transactions": "Transactions",
+    "viewExplorer": "Voir sur Explorer",
+    "distribution": "Distribution du Token",
+    "exactValue": "Valeur exacte",
+    "otherHolders": "Autres Detenteurs",
+    "individualWallets": "Wallets individuels",
+    "freeCirculation": "Tokens en circulation libre",
+    "contracts": "Contrats (SC)",
+    "decimals": "Decimales",
+    "info": "Informations du Token",
+    "owner": "Proprietaire (Issuer)",
+    "ticker": "Ticker",
+    "network": "Reseau",
+    "utility": "Utilite du Token",
+    "cycleRewards": "Recompenses de Cycle",
+    "cycleRewardsDesc": "Gagnez des XCIRCLEX en participant aux cycles quotidiens du Cercle de Vie.",
+    "stakingDesc": "Stakez vos tokens pour gagner jusqu'a 42% APY avec 12 niveaux de verrouillage.",
+    "daoDesc": "Votez sur les propositions et participez a la gouvernance du protocole.",
+    "viewContract": "Voir le contrat"
   },
   "staking": {
     "title": "Staking Circulaire 360",
@@ -182,7 +220,8 @@
     "disclaimer": "Avertissement",
     "madeWith": "Fait avec",
     "byTeam": "par l'equipe X-CIRCLE-X",
-    "build": "Build {{network}}"
+    "build": "Build {{network}}",
+    "createCircle": "Creer un Cercle"
   },
   "about": {
     "title": "A propos de X-CIRCLE-X",

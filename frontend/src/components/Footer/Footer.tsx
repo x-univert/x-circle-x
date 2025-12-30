@@ -4,6 +4,7 @@ import { faXTwitter, faFacebook, faLinkedin, faTelegram } from '@fortawesome/fre
 import moment from 'moment';
 import { MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { useGetNetworkConfig } from 'lib';
 import { RouteNamesEnum } from 'localConstants';
@@ -30,6 +31,7 @@ const styles = {
 } satisfies Record<string, string>;
 
 export const Footer = () => {
+  const { t } = useTranslation();
   const { network } = useGetNetworkConfig();
   const navigate = useNavigate();
   const currentYear = moment().year();
@@ -79,49 +81,49 @@ export const Footer = () => {
           </div>
 
           <div className={styles.footerCopyright}>
-            © {currentYear} X-CIRCLE-X. All rights reserved.
+            © {currentYear} {t('footer.copyright', 'X-CIRCLE-X. All rights reserved.')}
           </div>
         </div>
 
         {/* Section droite: Resources */}
         <div className={styles.footerRight}>
-          <h3 className={styles.footerResourcesTitle}>Resources</h3>
+          <h3 className={styles.footerResourcesTitle}>{t('footer.resources', 'Resources')}</h3>
           <div className={styles.footerResourcesList}>
             <span
               className={styles.footerLink}
               onClick={() => navigate(RouteNamesEnum.home)}
             >
-              Home
+              {t('header.circleOfLife', 'Circle of Life')}
             </span>
             <span
               className={styles.footerLink}
               onClick={() => navigate(RouteNamesEnum.circles)}
             >
-              Circles
+              {t('home.circles', 'Circles')}
             </span>
             <span
               className={styles.footerLink}
               onClick={() => navigate(RouteNamesEnum.createCircle)}
             >
-              Create Circle
+              {t('footer.createCircle', 'Create Circle')}
             </span>
             <span
               className={styles.footerLink}
               onClick={() => navigate(RouteNamesEnum.dashboard)}
             >
-              Dashboard
+              {t('header.dashboard', 'Dashboard')}
             </span>
             <span
               className={styles.footerLink}
               onClick={() => navigate(RouteNamesEnum.about)}
             >
-              About
+              {t('header.about', 'About')}
             </span>
             <span
               className={styles.footerLink}
               onClick={() => navigate(RouteNamesEnum.whitepaper)}
             >
-              Whitepaper
+              {t('header.whitepaper', 'Whitepaper')}
             </span>
           </div>
         </div>
@@ -131,16 +133,16 @@ export const Footer = () => {
       <div className={styles.footerBottom}>
         <div className={styles.footerDescription}>
           <span className={styles.footerDescriptionNetwork}>
-            {network.id} Build
+            {t('footer.build', { network: network.id })}
           </span>
           <span>•</span>
           <span>{version}</span>
         </div>
 
         <div className={styles.footerDescription}>
-          <span>Made with</span>
+          <span>{t('footer.madeWith', 'Made with')}</span>
           <FontAwesomeIcon icon={faHeart} className={styles.footerHeartIcon} />
-          <span>for the X-CIRCLE-X community, {currentYear}</span>
+          <span>{t('footer.byTeam', 'by the X-CIRCLE-X team')}</span>
         </div>
       </div>
     </footer>

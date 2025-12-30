@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useGetAccountInfo, useGetIsLoggedIn } from 'lib'
 import { XCircleLogo } from '../Logo/Logo'
 import {
@@ -36,6 +37,7 @@ interface AllocationInfo {
 }
 
 export function TokenTab() {
+  const { t } = useTranslation()
   const isLoggedIn = useGetIsLoggedIn()
   const { address } = useGetAccountInfo()
 
@@ -199,7 +201,7 @@ export function TokenTab() {
     return (
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-xl text-center">
         <div className="animate-spin text-6xl mb-4">🪙</div>
-        <p className="text-gray-300">Chargement des donnees du token...</p>
+        <p className="text-gray-300">{t('common.loading', 'Loading...')}</p>
       </div>
     )
   }
@@ -208,7 +210,7 @@ export function TokenTab() {
     return (
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-xl text-center">
         <div className="text-6xl mb-4">⚠️</div>
-        <h2 className="text-xl font-bold text-red-400 mb-4">Erreur</h2>
+        <h2 className="text-xl font-bold text-red-400 mb-4">{t('common.error', 'Error')}</h2>
         <p className="text-gray-300">{error}</p>
       </div>
     )
@@ -234,7 +236,7 @@ export function TokenTab() {
             rel="noopener noreferrer"
             className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition flex items-center gap-2"
           >
-            Voir sur Explorer &#8599;
+            {t('token.viewExplorer', 'View on Explorer')} &#8599;
           </a>
         </div>
       </div>
@@ -243,7 +245,7 @@ export function TokenTab() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {/* User Balance */}
         <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-xl p-4">
-          <p className="text-gray-400 text-sm mb-1">Votre Balance</p>
+          <p className="text-gray-400 text-sm mb-1">{t('token.yourBalance', 'Your Balance')}</p>
           <p className="text-2xl font-bold text-green-400">
             {isLoggedIn ? formatNumber(userBalance) : '-'}
           </p>
@@ -257,7 +259,7 @@ export function TokenTab() {
 
         {/* Price */}
         <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-xl p-4">
-          <p className="text-gray-400 text-sm mb-1">Prix</p>
+          <p className="text-gray-400 text-sm mb-1">{t('token.price', 'Price')}</p>
           <p className="text-2xl font-bold text-blue-400">
             {tokenInfo?.price ? `$${tokenInfo.price.toFixed(6)}` : 'N/A'}
           </p>
@@ -266,7 +268,7 @@ export function TokenTab() {
 
         {/* Market Cap */}
         <div className="bg-gradient-to-br from-yellow-500/20 to-amber-500/20 border border-yellow-500/30 rounded-xl p-4">
-          <p className="text-gray-400 text-sm mb-1">Market Cap</p>
+          <p className="text-gray-400 text-sm mb-1">{t('token.marketCap', 'Market Cap')}</p>
           <p className="text-2xl font-bold text-yellow-400">
             {tokenInfo?.marketCap
               ? tokenInfo.marketCap >= 1000000
@@ -283,11 +285,11 @@ export function TokenTab() {
 
         {/* Holders */}
         <div className="bg-gradient-to-br from-pink-500/20 to-rose-500/20 border border-pink-500/30 rounded-xl p-4">
-          <p className="text-gray-400 text-sm mb-1">Holders</p>
+          <p className="text-gray-400 text-sm mb-1">{t('token.holders', 'Holders')}</p>
           <p className="text-2xl font-bold text-pink-400">
-            {holdersCount > 0 ? holdersCount.toLocaleString('fr-FR') : '-'}
+            {holdersCount > 0 ? holdersCount.toLocaleString() : '-'}
           </p>
-          <p className="text-gray-500 text-xs mt-1">Detenteurs</p>
+          <p className="text-gray-500 text-xs mt-1">{t('token.holdersLabel', 'Holders')}</p>
         </div>
       </div>
 
@@ -295,7 +297,7 @@ export function TokenTab() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {/* Total Supply */}
         <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-4">
-          <p className="text-gray-400 text-sm mb-1">Supply Totale</p>
+          <p className="text-gray-400 text-sm mb-1">{t('token.totalSupply', 'Total Supply')}</p>
           <p className="text-2xl font-bold text-purple-400">
             {tokenInfo?.initialMinted ? formatNumber(tokenInfo.initialMinted) : '-'}
           </p>
@@ -304,7 +306,7 @@ export function TokenTab() {
 
         {/* Circulating Supply */}
         <div className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-xl p-4">
-          <p className="text-gray-400 text-sm mb-1">Supply Circulante</p>
+          <p className="text-gray-400 text-sm mb-1">{t('token.circulatingSupply', 'Circulating Supply')}</p>
           <p className="text-2xl font-bold text-amber-400">
             {tokenInfo?.circulatingSupply ? formatNumber(tokenInfo.circulatingSupply) : '-'}
           </p>
@@ -313,7 +315,7 @@ export function TokenTab() {
 
         {/* Tokens Burnt */}
         <div className="bg-gradient-to-br from-red-500/20 to-orange-500/20 border border-red-500/30 rounded-xl p-4">
-          <p className="text-gray-400 text-sm mb-1">Tokens Brules</p>
+          <p className="text-gray-400 text-sm mb-1">{t('token.burned', 'Tokens Burned')}</p>
           <p className="text-2xl font-bold text-red-400">
             {tokenInfo?.burnt && parseFloat(tokenInfo.burnt) > 0
               ? formatNumber(tokenInfo.burnt)
@@ -337,7 +339,7 @@ export function TokenTab() {
       {/* Token Distribution */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
         <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-          <span>📊</span> Distribution du Token
+          <span>📊</span> {t('token.distribution', 'Token Distribution')}
         </h2>
 
         {/* Total Supply Display */}
@@ -348,18 +350,18 @@ export function TokenTab() {
                 🥧
               </div>
               <div>
-                <p className="text-gray-400 text-sm">Supply Totale (PI)</p>
+                <p className="text-gray-400 text-sm">{t('token.totalSupply', 'Total Supply')} (PI)</p>
                 <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
                   {tokenInfo?.initialMinted
                     ? formatNumber(tokenInfo.initialMinted)
-                    : TOTAL_SUPPLY.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} XCIRCLEX
+                    : TOTAL_SUPPLY.toLocaleString('en-US', { maximumFractionDigits: 0 })} XCIRCLEX
                 </p>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-gray-400 text-xs">Valeur exacte</p>
+              <p className="text-gray-400 text-xs">{t('token.exactValue', 'Exact value')}</p>
               <p className="text-white font-mono text-sm">314,159,265.358979...</p>
-              <p className="text-purple-400 text-xs">= nombre PI</p>
+              <p className="text-purple-400 text-xs">= PI</p>
             </div>
           </div>
         </div>
@@ -378,7 +380,7 @@ export function TokenTab() {
             <div
               className="h-full bg-gradient-to-r from-cyan-500 to-teal-500"
               style={{ width: `${Math.max(100 - totalAllocatedPercentage, 0)}%` }}
-              title={`Autres Detenteurs: ${(100 - totalAllocatedPercentage).toFixed(2)}%`}
+              title={`${t('token.otherHolders', 'Other Holders')}: ${(100 - totalAllocatedPercentage).toFixed(2)}%`}
             />
           </div>
           <div className="flex justify-between mt-2 text-xs text-gray-500">
@@ -416,7 +418,7 @@ export function TokenTab() {
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:text-blue-300 text-xs mt-3 inline-flex items-center gap-1"
               >
-                Voir le contrat &#8599;
+                {t('token.viewContract', 'View contract')} &#8599;
               </a>
             </div>
           ))}
@@ -429,8 +431,8 @@ export function TokenTab() {
                   👥
                 </div>
                 <div>
-                  <p className="text-white font-semibold">Autres Detenteurs</p>
-                  <p className="text-gray-400 text-xs">Wallets individuels</p>
+                  <p className="text-white font-semibold">{t('token.otherHolders', 'Other Holders')}</p>
+                  <p className="text-gray-400 text-xs">{t('token.individualWallets', 'Individual wallets')}</p>
                 </div>
               </div>
               <div className="text-right">
@@ -443,9 +445,9 @@ export function TokenTab() {
             {/* Total amount in tokens */}
             <div className="mt-3 pt-3 border-t border-cyan-500/20">
               <div className="flex justify-between items-center">
-                <span className="text-gray-400 text-xs">Tokens en circulation libre</span>
+                <span className="text-gray-400 text-xs">{t('token.freeCirculation', 'Tokens in free circulation')}</span>
                 <span className="text-cyan-300 font-mono text-sm">
-                  {((TOTAL_SUPPLY * (100 - totalAllocatedPercentage) / 100)).toLocaleString('fr-FR', { maximumFractionDigits: 0 })} XCIRCLEX
+                  {((TOTAL_SUPPLY * (100 - totalAllocatedPercentage) / 100)).toLocaleString('en-US', { maximumFractionDigits: 0 })} XCIRCLEX
                 </span>
               </div>
             </div>
@@ -456,23 +458,23 @@ export function TokenTab() {
         <div className="mt-6 bg-white/5 rounded-xl p-4 border border-white/10">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
             <div>
-              <p className="text-gray-400 text-xs mb-1">Contracts (SC)</p>
+              <p className="text-gray-400 text-xs mb-1">{t('token.contracts', 'Contracts (SC)')}</p>
               <p className="text-purple-400 font-bold text-lg">{totalAllocatedPercentage.toFixed(2)}%</p>
             </div>
             <div>
-              <p className="text-gray-400 text-xs mb-1">Wallets Individuels</p>
+              <p className="text-gray-400 text-xs mb-1">{t('token.individualWallets', 'Individual Wallets')}</p>
               <p className="text-cyan-400 font-bold text-lg">{(100 - totalAllocatedPercentage).toFixed(2)}%</p>
             </div>
             <div>
-              <p className="text-gray-400 text-xs mb-1">Supply Totale</p>
+              <p className="text-gray-400 text-xs mb-1">{t('token.totalSupply', 'Total Supply')}</p>
               <p className="text-white font-bold text-lg">314.16M</p>
             </div>
             <div>
-              <p className="text-gray-400 text-xs mb-1">Holders</p>
+              <p className="text-gray-400 text-xs mb-1">{t('token.holders', 'Holders')}</p>
               <p className="text-pink-400 font-bold text-lg">{holdersCount > 0 ? holdersCount : '-'}</p>
             </div>
             <div>
-              <p className="text-gray-400 text-xs mb-1">Decimales</p>
+              <p className="text-gray-400 text-xs mb-1">{t('token.decimals', 'Decimals')}</p>
               <p className="text-white font-bold text-lg">{XCIRCLEX_DECIMALS}</p>
             </div>
           </div>
@@ -482,12 +484,12 @@ export function TokenTab() {
       {/* Token Info */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
         <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-          <span>ℹ️</span> Informations du Token
+          <span>ℹ️</span> {t('token.info', 'Token Information')}
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <p className="text-gray-400 text-sm mb-1">Proprietaire (Issuer)</p>
+            <p className="text-gray-400 text-sm mb-1">{t('token.owner', 'Owner (Issuer)')}</p>
             <p className="text-white font-mono text-xs break-all">{tokenInfo?.owner}</p>
             {tokenInfo?.owner && (
               <a
@@ -496,23 +498,23 @@ export function TokenTab() {
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:text-blue-300 text-xs mt-2 inline-flex items-center gap-1"
               >
-                Voir sur Explorer &#8599;
+                {t('token.viewExplorer', 'View on Explorer')} &#8599;
               </a>
             )}
           </div>
 
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <p className="text-gray-400 text-sm mb-1">Decimales</p>
+            <p className="text-gray-400 text-sm mb-1">{t('token.decimals', 'Decimals')}</p>
             <p className="text-2xl font-bold text-white">{tokenInfo?.decimals || XCIRCLEX_DECIMALS}</p>
           </div>
 
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <p className="text-gray-400 text-sm mb-1">Ticker</p>
+            <p className="text-gray-400 text-sm mb-1">{t('token.ticker', 'Ticker')}</p>
             <p className="text-2xl font-bold text-white">{tokenInfo?.ticker || 'XCIRCLEX'}</p>
           </div>
 
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <p className="text-gray-400 text-sm mb-1">Reseau</p>
+            <p className="text-gray-400 text-sm mb-1">{t('token.network', 'Network')}</p>
             <p className="text-2xl font-bold text-white">MultiversX Devnet</p>
           </div>
         </div>
@@ -521,31 +523,31 @@ export function TokenTab() {
       {/* Token Utility */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
         <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-          <span>⚡</span> Utilite du Token
+          <span>⚡</span> {t('token.utility', 'Token Utility')}
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4">
             <div className="text-3xl mb-2">🌀</div>
-            <h3 className="text-white font-semibold mb-2">Recompenses de Cycle</h3>
+            <h3 className="text-white font-semibold mb-2">{t('token.cycleRewards', 'Cycle Rewards')}</h3>
             <p className="text-gray-400 text-sm">
-              Gagnez des XCIRCLEX en participant aux cycles quotidiens du Cercle de Vie.
+              {t('token.cycleRewardsDesc', 'Earn XCIRCLEX by participating in the daily cycles of the Circle of Life.')}
             </p>
           </div>
 
           <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
             <div className="text-3xl mb-2">📈</div>
-            <h3 className="text-white font-semibold mb-2">Staking</h3>
+            <h3 className="text-white font-semibold mb-2">{t('header.staking', 'Staking')}</h3>
             <p className="text-gray-400 text-sm">
-              Stakez vos tokens pour gagner jusqu'a 42% APY avec 12 niveaux de verrouillage.
+              {t('token.stakingDesc', 'Stake your tokens to earn up to 42% APY with 12 lock levels.')}
             </p>
           </div>
 
           <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
             <div className="text-3xl mb-2">🏛️</div>
-            <h3 className="text-white font-semibold mb-2">Gouvernance DAO</h3>
+            <h3 className="text-white font-semibold mb-2">{t('dao.title', 'DAO Governance')}</h3>
             <p className="text-gray-400 text-sm">
-              Votez sur les propositions et participez a la gouvernance du protocole.
+              {t('token.daoDesc', 'Vote on proposals and participate in protocol governance.')}
             </p>
           </div>
         </div>
