@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useGetAccountInfo } from 'lib'
 import { useStaking } from '../../hooks/useStaking'
 import { STAKING_CONTRACT_ADDRESS, STAKING_LEVELS, NFT_CONTRACT_ADDRESS } from '../../config/contracts'
 import { getPendingRewards, getTimeUntilUnlock, getEmergencyPenalty, getNftBonus, getEffectiveApy } from '../../services/stakingService'
 
 export function StakingTab() {
+  const { t } = useTranslation()
   const { address } = useGetAccountInfo()
 
   const {
@@ -129,15 +131,15 @@ export function StakingTab() {
 
   // 1 epoch = 4 hours on devnet (2400 rounds × 6 sec)
   const formatTimeRemaining = (epochs: number): string => {
-    if (epochs <= 0) return 'Debloque!'
+    if (epochs <= 0) return t('stakingTab.unlocked', 'Unlocked!')
     const totalHours = epochs * 4
     if (totalHours < 24) {
       return `${totalHours}h`
     } else {
       const days = Math.floor(totalHours / 24)
       const remainingHours = totalHours % 24
-      if (remainingHours === 0) return `${days} jour${days > 1 ? 's' : ''}`
-      return `${days}j ${remainingHours}h`
+      if (remainingHours === 0) return `${days} ${t('stakingTab.day', 'day')}${days > 1 ? 's' : ''}`
+      return `${days}${t('stakingTab.dayShort', 'd')} ${remainingHours}h`
     }
   }
 
@@ -218,10 +220,10 @@ export function StakingTab() {
           <div>
             <h2 className="text-2xl font-bold text-white flex items-center gap-3">
               <span className="text-3xl">&#128176;</span>
-              Staking XCIRCLEX
+              {t('stakingTab.title', 'Staking XCIRCLEX')}
             </h2>
             <p className="text-gray-300 mt-1">
-              Stake vos tokens et gagnez jusqu'a 42% APY + bonus NFT
+              {t('stakingTab.subtitle', 'Stake your tokens and earn up to 42% APY + NFT bonus')}
             </p>
           </div>
           <button
@@ -229,7 +231,7 @@ export function StakingTab() {
             className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 px-6 rounded-lg transition flex items-center gap-2"
           >
             <span className="text-xl">+</span>
-            Staker
+            {t('stakingTab.stake', 'Stake')}
           </button>
         </div>
       </div>
@@ -245,11 +247,11 @@ export function StakingTab() {
             <div className="flex items-center gap-3">
               <span className="text-3xl">&#127752;</span>
               <div>
-                <h3 className="text-white font-semibold">Bonus NFT Staking</h3>
+                <h3 className="text-white font-semibold">{t('stakingTab.nftBonusTitle', 'NFT Staking Bonus')}</h3>
                 <p className="text-gray-400 text-sm">
                   {nftBonus > 0
-                    ? `Votre NFT vous donne un bonus de +${nftBonusPercent}% sur vos recompenses!`
-                    : "Obtenez un NFT pour booster vos recompenses de staking"
+                    ? t('stakingTab.nftBonusActive', 'Your NFT gives you a +{{percent}}% bonus on your rewards!', { percent: nftBonusPercent })
+                    : t('stakingTab.nftBonusInactive', 'Get an NFT to boost your staking rewards')
                   }
                 </p>
               </div>
@@ -274,32 +276,32 @@ export function StakingTab() {
         <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
           <div className="text-2xl mb-2">&#128176;</div>
           <div className="text-xl font-bold text-white">{formatAmount(tokenBalance)}</div>
-          <div className="text-gray-400 text-sm">Votre Balance</div>
+          <div className="text-gray-400 text-sm">{t('stakingTab.yourBalance', 'Your Balance')}</div>
         </div>
         <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
           <div className="text-2xl mb-2">&#128200;</div>
           <div className="text-xl font-bold text-white">{formatAmount(stats?.totalStaked || '0')}</div>
-          <div className="text-gray-400 text-sm">Total Stake</div>
+          <div className="text-gray-400 text-sm">{t('stakingTab.totalStaked', 'Total Staked')}</div>
         </div>
         <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
           <div className="text-2xl mb-2">&#127873;</div>
           <div className="text-xl font-bold text-white">{formatAmount(stats?.rewardsPool || '0')}</div>
-          <div className="text-gray-400 text-sm">Pool Recompenses</div>
+          <div className="text-gray-400 text-sm">{t('stakingTab.rewardsPool', 'Rewards Pool')}</div>
         </div>
         <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
           <div className="text-2xl mb-2">&#128293;</div>
           <div className="text-xl font-bold text-white">{positions.length}</div>
-          <div className="text-gray-400 text-sm">Vos Positions</div>
+          <div className="text-gray-400 text-sm">{t('stakingTab.yourPositions', 'Your Positions')}</div>
         </div>
       </div>
 
       {/* Staking Levels */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/10">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-white">Niveaux de Staking</h3>
+          <h3 className="text-lg font-bold text-white">{t('stakingTab.stakingLevels', 'Staking Levels')}</h3>
           {nftBonus > 0 && (
             <div className="text-xs bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full border border-purple-500/30">
-              Bonus NFT: +{nftBonusPercent}% sur les recompenses
+              {t('stakingTab.nftBonusOnRewards', 'NFT Bonus: +{{percent}}% on rewards', { percent: nftBonusPercent })}
             </div>
           )}
         </div>
@@ -377,22 +379,22 @@ export function StakingTab() {
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/10">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h3 className="text-lg font-bold text-white">Vos Positions</h3>
-            <p className="text-gray-400 text-xs">Epoch actuel: {currentEpoch} (1 epoch = 4h)</p>
+            <h3 className="text-lg font-bold text-white">{t('stakingTab.yourPositions', 'Your Positions')}</h3>
+            <p className="text-gray-400 text-xs">{t('stakingTab.currentEpoch', 'Current epoch')}: {currentEpoch} (1 epoch = 4h)</p>
           </div>
           <button
             onClick={refreshData}
             disabled={isLoading}
             className="text-blue-400 hover:text-blue-300 text-sm transition disabled:opacity-50"
           >
-            {isLoading ? 'Chargement...' : 'Rafraichir'}
+            {isLoading ? t('common.loading', 'Loading...') : t('stakingTab.refresh', 'Refresh')}
           </button>
         </div>
 
         {isLoading && positions.length === 0 ? (
           <div className="text-center py-8">
             <div className="animate-spin text-3xl mb-4">&#8987;</div>
-            <p className="text-gray-300">Chargement des positions...</p>
+            <p className="text-gray-300">{t('stakingTab.loadingPositions', 'Loading positions...')}</p>
           </div>
         ) : positions.length > 0 ? (
           <div className="space-y-3">
@@ -429,11 +431,11 @@ export function StakingTab() {
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                         <div>
-                          <p className="text-gray-500 text-xs">Montant</p>
+                          <p className="text-gray-500 text-xs">{t('stakingTab.amount', 'Amount')}</p>
                           <p className="text-white font-semibold">{formatAmount(position.amount)}</p>
                         </div>
                         <div>
-                          <p className="text-gray-500 text-xs">APY Effectif</p>
+                          <p className="text-gray-500 text-xs">{t('stakingTab.effectiveApy', 'Effective APY')}</p>
                           {nftBonus > 0 ? (
                             <div>
                               <p className="text-green-400 font-semibold">
@@ -448,13 +450,13 @@ export function StakingTab() {
                           )}
                         </div>
                         <div>
-                          <p className="text-gray-500 text-xs">Temps restant</p>
+                          <p className="text-gray-500 text-xs">{t('stakingTab.timeRemaining', 'Time remaining')}</p>
                           <p className={`font-semibold ${isUnlocked ? 'text-green-400' : 'text-white'}`}>
-                            {isUnlocked ? 'Debloque!' : formatTimeRemaining(timeRemaining)}
+                            {isUnlocked ? t('stakingTab.unlocked', 'Unlocked!') : formatTimeRemaining(timeRemaining)}
                           </p>
                         </div>
                         <div>
-                          <p className="text-gray-500 text-xs">Recompenses {nftBonus > 0 ? '(+bonus)' : ''}</p>
+                          <p className="text-gray-500 text-xs">{t('stakingTab.rewards', 'Rewards')} {nftBonus > 0 ? '(+bonus)' : ''}</p>
                           <p className="text-yellow-400 font-semibold">
                             {formatAmount(positionRewards[position.positionId] || position.accumulatedRewards)}
                           </p>
@@ -463,19 +465,19 @@ export function StakingTab() {
                       {/* Epoch information */}
                       <div className="flex flex-wrap gap-4 mt-2 pt-2 border-t border-white/5 text-xs">
                         <div>
-                          <span className="text-gray-500">Debut:</span>
+                          <span className="text-gray-500">{t('stakingTab.start', 'Start')}:</span>
                           <span className="text-white ml-1">Epoch {position.startEpoch}</span>
                         </div>
                         <div>
-                          <span className="text-gray-500">Fin:</span>
+                          <span className="text-gray-500">{t('stakingTab.end', 'End')}:</span>
                           <span className="text-blue-400 ml-1">Epoch {position.endEpoch}</span>
                         </div>
                         <div>
-                          <span className="text-gray-500">Duree:</span>
+                          <span className="text-gray-500">{t('stakingTab.duration', 'Duration')}:</span>
                           <span className="text-white ml-1">{formatTimeRemaining(position.endEpoch - position.startEpoch)}</span>
                         </div>
                         <div>
-                          <span className="text-gray-500">Recompenses prevues:</span>
+                          <span className="text-gray-500">{t('stakingTab.expectedRewards', 'Expected rewards')}:</span>
                           <span className="text-green-400 ml-1">
                             ~{formatAmount(calculateExpectedRewards(
                               position.amount,
@@ -488,7 +490,7 @@ export function StakingTab() {
                       {/* Info about rewards after unlock */}
                       {isUnlocked && (
                         <div className="mt-2 text-xs text-green-400/70 italic">
-                          Les recompenses continuent a s'accumuler apres le deblocage
+                          {t('stakingTab.rewardsAccumulateAfterUnlock', 'Rewards continue to accumulate after unlock')}
                         </div>
                       )}
                     </div>
@@ -498,7 +500,7 @@ export function StakingTab() {
                         disabled={actionLoading === `claim-${position.positionId}`}
                         className="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50 text-sm"
                       >
-                        {actionLoading === `claim-${position.positionId}` ? 'Reclamation...' : 'Reclamer'}
+                        {actionLoading === `claim-${position.positionId}` ? t('stakingTab.claiming', 'Claiming...') : t('stakingTab.claim', 'Claim')}
                       </button>
 
                       {isUnlocked ? (
@@ -507,18 +509,18 @@ export function StakingTab() {
                           disabled={actionLoading === `unstake-${position.positionId}`}
                           className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50 text-sm"
                         >
-                          {actionLoading === `unstake-${position.positionId}` ? 'Unstaking...' : 'Unstake'}
+                          {actionLoading === `unstake-${position.positionId}` ? t('stakingTab.unstaking', 'Unstaking...') : t('stakingTab.unstake', 'Unstake')}
                         </button>
                       ) : (
                         <button
                           onClick={() => handleEmergencyUnstake(position.positionId)}
                           disabled={actionLoading === `emergency-${position.positionId}`}
                           className="bg-red-600/50 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50 text-xs"
-                          title={`Retrait anticipe avec ${penaltyPercent}% de penalite`}
+                          title={t('stakingTab.emergencyPenaltyTitle', 'Early withdrawal with {{percent}}% penalty', { percent: penaltyPercent })}
                         >
                           {actionLoading === `emergency-${position.positionId}`
-                            ? 'Processing...'
-                            : `Urgence (-${penaltyPercent}%)`}
+                            ? t('stakingTab.processing', 'Processing...')
+                            : t('stakingTab.emergency', 'Emergency (-{{percent}}%)', { percent: penaltyPercent })}
                         </button>
                       )}
                     </div>
@@ -530,12 +532,12 @@ export function StakingTab() {
         ) : (
           <div className="text-center py-8">
             <div className="text-4xl mb-4">&#128176;</div>
-            <p className="text-gray-300 mb-4">Aucune position de staking</p>
+            <p className="text-gray-300 mb-4">{t('stakingTab.noPositions', 'No staking positions')}</p>
             <button
               onClick={() => setShowStakeModal(true)}
               className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-2 px-6 rounded-lg transition"
             >
-              Commencer a Staker
+              {t('stakingTab.startStaking', 'Start Staking')}
             </button>
           </div>
         )}
@@ -545,7 +547,7 @@ export function StakingTab() {
       <div className="bg-white/5 rounded-xl p-4 border border-white/10">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
           <div>
-            <p className="text-gray-400 text-xs">Contrat Staking</p>
+            <p className="text-gray-400 text-xs">{t('stakingTab.stakingContract', 'Staking Contract')}</p>
             <p className="text-white font-mono text-xs break-all">{STAKING_CONTRACT_ADDRESS}</p>
           </div>
           <a
@@ -554,7 +556,7 @@ export function StakingTab() {
             rel="noopener noreferrer"
             className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 transition"
           >
-            Explorer &#8599;
+            {t('stakingTab.explorer', 'Explorer')} &#8599;
           </a>
         </div>
       </div>
@@ -564,7 +566,7 @@ export function StakingTab() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-gradient-to-br from-blue-900 to-purple-900 rounded-2xl p-6 max-w-md w-full border border-white/20">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-white">Staker XCIRCLEX</h3>
+              <h3 className="text-xl font-bold text-white">{t('stakingTab.stakeXcirclex', 'Stake XCIRCLEX')}</h3>
               <button
                 onClick={() => setShowStakeModal(false)}
                 className="text-gray-400 hover:text-white text-2xl"
@@ -574,7 +576,7 @@ export function StakingTab() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-gray-300 text-sm mb-2">Montant</label>
+              <label className="block text-gray-300 text-sm mb-2">{t('stakingTab.amount', 'Amount')}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -591,12 +593,12 @@ export function StakingTab() {
                 </button>
               </div>
               <p className="text-gray-400 text-sm mt-1">
-                Disponible: {formatAmount(tokenBalance)} XCIRCLEX
+                {t('stakingTab.available', 'Available')}: {formatAmount(tokenBalance)} XCIRCLEX
               </p>
             </div>
 
             <div className="mb-4">
-              <label className="block text-gray-300 text-sm mb-2">Periode de Lock</label>
+              <label className="block text-gray-300 text-sm mb-2">{t('stakingTab.lockPeriod', 'Lock Period')}</label>
               <select
                 value={selectedLevel}
                 onChange={(e) => setSelectedLevel(parseInt(e.target.value))}
@@ -612,21 +614,21 @@ export function StakingTab() {
 
             <div className="bg-white/5 rounded-lg p-4 mb-4">
               <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-400">Duree</span>
-                <span className="text-white">{getLevelInfo(selectedLevel).days} jours</span>
+                <span className="text-gray-400">{t('stakingTab.duration', 'Duration')}</span>
+                <span className="text-white">{getLevelInfo(selectedLevel).days} {t('stakingTab.days', 'days')}</span>
               </div>
               <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-400">APY de base</span>
+                <span className="text-gray-400">{t('stakingTab.baseApy', 'Base APY')}</span>
                 <span className="text-white">{getLevelInfo(selectedLevel).apy}%</span>
               </div>
               {nftBonus > 0 && (
                 <>
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="text-gray-400">Bonus NFT sur recompenses</span>
+                    <span className="text-gray-400">{t('stakingTab.nftBonusOnRewardsLabel', 'NFT Bonus on rewards')}</span>
                     <span className="text-purple-400 font-semibold">+{nftBonusPercent}%</span>
                   </div>
                   <div className="flex justify-between text-sm mb-2 bg-green-500/10 -mx-4 px-4 py-2 border-y border-green-500/20">
-                    <span className="text-green-300 font-semibold">APY Effectif Total</span>
+                    <span className="text-green-300 font-semibold">{t('stakingTab.totalEffectiveApy', 'Total Effective APY')}</span>
                     <span className="text-green-400 font-bold">
                       {formatApy(calculateEffectiveApy(getLevelInfo(selectedLevel).apy))}%
                     </span>
@@ -634,7 +636,7 @@ export function StakingTab() {
                 </>
               )}
               <div className="flex justify-between text-sm border-t border-white/10 pt-2 mt-2">
-                <span className="text-gray-400">Recompenses journalieres estimees</span>
+                <span className="text-gray-400">{t('stakingTab.estimatedDailyRewards', 'Estimated daily rewards')}</span>
                 <span className="text-yellow-400 font-semibold">
                   {stakeAmount
                     ? (parseFloat(stakeAmount) * calculateEffectiveApy(getLevelInfo(selectedLevel).apy) / 100 / 365).toFixed(4)
@@ -643,7 +645,7 @@ export function StakingTab() {
               </div>
               {nftBonus > 0 && stakeAmount && parseFloat(stakeAmount) > 0 && (
                 <div className="text-xs text-purple-400 text-right mt-1">
-                  Dont +{(parseFloat(stakeAmount) * getLevelInfo(selectedLevel).apy * nftBonus / 10000 / 100 / 365).toFixed(4)} grace au bonus NFT
+                  {t('stakingTab.includingNftBonus', 'Including +{{amount}} thanks to NFT bonus', { amount: (parseFloat(stakeAmount) * getLevelInfo(selectedLevel).apy * nftBonus / 10000 / 100 / 365).toFixed(4) })}
                 </div>
               )}
             </div>
@@ -653,7 +655,7 @@ export function StakingTab() {
               disabled={actionLoading === 'stake' || !stakeAmount || parseFloat(stakeAmount) <= 0}
               className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {actionLoading === 'stake' ? 'Staking...' : 'Staker XCIRCLEX'}
+              {actionLoading === 'stake' ? t('stakingTab.staking', 'Staking...') : t('stakingTab.stakeXcirclex', 'Stake XCIRCLEX')}
             </button>
           </div>
         </div>

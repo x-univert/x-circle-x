@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { NftVisual } from '../NftVisual'
 import { useCircleOfLife } from '../../hooks/useCircleOfLife'
 import { NFT_CONTRACT_ADDRESS, NFT_TOKEN_ID } from '../../config/contracts'
@@ -50,6 +51,7 @@ const LEVEL_REQUIREMENTS = [
 ]
 
 export function NftTab() {
+  const { t } = useTranslation()
   const [previewLevel, setPreviewLevel] = useState(0)
   const [showAllLevels, setShowAllLevels] = useState(false)
   const [showGallery, setShowGallery] = useState(false)
@@ -208,17 +210,17 @@ export function NftTab() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold text-white flex items-center gap-3">
             <span className="text-4xl">&#x1F3A8;</span>
-            NFT Evolutif - Cercle de Reputation
+            {t('nftTab.title', 'Evolving NFT - Reputation Circle')}
           </h2>
           <div className="flex items-center gap-2">
             {!NFT_CONTRACT_ADDRESS && enablePreviewMode && (
               <span className="bg-blue-500/20 border border-blue-500/30 text-blue-300 px-3 py-1 rounded-lg text-sm">
-                Mode Preview
+                {t('nftTab.previewMode', 'Preview Mode')}
               </span>
             )}
             {!NFT_CONTRACT_ADDRESS && !enablePreviewMode && (
               <span className="bg-orange-500/20 border border-orange-500/30 text-orange-300 px-3 py-1 rounded-lg text-sm">
-                Bientot disponible
+                {t('nftTab.comingSoon', 'Coming Soon')}
               </span>
             )}
             <button
@@ -228,34 +230,34 @@ export function NftTab() {
                   ? 'bg-blue-500/30 text-blue-300 hover:bg-blue-500/40'
                   : 'bg-gray-500/30 text-gray-400 hover:bg-gray-500/40'
               }`}
-              title="Activer/Desactiver le mode preview"
+              title={t('nftTab.togglePreview', 'Toggle preview mode')}
             >
-              {enablePreviewMode ? 'Preview ON' : 'Preview OFF'}
+              {enablePreviewMode ? t('nftTab.previewOn', 'Preview ON') : t('nftTab.previewOff', 'Preview OFF')}
             </button>
           </div>
         </div>
         <p className="text-gray-300 mb-4">
-          Votre NFT evolue avec votre participation au Cercle de Vie. Plus vous completez de cycles, plus votre NFT gagne en niveau et en rarete!
+          {t('nftTab.description', 'Your NFT evolves with your participation in the Circle of Life. The more cycles you complete, the higher your NFT level and rarity!')}
         </p>
 
         {/* Collection Info */}
         {NFT_CONTRACT_ADDRESS && (
           <div className="flex flex-wrap gap-4 text-sm">
             <div className="bg-black/20 rounded-lg px-4 py-2">
-              <span className="text-gray-400">Collection:</span>
+              <span className="text-gray-400">{t('nftTab.collection', 'Collection')}:</span>
               <span className="ml-2 text-white font-mono">{NFT_TOKEN_ID || 'N/A'}</span>
             </div>
             <div className="bg-black/20 rounded-lg px-4 py-2">
-              <span className="text-gray-400">Total mint:</span>
+              <span className="text-gray-400">{t('nftTab.totalMinted', 'Total minted')}:</span>
               <span className="ml-2 text-white font-bold">{collectionStats.totalMinted}</span>
             </div>
             <div className="bg-black/20 rounded-lg px-4 py-2">
-              <span className="text-gray-400">Holders:</span>
+              <span className="text-gray-400">{t('nftTab.holders', 'Holders')}:</span>
               <span className="ml-2 text-white font-bold">{collectionStats.holders}</span>
             </div>
             {hasNft && nftNonce > 0 && (
               <div className="bg-green-500/20 border border-green-500/30 rounded-lg px-4 py-2">
-                <span className="text-green-300">Votre NFT #</span>
+                <span className="text-green-300">{t('nftTab.yourNft', 'Your NFT')} #</span>
                 <span className="ml-1 text-white font-bold">{nftNonce}</span>
               </div>
             )}
@@ -266,7 +268,7 @@ export function NftTab() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Preview Section */}
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
-          <h3 className="text-lg font-bold text-white mb-4">Preview du NFT</h3>
+          <h3 className="text-lg font-bold text-white mb-4">{t('nftTab.nftPreview', 'NFT Preview')}</h3>
 
           {/* NFT Visual */}
           <div className="flex justify-center mb-6">
@@ -280,7 +282,7 @@ export function NftTab() {
 
           {/* Level selector */}
           <div className="mb-4">
-            <label className="text-gray-400 text-sm mb-2 block">Previsualiser un niveau:</label>
+            <label className="text-gray-400 text-sm mb-2 block">{t('nftTab.previewLevel', 'Preview a level')}:</label>
             <div className="flex flex-wrap gap-2">
               {DEMO_LEVELS.map((demo) => (
                 <button
@@ -292,7 +294,7 @@ export function NftTab() {
                       : 'bg-white/10 text-gray-300 hover:bg-white/20'
                   }`}
                 >
-                  Niv.{demo.level}
+                  {t('nftTab.lvl', 'Lvl')}.{demo.level}
                 </button>
               ))}
             </div>
@@ -301,19 +303,19 @@ export function NftTab() {
           {/* Current preview info */}
           <div className="bg-black/20 rounded-lg p-4 space-y-2">
             <div className="flex justify-between">
-              <span className="text-gray-400">Niveau</span>
+              <span className="text-gray-400">{t('nftTab.level', 'Level')}</span>
               <span className="text-white font-bold">{currentDemo.level}/12</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Rarete</span>
+              <span className="text-gray-400">{t('nftTab.rarity', 'Rarity')}</span>
               <span className="text-purple-400 font-semibold">{currentDemo.name}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Cycles requis</span>
+              <span className="text-gray-400">{t('nftTab.cyclesRequired', 'Cycles required')}</span>
               <span className="text-white">{currentDemo.cycles}+</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Bonus Staking</span>
+              <span className="text-gray-400">{t('nftTab.stakingBonus', 'Staking Bonus')}</span>
               <span className="text-green-400 font-bold">
                 {LEVEL_REQUIREMENTS.find(l => l.level === currentDemo.level)?.bonus}
               </span>
@@ -323,41 +325,41 @@ export function NftTab() {
 
         {/* User NFT Section */}
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
-          <h3 className="text-lg font-bold text-white mb-4">Mon NFT</h3>
+          <h3 className="text-lg font-bold text-white mb-4">{t('nftTab.myNft', 'My NFT')}</h3>
 
           {isLoading ? (
             <div className="text-center py-8">
               <div className="text-4xl mb-4 animate-spin">&#x23F3;</div>
-              <p className="text-gray-400">Chargement de vos donnees...</p>
+              <p className="text-gray-400">{t('nftTab.loadingData', 'Loading your data...')}</p>
             </div>
           ) : !isMember ? (
             <div className="text-center py-8">
               <div className="text-6xl mb-4 opacity-50">&#x1F510;</div>
-              <h4 className="text-xl text-white mb-2">Rejoignez le Cercle</h4>
+              <h4 className="text-xl text-white mb-2">{t('nftTab.joinCircle', 'Join the Circle')}</h4>
               <p className="text-gray-400 mb-4">
-                Vous devez etre membre du Cercle de Vie pour accumuler des cycles et obtenir un NFT evolutif.
+                {t('nftTab.joinCircleDesc', 'You must be a member of the Circle of Life to accumulate cycles and get an evolving NFT.')}
               </p>
               <p className="text-purple-400 text-sm">
-                Rendez-vous dans l'onglet "Cercle de Vie" pour rejoindre!
+                {t('nftTab.goToCircleTab', 'Go to the "Circle of Life" tab to join!')}
               </p>
             </div>
           ) : !nftContractDeployed ? (
             <div className="text-center py-8">
               <div className="text-6xl mb-4 opacity-50">&#x1F3AD;</div>
-              <h4 className="text-xl text-white mb-2">NFT bientot disponible</h4>
+              <h4 className="text-xl text-white mb-2">{t('nftTab.nftComingSoon', 'NFT Coming Soon')}</h4>
               <p className="text-gray-400 mb-4">
-                Le contrat NFT sera deploye prochainement. Continuez a participer aux cycles pour accumuler des points!
+                {t('nftTab.nftComingSoonDesc', 'The NFT contract will be deployed soon. Keep participating in cycles to accumulate points!')}
               </p>
               <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-4">
-                <div className="text-blue-300 font-semibold mb-1">Vos cycles completes</div>
+                <div className="text-blue-300 font-semibold mb-1">{t('nftTab.yourCyclesCompleted', 'Your cycles completed')}</div>
                 <div className="text-3xl text-white font-bold">{userCycles}</div>
                 <div className="text-blue-300 text-sm mt-1">
-                  Niveau prevu: {userLevel} ({LEVEL_REQUIREMENTS[userLevel]?.rarity})
+                  {t('nftTab.expectedLevel', 'Expected level')}: {userLevel} ({LEVEL_REQUIREMENTS[userLevel]?.rarity})
                 </div>
               </div>
               {/* Preview du NFT de l'utilisateur */}
               <div className="mt-6">
-                <p className="text-gray-400 text-sm mb-3">Apercu de votre futur NFT:</p>
+                <p className="text-gray-400 text-sm mb-3">{t('nftTab.previewFutureNft', 'Preview of your future NFT')}:</p>
                 <div className="flex justify-center">
                   <NftVisual level={userLevel} cycles={userCycles} size={200} animated={true} />
                 </div>
@@ -372,11 +374,11 @@ export function NftTab() {
               <div className="bg-black/20 rounded-lg p-4 mb-4">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-400">Niveau</span>
+                    <span className="text-gray-400">{t('nftTab.level', 'Level')}</span>
                     <p className="text-white font-bold text-xl">{userLevel}/12</p>
                   </div>
                   <div>
-                    <span className="text-gray-400">Cycles</span>
+                    <span className="text-gray-400">{t('nftTab.cycles', 'Cycles')}</span>
                     <p className="text-white font-bold text-xl">{userCycles}</p>
                   </div>
                 </div>
@@ -389,10 +391,10 @@ export function NftTab() {
                     isUpdatingNft ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
-                  {isUpdatingNft ? 'Mise a jour en cours...' : 'Mettre a jour le NFT'}
+                  {isUpdatingNft ? t('nftTab.updating', 'Updating...') : t('nftTab.updateNft', 'Update NFT')}
                 </button>
                 <p className="text-gray-500 text-xs">
-                  Mettez a jour votre NFT pour synchroniser vos cycles et evoluer de niveau
+                  {t('nftTab.updateNftDesc', 'Update your NFT to sync your cycles and evolve level')}
                 </p>
               </div>
 
@@ -404,12 +406,12 @@ export function NftTab() {
                 <NftVisual level={userLevel} cycles={userCycles} size={220} animated={true} />
               </div>
               <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-4 mb-4">
-                <div className="text-blue-300 font-semibold mb-1">Votre futur NFT</div>
+                <div className="text-blue-300 font-semibold mb-1">{t('nftTab.yourFutureNft', 'Your future NFT')}</div>
                 <div className="text-white">
-                  Niveau <span className="font-bold text-xl">{userLevel}</span> • {userCycles} cycles
+                  {t('nftTab.level', 'Level')} <span className="font-bold text-xl">{userLevel}</span> • {userCycles} {t('nftTab.cycles', 'cycles')}
                 </div>
                 <div className="text-blue-300 text-sm mt-1">
-                  Rarete: {LEVEL_REQUIREMENTS[userLevel]?.rarity}
+                  {t('nftTab.rarity', 'Rarity')}: {LEVEL_REQUIREMENTS[userLevel]?.rarity}
                 </div>
               </div>
               <button
@@ -419,10 +421,10 @@ export function NftTab() {
                   isClaimingNft ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
-                {isClaimingNft ? 'Mint en cours...' : 'Reclamer mon NFT'}
+                {isClaimingNft ? t('nftTab.minting', 'Minting...') : t('nftTab.claimNft', 'Claim my NFT')}
               </button>
               <p className="text-gray-500 text-xs mt-2">
-                Gratuit - seulement les frais de gas (~0.005 EGLD)
+                {t('nftTab.freeGasOnly', 'Free - only gas fees (~0.005 EGLD)')}
               </p>
             </div>
           )}
@@ -432,12 +434,12 @@ export function NftTab() {
       {/* Level Requirements Table */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-white">Tableau des Niveaux</h3>
+          <h3 className="text-lg font-bold text-white">{t('nftTab.levelTable', 'Level Table')}</h3>
           <button
             onClick={() => setShowAllLevels(!showAllLevels)}
             className="text-purple-400 hover:text-purple-300 text-sm"
           >
-            {showAllLevels ? 'Reduire' : 'Voir tout'}
+            {showAllLevels ? t('nftTab.collapse', 'Collapse') : t('nftTab.seeAll', 'See all')}
           </button>
         </div>
 
@@ -445,10 +447,10 @@ export function NftTab() {
           <table className="w-full">
             <thead>
               <tr className="text-gray-400 text-sm border-b border-white/10">
-                <th className="text-left py-2 px-2">Niveau</th>
-                <th className="text-left py-2 px-2">Cycles</th>
-                <th className="text-left py-2 px-2">Rarete</th>
-                <th className="text-right py-2 px-2">Bonus Staking</th>
+                <th className="text-left py-2 px-2">{t('nftTab.level', 'Level')}</th>
+                <th className="text-left py-2 px-2">{t('nftTab.cycles', 'Cycles')}</th>
+                <th className="text-left py-2 px-2">{t('nftTab.rarity', 'Rarity')}</th>
+                <th className="text-right py-2 px-2">{t('nftTab.stakingBonus', 'Staking Bonus')}</th>
               </tr>
             </thead>
             <tbody>

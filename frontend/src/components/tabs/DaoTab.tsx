@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useGetIsLoggedIn, useGetAccountInfo } from 'lib';
 import {
   getDaoStats,
@@ -35,6 +36,7 @@ interface ProposalDisplay {
 }
 
 export function DaoTab() {
+  const { t } = useTranslation();
   const isLoggedIn = useGetIsLoggedIn();
   const { address } = useGetAccountInfo();
 
@@ -323,7 +325,7 @@ export function DaoTab() {
     return (
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-xl text-center">
         <div className="animate-spin text-4xl mb-4">&#x1F300;</div>
-        <p className="text-gray-300">Chargement du DAO...</p>
+        <p className="text-gray-300">{t('daoTab.loading', 'Loading DAO...')}</p>
       </div>
     );
   }
@@ -345,7 +347,7 @@ export function DaoTab() {
           <div className="flex items-center gap-3 mb-2">
             <span className="text-3xl">&#x1F3E6;</span>
             <div>
-              <p className="text-gray-400 text-sm">Tresorerie</p>
+              <p className="text-gray-400 text-sm">{t('daoTab.treasury', 'Treasury')}</p>
               <p className="text-2xl font-bold text-white">{formatNumber(daoStats?.treasuryBalance || '0')}</p>
             </div>
           </div>
@@ -357,11 +359,11 @@ export function DaoTab() {
           <div className="flex items-center gap-3 mb-2">
             <span className="text-3xl">&#x1F4DC;</span>
             <div>
-              <p className="text-gray-400 text-sm">Propositions</p>
+              <p className="text-gray-400 text-sm">{t('daoTab.proposals', 'Proposals')}</p>
               <p className="text-2xl font-bold text-white">{daoStats?.proposalCount || 0}</p>
             </div>
           </div>
-          <p className="text-blue-300 text-sm">{activeProposalIds.length} actives</p>
+          <p className="text-blue-300 text-sm">{t('daoTab.activeCount', '{{count}} active', { count: activeProposalIds.length })}</p>
         </div>
 
         {/* Voting Power */}
@@ -369,13 +371,13 @@ export function DaoTab() {
           <div className="flex items-center gap-3 mb-2">
             <span className="text-3xl">&#x1F5F3;</span>
             <div>
-              <p className="text-gray-400 text-sm">Pouvoir de Vote</p>
+              <p className="text-gray-400 text-sm">{t('daoTab.votingPower', 'Voting Power')}</p>
               <p className="text-2xl font-bold text-white">{formatNumber(votingPower)}</p>
             </div>
           </div>
           <div className="text-green-300 text-xs space-y-1">
-            <p>Wallet: {formatNumber(userBalance)}</p>
-            <p>Stake: {formatNumber(stakedBalance)}</p>
+            <p>{t('daoTab.wallet', 'Wallet')}: {formatNumber(userBalance)}</p>
+            <p>{t('daoTab.stake', 'Stake')}: {formatNumber(stakedBalance)}</p>
           </div>
         </div>
 
@@ -388,12 +390,12 @@ export function DaoTab() {
               <span className="text-3xl">&#x1F4B0;</span>
             )}
             <div>
-              <p className="text-gray-400 text-sm">{isUserCouncilMember ? 'Membre du Conseil' : 'Votre Solde'}</p>
-              <p className="text-2xl font-bold text-white">{isUserCouncilMember ? 'Actif' : formatNumber(userBalance)}</p>
+              <p className="text-gray-400 text-sm">{isUserCouncilMember ? t('daoTab.councilMember', 'Council Member') : t('daoTab.yourBalance', 'Your Balance')}</p>
+              <p className="text-2xl font-bold text-white">{isUserCouncilMember ? t('daoTab.active', 'Active') : formatNumber(userBalance)}</p>
             </div>
           </div>
           {isUserCouncilMember ? (
-            <p className="text-yellow-300 text-sm">Privileges speciaux actifs</p>
+            <p className="text-yellow-300 text-sm">{t('daoTab.specialPrivilegesActive', 'Special privileges active')}</p>
           ) : (
             <p className="text-amber-300 text-sm">XCIRCLEX</p>
           )}
@@ -406,9 +408,9 @@ export function DaoTab() {
           <div className="flex items-center gap-3">
             <span className="text-2xl">&#x1F451;</span>
             <div>
-              <p className="text-yellow-300 font-semibold">Vous etes membre du Conseil</p>
+              <p className="text-yellow-300 font-semibold">{t('daoTab.youAreCouncilMember', 'You are a Council Member')}</p>
               <p className="text-gray-400 text-sm">
-                Privileges: Creer des propositions sans seuil | Veto | Execution d'urgence
+                {t('daoTab.councilPrivileges', 'Privileges: Create proposals without threshold | Veto | Emergency execution')}
               </p>
             </div>
           </div>
@@ -421,7 +423,7 @@ export function DaoTab() {
         <div className="space-y-6">
           {/* Actions */}
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
-            <h3 className="text-xl font-bold text-white mb-4">Actions</h3>
+            <h3 className="text-xl font-bold text-white mb-4">{t('daoTab.actions', 'Actions')}</h3>
 
             <div className="space-y-3">
               {isLoggedIn ? (
@@ -430,14 +432,14 @@ export function DaoTab() {
                     onClick={() => setShowDepositModal(true)}
                     className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 px-4 rounded-lg transition"
                   >
-                    &#x1F4B8; Deposer dans la Tresorerie
+                    &#x1F4B8; {t('daoTab.depositToTreasury', 'Deposit to Treasury')}
                   </button>
 
                   <button
                     onClick={() => setShowProposalModal(true)}
                     className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold py-3 px-4 rounded-lg transition"
                   >
-                    &#x1F4DD; Creer une Proposition
+                    &#x1F4DD; {t('daoTab.createProposal', 'Create Proposal')}
                   </button>
 
                   <button
@@ -445,12 +447,12 @@ export function DaoTab() {
                     disabled={isLoading}
                     className="w-full bg-gray-600 hover:bg-gray-700 disabled:opacity-50 text-white font-semibold py-2 px-4 rounded-lg transition text-sm"
                   >
-                    {isLoading ? 'Chargement...' : 'Actualiser'}
+                    {isLoading ? t('daoTab.loadingBtn', 'Loading...') : t('daoTab.refresh', 'Refresh')}
                   </button>
                 </>
               ) : (
                 <div className="text-center py-4">
-                  <p className="text-gray-400">Connectez-vous pour participer au DAO</p>
+                  <p className="text-gray-400">{t('daoTab.connectToParticipate', 'Connect to participate in the DAO')}</p>
                 </div>
               )}
             </div>
@@ -458,54 +460,54 @@ export function DaoTab() {
 
           {/* How to Join */}
           <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-2xl p-6">
-            <h3 className="text-lg font-bold text-white mb-3">Comment participer ?</h3>
+            <h3 className="text-lg font-bold text-white mb-3">{t('daoTab.howToParticipate', 'How to participate?')}</h3>
             <ul className="text-gray-300 text-sm space-y-2">
               <li className="flex items-start gap-2">
                 <span className="text-green-400">&#x2713;</span>
-                <span><strong>Voter:</strong> Detenez des XCIRCLEX (1 token = 1 vote)</span>
+                <span><strong>{t('daoTab.vote', 'Vote')}:</strong> {t('daoTab.voteDesc', 'Hold XCIRCLEX (1 token = 1 vote)')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-green-400">&#x2713;</span>
-                <span><strong>Proposer:</strong> Minimum 100K XCIRCLEX requis</span>
+                <span><strong>{t('daoTab.propose', 'Propose')}:</strong> {t('daoTab.proposeDesc', 'Minimum 100K XCIRCLEX required')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-green-400">&#x2713;</span>
-                <span><strong>Staking:</strong> Les tokens stakes comptent aussi pour le vote !</span>
+                <span><strong>{t('daoTab.staking', 'Staking')}:</strong> {t('daoTab.stakingDesc', 'Staked tokens also count for voting!')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-400">&#x2139;</span>
-                <span>Pouvoir de vote = Wallet + Tokens stakes</span>
+                <span>{t('daoTab.votingPowerFormula', 'Voting power = Wallet + Staked tokens')}</span>
               </li>
             </ul>
           </div>
 
           {/* DAO Parameters */}
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
-            <h3 className="text-xl font-bold text-white mb-4">Parametres du DAO</h3>
+            <h3 className="text-xl font-bold text-white mb-4">{t('daoTab.daoParameters', 'DAO Parameters')}</h3>
 
             <div className="space-y-3">
               <div className="flex justify-between items-center py-2 border-b border-white/10">
-                <span className="text-gray-400">Seuil de proposition</span>
+                <span className="text-gray-400">{t('daoTab.proposalThreshold', 'Proposal threshold')}</span>
                 <span className="text-white font-semibold">{formatNumber(daoStats?.minProposalThreshold || '0')} XCIRCLEX</span>
               </div>
 
               <div className="flex justify-between items-center py-2 border-b border-white/10">
-                <span className="text-gray-400">Periode de vote</span>
-                <span className="text-white font-semibold">{Math.round((daoStats?.votingPeriod || 0) / 86400)} jours</span>
+                <span className="text-gray-400">{t('daoTab.votingPeriod', 'Voting period')}</span>
+                <span className="text-white font-semibold">{Math.round((daoStats?.votingPeriod || 0) / 86400)} {t('daoTab.days', 'days')}</span>
               </div>
 
               <div className="flex justify-between items-center py-2 border-b border-white/10">
-                <span className="text-gray-400">Periode de timelock</span>
-                <span className="text-white font-semibold">{Math.round((daoStats?.timelockPeriod || 0) / 86400)} jours</span>
+                <span className="text-gray-400">{t('daoTab.timelockPeriod', 'Timelock period')}</span>
+                <span className="text-white font-semibold">{Math.round((daoStats?.timelockPeriod || 0) / 86400)} {t('daoTab.days', 'days')}</span>
               </div>
 
               <div className="flex justify-between items-center py-2 border-b border-white/10">
-                <span className="text-gray-400">Quorum requis</span>
+                <span className="text-gray-400">{t('daoTab.requiredQuorum', 'Required quorum')}</span>
                 <span className="text-white font-semibold">{(daoStats?.quorumPercentage || 0) / 100}%</span>
               </div>
 
               <div className="flex justify-between items-center py-2">
-                <span className="text-gray-400">Seuil de passage</span>
+                <span className="text-gray-400">{t('daoTab.passThreshold', 'Pass threshold')}</span>
                 <span className="text-white font-semibold">{(daoStats?.passThreshold || 0) / 100}%</span>
               </div>
             </div>
@@ -514,11 +516,11 @@ export function DaoTab() {
           {/* Council Members */}
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
             <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <span>&#x1F451;</span> Conseil ({councilMemberCount})
+              <span>&#x1F451;</span> {t('daoTab.council', 'Council')} ({councilMemberCount})
             </h3>
 
             {councilMembers.length === 0 ? (
-              <p className="text-gray-400 text-sm">Aucun membre du conseil</p>
+              <p className="text-gray-400 text-sm">{t('daoTab.noCouncilMembers', 'No council members')}</p>
             ) : (
               <div className="space-y-2">
                 {councilMembers.map((member, index) => (
@@ -526,7 +528,7 @@ export function DaoTab() {
                     <span className="text-yellow-400">&#x2605;</span>
                     <span className="text-white font-mono text-xs">{formatAddress(member)}</span>
                     {member.toLowerCase() === address?.toLowerCase() && (
-                      <span className="bg-yellow-500/20 text-yellow-300 text-xs px-2 py-0.5 rounded">Vous</span>
+                      <span className="bg-yellow-500/20 text-yellow-300 text-xs px-2 py-0.5 rounded">{t('daoTab.you', 'You')}</span>
                     )}
                   </div>
                 ))}
@@ -535,7 +537,7 @@ export function DaoTab() {
 
             <div className="mt-4 pt-4 border-t border-white/10">
               <p className="text-gray-400 text-xs">
-                <span className="text-yellow-400">Privileges:</span> Propositions sans seuil, Veto, Execution d'urgence
+                <span className="text-yellow-400">{t('daoTab.privileges', 'Privileges')}:</span> {t('daoTab.councilPrivilegesShort', 'No threshold proposals, Veto, Emergency execution')}
               </p>
             </div>
           </div>
@@ -545,15 +547,15 @@ export function DaoTab() {
         <div className="lg:col-span-2">
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
             <h3 className="text-xl font-bold text-white mb-4">
-              Propositions Actives ({proposals.length})
+              {t('daoTab.activeProposals', 'Active Proposals')} ({proposals.length})
             </h3>
 
             {proposals.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">&#x1F4ED;</div>
-                <p className="text-gray-400 mb-2">Aucune proposition active</p>
+                <p className="text-gray-400 mb-2">{t('daoTab.noActiveProposals', 'No active proposals')}</p>
                 <p className="text-gray-500 text-sm">
-                  Soyez le premier a creer une proposition pour la communaute !
+                  {t('daoTab.beFirstToPropose', 'Be the first to create a proposal for the community!')}
                 </p>
               </div>
             ) : (
@@ -570,13 +572,13 @@ export function DaoTab() {
 
                   const getProposalTypeName = (type: number) => {
                     switch (type) {
-                      case 0: return 'Transfert de Fonds';
-                      case 1: return 'Changement Parametres';
-                      case 2: return 'Ajouter Membre';
-                      case 3: return 'Retirer Membre';
-                      case 4: return 'Upgrade Contrat';
-                      case 5: return 'Custom';
-                      default: return 'Autre';
+                      case 0: return t('daoTab.proposalTypeFunds', 'Transfer Funds');
+                      case 1: return t('daoTab.proposalTypeParams', 'Change Parameters');
+                      case 2: return t('daoTab.proposalTypeAddMember', 'Add Member');
+                      case 3: return t('daoTab.proposalTypeRemoveMember', 'Remove Member');
+                      case 4: return t('daoTab.proposalTypeUpgrade', 'Contract Upgrade');
+                      case 5: return t('daoTab.proposalTypeCustom', 'Custom');
+                      default: return t('daoTab.proposalTypeOther', 'Other');
                     }
                   };
 
@@ -601,13 +603,13 @@ export function DaoTab() {
 
                   const getStatusName = (status: ProposalStatus) => {
                     switch (status) {
-                      case ProposalStatus.Active: return 'Active';
-                      case ProposalStatus.Passed: return 'Approuvee';
-                      case ProposalStatus.Executed: return 'Executee';
-                      case ProposalStatus.Failed: return 'Rejetee';
-                      case ProposalStatus.Cancelled: return 'Annulee';
-                      case ProposalStatus.Expired: return 'Expiree';
-                      default: return 'Inconnue';
+                      case ProposalStatus.Active: return t('daoTab.statusActive', 'Active');
+                      case ProposalStatus.Passed: return t('daoTab.statusPassed', 'Approved');
+                      case ProposalStatus.Executed: return t('daoTab.statusExecuted', 'Executed');
+                      case ProposalStatus.Failed: return t('daoTab.statusFailed', 'Rejected');
+                      case ProposalStatus.Cancelled: return t('daoTab.statusCancelled', 'Cancelled');
+                      case ProposalStatus.Expired: return t('daoTab.statusExpired', 'Expired');
+                      default: return t('daoTab.statusUnknown', 'Unknown');
                     }
                   };
 
@@ -640,7 +642,7 @@ export function DaoTab() {
 
                       {/* Proposer */}
                       <div className="text-xs text-gray-500 mb-3">
-                        Propose par: <span className="text-gray-400 font-mono">{formatAddress(proposal.proposer)}</span>
+                        {t('daoTab.proposedBy', 'Proposed by')}: <span className="text-gray-400 font-mono">{formatAddress(proposal.proposer)}</span>
                       </div>
 
                       {/* Transfer Details - show for TransferFunds, AddMember, RemoveMember */}
@@ -649,13 +651,13 @@ export function DaoTab() {
                           <div className="text-xs space-y-2">
                             <div className="flex justify-between items-center">
                               <span className="text-gray-500">
-                                {proposal.proposalType === 0 ? 'Beneficiaire:' : 'Membre:'}
+                                {proposal.proposalType === 0 ? t('daoTab.beneficiary', 'Beneficiary') : t('daoTab.member', 'Member')}:
                               </span>
                               <span className="text-white font-mono">{formatAddress(proposal.targetAddress)}</span>
                             </div>
                             {proposal.proposalType === 0 && parseFloat(proposal.amount) > 0 && (
                               <div className="flex justify-between items-center">
-                                <span className="text-gray-500">Montant:</span>
+                                <span className="text-gray-500">{t('daoTab.amount', 'Amount')}:</span>
                                 <span className="text-amber-400 font-semibold">{formatNumber(proposal.amount)} XCIRCLEX</span>
                               </div>
                             )}
@@ -666,8 +668,8 @@ export function DaoTab() {
                       {/* Vote Progress Bar */}
                       <div className="mb-3">
                         <div className="flex justify-between text-xs mb-1">
-                          <span className="text-green-400">Pour: {formatNumber(proposal.votesFor)} ({forPercentage.toFixed(1)}%)</span>
-                          <span className="text-red-400">Contre: {formatNumber(proposal.votesAgainst)} ({againstPercentage.toFixed(1)}%)</span>
+                          <span className="text-green-400">{t('daoTab.for', 'For')}: {formatNumber(proposal.votesFor)} ({forPercentage.toFixed(1)}%)</span>
+                          <span className="text-red-400">{t('daoTab.against', 'Against')}: {formatNumber(proposal.votesAgainst)} ({againstPercentage.toFixed(1)}%)</span>
                         </div>
                         <div className="h-2 bg-gray-700 rounded-full overflow-hidden flex">
                           <div
@@ -680,14 +682,14 @@ export function DaoTab() {
                           />
                         </div>
                         <div className="text-xs text-gray-500 mt-1">
-                          Total: {formatNumber(totalVotes.toString())} votes
+                          {t('daoTab.total', 'Total')}: {formatNumber(totalVotes.toString())} {t('daoTab.votes', 'votes')}
                         </div>
                       </div>
 
                       {/* Time Remaining */}
                       {proposal.status === ProposalStatus.Active && timeRemaining > 0 && (
                         <div className="text-xs text-gray-400 mb-3">
-                          Temps restant: {daysRemaining > 0 ? `${daysRemaining}j ` : ''}{hoursRemaining}h
+                          {t('daoTab.timeRemaining', 'Time remaining')}: {daysRemaining > 0 ? `${daysRemaining}${t('daoTab.daysShort', 'd')} ` : ''}{hoursRemaining}{t('daoTab.hoursShort', 'h')}
                         </div>
                       )}
 
@@ -695,7 +697,7 @@ export function DaoTab() {
                       <div className="flex gap-2 mt-4 flex-wrap">
                         {userHasVoted ? (
                           <span className="px-4 py-2 rounded-lg text-sm bg-gray-500/30 text-gray-400">
-                            &#x2713; Vote enregistre
+                            &#x2713; {t('daoTab.voteRecorded', 'Vote recorded')}
                           </span>
                         ) : proposal.status === ProposalStatus.Active ? (
                           <button
@@ -705,11 +707,11 @@ export function DaoTab() {
                             }}
                             className="px-4 py-2 rounded-lg text-sm bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 transition"
                           >
-                            Voter
+                            {t('daoTab.voteBtn', 'Vote')}
                           </button>
                         ) : (
                           <span className="px-4 py-2 rounded-lg text-sm bg-gray-500/30 text-gray-400">
-                            Vote termine
+                            {t('daoTab.voteEnded', 'Vote ended')}
                           </span>
                         )}
 
@@ -720,7 +722,7 @@ export function DaoTab() {
                             disabled={isVetoing}
                             className="px-4 py-2 rounded-lg text-sm bg-orange-500/20 text-orange-300 hover:bg-orange-500/30 transition border border-orange-500/30"
                           >
-                            {isVetoing ? '...' : 'Veto'}
+                            {isVetoing ? '...' : t('daoTab.veto', 'Veto')}
                           </button>
                         )}
 
@@ -731,7 +733,7 @@ export function DaoTab() {
                             disabled={isCouncilExecuting}
                             className="px-4 py-2 rounded-lg text-sm bg-yellow-500/20 text-yellow-300 hover:bg-yellow-500/30 transition border border-yellow-500/30"
                           >
-                            {isCouncilExecuting ? '...' : 'Exec. Urgente'}
+                            {isCouncilExecuting ? '...' : t('daoTab.emergencyExec', 'Emergency Exec.')}
                           </button>
                         )}
 
@@ -759,7 +761,7 @@ export function DaoTab() {
                 className="w-full bg-white/5 hover:bg-white/10 text-gray-300 font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2"
               >
                 <span>{showHistory ? '&#x25B2;' : '&#x25BC;'}</span>
-                <span>{showHistory ? 'Masquer l\'historique' : 'Voir l\'historique des propositions'}</span>
+                <span>{showHistory ? t('daoTab.hideHistory', 'Hide history') : t('daoTab.viewProposalHistory', 'View proposal history')}</span>
                 <span className="bg-gray-600 px-2 py-0.5 rounded text-xs">{allProposals.filter(p => p.status !== ProposalStatus.Active).length}</span>
               </button>
             </div>
@@ -769,12 +771,12 @@ export function DaoTab() {
           {showHistory && (
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl mt-6">
               <h3 className="text-xl font-bold text-white mb-4">
-                Historique des Propositions
+                {t('daoTab.proposalHistory', 'Proposal History')}
               </h3>
 
               {allProposals.filter(p => p.status !== ProposalStatus.Active).length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-gray-400">Aucune proposition dans l'historique</p>
+                  <p className="text-gray-400">{t('daoTab.noProposalHistory', 'No proposals in history')}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -787,13 +789,13 @@ export function DaoTab() {
 
                       const getProposalTypeName = (type: number) => {
                         switch (type) {
-                          case 0: return 'Transfert';
-                          case 1: return 'Parametres';
-                          case 2: return 'Ajout Membre';
-                          case 3: return 'Retrait Membre';
-                          case 4: return 'Upgrade';
-                          case 5: return 'Custom';
-                          default: return 'Autre';
+                          case 0: return t('daoTab.historyTransfer', 'Transfer');
+                          case 1: return t('daoTab.historyParams', 'Parameters');
+                          case 2: return t('daoTab.historyAddMember', 'Add Member');
+                          case 3: return t('daoTab.historyRemoveMember', 'Remove Member');
+                          case 4: return t('daoTab.historyUpgrade', 'Upgrade');
+                          case 5: return t('daoTab.historyCustom', 'Custom');
+                          default: return t('daoTab.historyOther', 'Other');
                         }
                       };
 
@@ -816,12 +818,12 @@ export function DaoTab() {
 
                       const getStatusName = (status: ProposalStatus) => {
                         switch (status) {
-                          case ProposalStatus.Executed: return 'Executee';
-                          case ProposalStatus.Passed: return 'Approuvee';
-                          case ProposalStatus.Failed: return 'Rejetee';
-                          case ProposalStatus.Cancelled: return 'Annulee';
-                          case ProposalStatus.Expired: return 'Expiree';
-                          default: return 'Inconnue';
+                          case ProposalStatus.Executed: return t('daoTab.statusExecuted', 'Executed');
+                          case ProposalStatus.Passed: return t('daoTab.statusPassed', 'Approved');
+                          case ProposalStatus.Failed: return t('daoTab.statusFailed', 'Rejected');
+                          case ProposalStatus.Cancelled: return t('daoTab.statusCancelled', 'Cancelled');
+                          case ProposalStatus.Expired: return t('daoTab.statusExpired', 'Expired');
+                          default: return t('daoTab.statusUnknown', 'Unknown');
                         }
                       };
 
@@ -849,10 +851,10 @@ export function DaoTab() {
 
                           {/* Vote summary */}
                           <div className="mt-3 flex items-center gap-4 text-xs">
-                            <span className="text-green-400">Pour: {formatNumber(proposal.votesFor)} ({forPercentage.toFixed(0)}%)</span>
-                            <span className="text-red-400">Contre: {formatNumber(proposal.votesAgainst)}</span>
+                            <span className="text-green-400">{t('daoTab.for', 'For')}: {formatNumber(proposal.votesFor)} ({forPercentage.toFixed(0)}%)</span>
+                            <span className="text-red-400">{t('daoTab.against', 'Against')}: {formatNumber(proposal.votesAgainst)}</span>
                             {proposal.proposalType === 0 && parseFloat(proposal.amount) > 0 && (
-                              <span className="text-amber-400">Montant: {formatNumber(proposal.amount)} XCIRCLEX</span>
+                              <span className="text-amber-400">{t('daoTab.amount', 'Amount')}: {formatNumber(proposal.amount)} XCIRCLEX</span>
                             )}
                           </div>
 
@@ -882,7 +884,7 @@ export function DaoTab() {
       <div className="bg-white/5 rounded-xl p-4 border border-white/10">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <p className="text-gray-400 text-sm">Smart Contract DAO</p>
+            <p className="text-gray-400 text-sm">{t('daoTab.daoSmartContract', 'DAO Smart Contract')}</p>
             <p className="text-white font-mono text-xs md:text-sm break-all">{DAO_CONTRACT_ADDRESS}</p>
           </div>
           <a
@@ -891,7 +893,7 @@ export function DaoTab() {
             rel="noopener noreferrer"
             className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 transition"
           >
-            Voir sur Explorer &#8599;
+            {t('daoTab.viewOnExplorer', 'View on Explorer')} &#8599;
           </a>
         </div>
       </div>
@@ -900,10 +902,10 @@ export function DaoTab() {
       {showDepositModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 rounded-2xl p-6 max-w-md w-full border border-purple-500/30">
-            <h3 className="text-xl font-bold text-white mb-4">Deposer dans la Tresorerie</h3>
+            <h3 className="text-xl font-bold text-white mb-4">{t('daoTab.depositToTreasury', 'Deposit to Treasury')}</h3>
 
             <div className="mb-4">
-              <label className="block text-gray-400 text-sm mb-2">Montant (XCIRCLEX)</label>
+              <label className="block text-gray-400 text-sm mb-2">{t('daoTab.amountXcirclex', 'Amount (XCIRCLEX)')}</label>
               <input
                 type="number"
                 value={depositAmount}
@@ -911,7 +913,7 @@ export function DaoTab() {
                 placeholder="0.00"
                 className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
               />
-              <p className="text-gray-500 text-xs mt-1">Solde disponible: {formatNumber(userBalance)} XCIRCLEX</p>
+              <p className="text-gray-500 text-xs mt-1">{t('daoTab.availableBalance', 'Available balance')}: {formatNumber(userBalance)} XCIRCLEX</p>
             </div>
 
             <div className="flex gap-3">
@@ -919,14 +921,14 @@ export function DaoTab() {
                 onClick={() => setShowDepositModal(false)}
                 className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition"
               >
-                Annuler
+                {t('daoTab.cancel', 'Cancel')}
               </button>
               <button
                 onClick={handleDeposit}
                 disabled={isDepositing || !depositAmount}
                 className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition"
               >
-                {isDepositing ? 'Depot...' : 'Deposer'}
+                {isDepositing ? t('daoTab.depositing', 'Depositing...') : t('daoTab.deposit', 'Deposit')}
               </button>
             </div>
           </div>
@@ -937,42 +939,42 @@ export function DaoTab() {
       {showProposalModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-gray-900 rounded-2xl p-6 max-w-lg w-full border border-blue-500/30 my-8">
-            <h3 className="text-xl font-bold text-white mb-4">Creer une Proposition</h3>
+            <h3 className="text-xl font-bold text-white mb-4">{t('daoTab.createProposal', 'Create Proposal')}</h3>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-gray-400 text-sm mb-2">Type de Proposition</label>
+                <label className="block text-gray-400 text-sm mb-2">{t('daoTab.proposalType', 'Proposal Type')}</label>
                 <select
                   value={proposalType}
                   onChange={(e) => setProposalType(parseInt(e.target.value))}
                   className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500"
                 >
-                  <option value={5}>Custom (Discussion/Vote)</option>
-                  <option value={0}>Transfert de Fonds</option>
-                  <option value={1}>Changement de Parametres</option>
-                  <option value={2}>Ajouter un Membre au Conseil</option>
-                  <option value={3}>Retirer un Membre du Conseil</option>
-                  <option value={4}>Mise a jour de Contrat</option>
+                  <option value={5}>{t('daoTab.optionCustom', 'Custom (Discussion/Vote)')}</option>
+                  <option value={0}>{t('daoTab.optionTransferFunds', 'Transfer Funds')}</option>
+                  <option value={1}>{t('daoTab.optionChangeParams', 'Change Parameters')}</option>
+                  <option value={2}>{t('daoTab.optionAddMember', 'Add Council Member')}</option>
+                  <option value={3}>{t('daoTab.optionRemoveMember', 'Remove Council Member')}</option>
+                  <option value={4}>{t('daoTab.optionContractUpgrade', 'Contract Upgrade')}</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-gray-400 text-sm mb-2">Titre</label>
+                <label className="block text-gray-400 text-sm mb-2">{t('daoTab.title', 'Title')}</label>
                 <input
                   type="text"
                   value={proposalTitle}
                   onChange={(e) => setProposalTitle(e.target.value)}
-                  placeholder="Titre de la proposition"
+                  placeholder={t('daoTab.titlePlaceholder', 'Proposal title')}
                   className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-gray-400 text-sm mb-2">Description</label>
+                <label className="block text-gray-400 text-sm mb-2">{t('daoTab.description', 'Description')}</label>
                 <textarea
                   value={proposalDescription}
                   onChange={(e) => setProposalDescription(e.target.value)}
-                  placeholder="Description detaillee de la proposition..."
+                  placeholder={t('daoTab.descriptionPlaceholder', 'Detailed description of the proposal...')}
                   rows={4}
                   className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
                 />
@@ -982,7 +984,7 @@ export function DaoTab() {
               {(proposalType === 0 || proposalType === 2 || proposalType === 3) && (
                 <div>
                   <label className="block text-gray-400 text-sm mb-2">
-                    {proposalType === 0 ? 'Adresse du Beneficiaire' : 'Adresse du Membre'}
+                    {proposalType === 0 ? t('daoTab.beneficiaryAddress', 'Beneficiary Address') : t('daoTab.memberAddress', 'Member Address')}
                   </label>
                   <input
                     type="text"
@@ -997,7 +999,7 @@ export function DaoTab() {
               {/* Amount - show only for TransferFunds */}
               {proposalType === 0 && (
                 <div>
-                  <label className="block text-gray-400 text-sm mb-2">Montant (XCIRCLEX)</label>
+                  <label className="block text-gray-400 text-sm mb-2">{t('daoTab.amountXcirclex', 'Amount (XCIRCLEX)')}</label>
                   <input
                     type="number"
                     value={proposalAmount}
@@ -1008,7 +1010,7 @@ export function DaoTab() {
                     className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
                   />
                   <p className="text-gray-500 text-xs mt-1">
-                    Tresorerie disponible: {formatNumber(daoStats?.treasuryBalance || '0')} XCIRCLEX
+                    {t('daoTab.availableTreasury', 'Available treasury')}: {formatNumber(daoStats?.treasuryBalance || '0')} XCIRCLEX
                   </p>
                 </div>
               )}
@@ -1016,22 +1018,22 @@ export function DaoTab() {
               {isUserCouncilMember ? (
                 <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
                   <p className="text-yellow-300 text-sm flex items-center gap-2">
-                    <span>&#x1F451;</span> Privilege Conseil: Pas de seuil requis
+                    <span>&#x1F451;</span> {t('daoTab.councilPrivilegeNoThreshold', 'Council Privilege: No threshold required')}
                   </p>
                   <p className="text-gray-400 text-xs mt-1">
-                    En tant que membre du conseil, vous pouvez creer des propositions sans envoyer de tokens.
+                    {t('daoTab.councilCanCreateWithoutTokens', 'As a council member, you can create proposals without sending tokens.')}
                   </p>
                 </div>
               ) : (
                 <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
                   <p className="text-blue-300 text-sm">
-                    Seuil requis: {formatNumber(daoStats?.minProposalThreshold || '0')} XCIRCLEX
+                    {t('daoTab.requiredThreshold', 'Required threshold')}: {formatNumber(daoStats?.minProposalThreshold || '0')} XCIRCLEX
                   </p>
                   <p className="text-gray-400 text-xs mt-1">
-                    Votre solde: {formatNumber(userBalance)} XCIRCLEX
+                    {t('daoTab.yourBalanceLabel', 'Your balance')}: {formatNumber(userBalance)} XCIRCLEX
                   </p>
                   <p className="text-yellow-400 text-xs mt-2">
-                    Note: {formatNumber(daoStats?.minProposalThreshold || '100000')} tokens seront envoyes pour verification puis retournes immediatement.
+                    {t('daoTab.tokenVerificationNote', 'Note: {{amount}} tokens will be sent for verification then returned immediately.', { amount: formatNumber(daoStats?.minProposalThreshold || '100000') })}
                   </p>
                 </div>
               )}
@@ -1049,14 +1051,14 @@ export function DaoTab() {
                 }}
                 className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition"
               >
-                Annuler
+                {t('daoTab.cancel', 'Cancel')}
               </button>
               <button
                 onClick={handleCreateProposal}
                 disabled={isCreatingProposal || !proposalTitle || !proposalDescription}
                 className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition"
               >
-                {isCreatingProposal ? 'Creation...' : 'Creer'}
+                {isCreatingProposal ? t('daoTab.creating', 'Creating...') : t('daoTab.create', 'Create')}
               </button>
             </div>
           </div>
@@ -1067,14 +1069,14 @@ export function DaoTab() {
       {showVoteModal && selectedProposalId !== null && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 rounded-2xl p-6 max-w-md w-full border border-green-500/30">
-            <h3 className="text-xl font-bold text-white mb-4">Voter sur la Proposition #{selectedProposalId}</h3>
+            <h3 className="text-xl font-bold text-white mb-4">{t('daoTab.voteOnProposal', 'Vote on Proposal')} #{selectedProposalId}</h3>
 
             <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-6">
               <p className="text-green-300 text-sm">
-                Votre pouvoir de vote: <span className="font-bold">{formatNumber(userBalance)} XCIRCLEX</span>
+                {t('daoTab.yourVotingPower', 'Your voting power')}: <span className="font-bold">{formatNumber(userBalance)} XCIRCLEX</span>
               </p>
               <p className="text-yellow-400 text-xs mt-2">
-                Note: Vos {formatNumber(userBalance)} tokens seront envoyes comme preuve de vote puis retournes immediatement.
+                {t('daoTab.voteTokenNote', 'Note: Your {{amount}} tokens will be sent as proof of vote then returned immediately.', { amount: formatNumber(userBalance) })}
               </p>
             </div>
 
@@ -1085,7 +1087,7 @@ export function DaoTab() {
                 className="bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 text-green-300 font-semibold py-4 px-4 rounded-lg transition flex flex-col items-center gap-2"
               >
                 <span className="text-3xl">&#x1F44D;</span>
-                <span>POUR</span>
+                <span>{t('daoTab.forBtn', 'FOR')}</span>
               </button>
 
               <button
@@ -1094,7 +1096,7 @@ export function DaoTab() {
                 className="bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-300 font-semibold py-4 px-4 rounded-lg transition flex flex-col items-center gap-2"
               >
                 <span className="text-3xl">&#x1F44E;</span>
-                <span>CONTRE</span>
+                <span>{t('daoTab.againstBtn', 'AGAINST')}</span>
               </button>
             </div>
 
@@ -1105,13 +1107,13 @@ export function DaoTab() {
               }}
               className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition"
             >
-              Annuler
+              {t('daoTab.cancel', 'Cancel')}
             </button>
 
             {isVoting && (
               <div className="mt-4 text-center">
                 <div className="animate-spin inline-block text-2xl">&#x1F300;</div>
-                <p className="text-gray-400 mt-2">Vote en cours...</p>
+                <p className="text-gray-400 mt-2">{t('daoTab.votingInProgress', 'Voting in progress...')}</p>
               </div>
             )}
           </div>

@@ -42,24 +42,29 @@ export const LP_LOCKER_ADDRESS = 'erd1qqqqqqqqqqqqqpgqtwutsamdra4capldu6nkzsu8zw
 // Anti-whale (2% max), Sell tax progressive (10%/5%/0%)
 export const TOKEN_PROTECTION_ADDRESS = 'erd1qqqqqqqqqqqqqpgqescv0dcpdgu62sa7a89s3w2qdc9njsydflfqwfxdvx';
 
+// XCIRCLEX IDO Contract - Deploye le 4 janvier 2026 (avec metadata-payable)
+// Initial DEX Offering: 5% du supply (15.7M XCIRCLEX) pour lever 360 EGLD
+// Start: +1h, End: +15 jours
+export const IDO_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgq5h7twxcl5fd0fwkfujxsnj7v6ww8ezd2flfqxnd5lt';
+
 // IDO Configuration
 export const IDO_CONFIG = {
-  // Allocation: 2% du supply pour l'IDO
-  allocation: 6_283_185, // ~6.28M XCIRCLEX
-  // Prix: 1 EGLD = 800,000 XCIRCLEX
-  rate: 800_000,
-  // Minimum: 0.1 EGLD
-  minContribution: 0.1,
-  // Maximum: 10 EGLD par wallet
-  maxContribution: 10,
-  // Soft cap: 25 EGLD
-  softCap: 25,
-  // Hard cap: 50 EGLD (car 6.28M / 800,000 = ~7.85 EGLD, mais on met plus haut pour buffer)
-  hardCap: 50,
+  // Allocation: 5% du supply pour l'IDO (pris sur la pool de liquidite)
+  allocation: 15_707_963, // ~15.7M XCIRCLEX (5% de PI x 10^8)
+  // Prix: 1 EGLD = 43,633 XCIRCLEX (pour lever 360 EGLD minimum)
+  rate: 43_633,
+  // Minimum: 0.5 EGLD
+  minContribution: 0.5,
+  // Maximum: 20 EGLD par wallet
+  maxContribution: 20,
+  // Soft cap: 180 EGLD (50%)
+  softCap: 180,
+  // Hard cap: 360 EGLD (objectif minimum)
+  hardCap: 360,
   // Date de debut (timestamp)
   startTime: Date.now(), // A ajuster
-  // Duree: 7 jours
-  duration: 7 * 24 * 60 * 60 * 1000,
+  // Duree: 14 jours
+  duration: 14 * 24 * 60 * 60 * 1000,
 };
 
 export const NETWORK_CONFIG = {
@@ -90,6 +95,13 @@ export const STAKING_GAS_LIMITS = {
   unstake: 15_000_000,
   claimRewards: 10_000_000,
   emergencyUnstake: 15_000_000,
+};
+
+// Gas limits pour les transactions IDO
+export const IDO_GAS_LIMITS = {
+  contribute: 15_000_000,
+  claimTokens: 15_000_000,
+  refund: 15_000_000,
 };
 
 // Staking levels configuration (matches smart contract)

@@ -1,19 +1,21 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { RouteNamesEnum } from 'routes/routes';
 
 const About = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       {/* Header */}
       <div className="mb-12 text-center">
         <h1 className="text-5xl font-bold text-primary mb-4 animate-pageFadeIn">
-          A propos de X-CIRCLE-X
+          {t('about.title')}
         </h1>
         <p className="text-xl text-secondary max-w-3xl mx-auto">
-          La premiere plateforme de tontine decentralisee sur MultiversX
+          {t('about.subtitle')}
         </p>
       </div>
 
@@ -22,43 +24,155 @@ const About = () => {
         <div className="bg-secondary border-2 border-secondary vibe-border rounded-xl p-8 shadow-lg">
           <div className="flex items-center gap-3 mb-6">
             <span className="text-4xl">⭕</span>
-            <h2 className="text-3xl font-bold text-primary">Qu'est-ce que X-CIRCLE-X ?</h2>
+            <h2 className="text-3xl font-bold text-primary">{t('about.what.title')}</h2>
           </div>
           <p className="text-lg text-secondary leading-relaxed mb-4">
-            X-CIRCLE-X est une plateforme revolutionnaire qui reinvente le concept traditionnel de la tontine (ROSCA - Rotating Savings and Credit Association) en utilisant la technologie blockchain de MultiversX.
+            {t('about.what.description1')}
           </p>
           <p className="text-lg text-secondary leading-relaxed">
-            Notre mission est de democratiser l'acces a l'epargne collective et au microcredit en eliminant les intermediaires et en garantissant la transparence totale grace aux smart contracts.
+            {t('about.what.description2')}
           </p>
+        </div>
+      </section>
+
+      {/* Circle of Life Principle */}
+      <section className="mb-16">
+        <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-2 border-purple-500/30 rounded-xl p-8 shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <span className="text-4xl">🌀</span>
+            <h2 className="text-3xl font-bold text-primary">{t('about.circleOfLife.title')}</h2>
+          </div>
+
+          <p className="text-lg text-secondary leading-relaxed mb-6" dangerouslySetInnerHTML={{ __html: t('about.circleOfLife.intro').replace('<strong>', '<strong class="text-purple-400">') }} />
+
+          {/* Visual Diagram */}
+          <div className="bg-black/30 rounded-xl p-6 mb-6">
+            <div className="flex flex-col items-center">
+              <div className="text-center mb-4">
+                <div className="inline-block bg-purple-500/30 border-2 border-purple-500 rounded-full px-6 py-3 mb-2">
+                  <span className="text-2xl">🏠</span>
+                  <span className="text-white font-bold ml-2">{t('about.circleOfLife.sc0Label')}</span>
+                </div>
+                <p className="text-gray-400 text-sm">{t('about.circleOfLife.sc0Subtitle')}</p>
+              </div>
+
+              <div className="text-3xl text-purple-400 my-2">↓ 0.001 EGLD ↓</div>
+
+              <div className="flex flex-wrap justify-center gap-4 my-4">
+                {['SC1', 'SC2', 'SC3', '...', 'SCn'].map((sc, i) => (
+                  <div key={i} className="bg-blue-500/20 border border-blue-500/50 rounded-lg px-4 py-2">
+                    <span className="text-blue-300 font-mono">{sc}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="text-3xl text-green-400 my-2">↓ {t('about.circleOfLife.transfer')} ↓</div>
+
+              <div className="text-center">
+                <div className="inline-block bg-green-500/30 border-2 border-green-500 rounded-full px-6 py-3">
+                  <span className="text-2xl">🏠</span>
+                  <span className="text-white font-bold ml-2">{t('about.circleOfLife.returnSc0')}</span>
+                </div>
+                <p className="text-gray-400 text-sm mt-2">{t('about.circleOfLife.cycleComplete')}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* How Circle of Life Works */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold text-purple-400 flex items-center gap-2">
+                <span>📋</span> {t('about.circleOfLife.howItWorks.title')}
+              </h3>
+              <ul className="space-y-3 text-secondary">
+                <li className="flex items-start gap-2">
+                  <span className="text-green-400 mt-1">✓</span>
+                  <span dangerouslySetInnerHTML={{ __html: t('about.circleOfLife.howItWorks.step1') }} />
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-400 mt-1">✓</span>
+                  <span dangerouslySetInnerHTML={{ __html: t('about.circleOfLife.howItWorks.step2') }} />
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-400 mt-1">✓</span>
+                  <span dangerouslySetInnerHTML={{ __html: t('about.circleOfLife.howItWorks.step3') }} />
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-400 mt-1">✓</span>
+                  <span dangerouslySetInnerHTML={{ __html: t('about.circleOfLife.howItWorks.step4') }} />
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-400 mt-1">✓</span>
+                  <span dangerouslySetInnerHTML={{ __html: t('about.circleOfLife.howItWorks.step5') }} />
+                </li>
+              </ul>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold text-amber-400 flex items-center gap-2">
+                <span>🎁</span> {t('about.circleOfLife.rewards.title')}
+              </h3>
+              <ul className="space-y-3 text-secondary">
+                <li className="flex items-start gap-2">
+                  <span className="text-amber-400 mt-1">★</span>
+                  <span dangerouslySetInnerHTML={{ __html: t('about.circleOfLife.rewards.item1') }} />
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-amber-400 mt-1">★</span>
+                  <span dangerouslySetInnerHTML={{ __html: t('about.circleOfLife.rewards.item2') }} />
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-amber-400 mt-1">★</span>
+                  <span dangerouslySetInnerHTML={{ __html: t('about.circleOfLife.rewards.item3') }} />
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-amber-400 mt-1">★</span>
+                  <span dangerouslySetInnerHTML={{ __html: t('about.circleOfLife.rewards.item4') }} />
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-amber-400 mt-1">★</span>
+                  <span dangerouslySetInnerHTML={{ __html: t('about.circleOfLife.rewards.item5') }} />
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Penalties */}
+          <div className="mt-6 bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+            <h3 className="text-lg font-bold text-red-400 flex items-center gap-2 mb-2">
+              <span>⚠️</span> {t('about.circleOfLife.penalties.title')}
+            </h3>
+            <p className="text-secondary text-sm" dangerouslySetInnerHTML={{ __html: t('about.circleOfLife.penalties.description').replace('<strong>', '<strong class="text-red-400">') }} />
+          </div>
         </div>
       </section>
 
       {/* How it works */}
       <section className="mb-16">
         <h2 className="text-3xl font-bold text-primary mb-8 text-center">
-          Comment ca fonctionne ?
+          {t('about.howToParticipate.title')}
         </h2>
         <div className="space-y-6">
           {[
             {
-              title: "Creez ou rejoignez un cercle",
-              description: "Creez votre propre cercle de tontine ou demandez a rejoindre un cercle existant. Chaque cercle a un nombre limite de membres (5-20) qui s'engagent a contribuer regulierement."
+              title: t('about.howToParticipate.steps.step1.title'),
+              description: t('about.howToParticipate.steps.step1.description')
             },
             {
-              title: "Les membres votent",
-              description: "Lorsqu'un nouveau membre souhaite rejoindre, les membres existants votent pour approuver ou rejeter sa candidature. Cela garantit la confiance au sein du groupe."
+              title: t('about.howToParticipate.steps.step2.title'),
+              description: t('about.howToParticipate.steps.step2.description')
             },
             {
-              title: "Contribuez chaque cycle",
-              description: "A chaque cycle (hebdomadaire, mensuel...), tous les membres contribuent un montant fixe en EGLD. Les contributions sont securisees dans le smart contract."
+              title: t('about.howToParticipate.steps.step3.title'),
+              description: t('about.howToParticipate.steps.step3.description')
             },
             {
-              title: "Distribution des fonds",
-              description: "A la fin de chaque cycle, l'ensemble des contributions est distribue a un membre du cercle, selon un ordre predetermine. Chaque membre recoit la cagnotte une fois."
+              title: t('about.howToParticipate.steps.step4.title'),
+              description: t('about.howToParticipate.steps.step4.description')
             },
             {
-              title: "Repetez jusqu'a la fin",
-              description: "Le processus continue jusqu'a ce que chaque membre ait recu sa part. Le cercle peut ensuite etre renouvele ou clou ture."
+              title: t('about.howToParticipate.steps.step5.title'),
+              description: t('about.howToParticipate.steps.step5.description')
             }
           ].map((step, index) => (
             <div
@@ -86,39 +200,39 @@ const About = () => {
       {/* Key Features */}
       <section className="mb-16">
         <h2 className="text-3xl font-bold text-primary mb-8 text-center">
-          Fonctionnalites cles
+          {t('about.features.title')}
         </h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[
             {
               icon: "🔗",
-              title: "100% Blockchain",
-              description: "Toutes les transactions et donnees sont stockees de maniere immuable sur la blockchain MultiversX."
+              title: t('about.features.blockchain.title'),
+              description: t('about.features.blockchain.description')
             },
             {
               icon: "🔒",
-              title: "Smart Contracts",
-              description: "Les regles sont encodees dans des smart contracts audites et transparents. Aucune manipulation possible."
+              title: t('about.features.smartContracts.title'),
+              description: t('about.features.smartContracts.description')
             },
             {
               icon: "👥",
-              title: "Gouvernance DAO",
-              description: "Les membres votent pour les nouvelles adhesions. La communaute controle le cercle."
+              title: t('about.features.dao.title'),
+              description: t('about.features.dao.description')
             },
             {
               icon: "💰",
-              title: "Frais reduits",
-              description: "Seulement 3% de frais sur les distributions, bien moins que les tontines traditionnelles."
+              title: t('about.features.fees.title'),
+              description: t('about.features.fees.description')
             },
             {
               icon: "⚡",
-              title: "Rapide & Efficace",
-              description: "Transactions instantanees grace a MultiversX. Plus besoin d'attendre des jours."
+              title: t('about.features.fast.title'),
+              description: t('about.features.fast.description')
             },
             {
               icon: "🌍",
-              title: "Accessible partout",
-              description: "Participez de n'importe ou dans le monde. Seule une connexion internet est necessaire."
+              title: t('about.features.global.title'),
+              description: t('about.features.global.description')
             }
           ].map((feature, index) => (
             <div
@@ -140,49 +254,49 @@ const About = () => {
       {/* FAQ Section */}
       <section className="mb-16">
         <h2 className="text-3xl font-bold text-primary mb-8 text-center">
-          Questions frequentes
+          {t('about.faq.title')}
         </h2>
         <div className="space-y-4">
           {[
             {
-              question: "Qu'est-ce qu'une tontine (ROSCA) ?",
-              answer: "Une tontine, ou ROSCA (Rotating Savings and Credit Association), est un systeme d'epargne collectif ou un groupe de personnes contribue regulierement a un fonds commun. A chaque cycle, un membre recoit l'integralite du pot. C'est une methode traditionnelle d'entraide financiere utilisee dans de nombreuses cultures."
+              question: t('about.faq.q1.question'),
+              answer: t('about.faq.q1.answer')
             },
             {
-              question: "Comment rejoindre un cercle existant ?",
-              answer: "Pour rejoindre un cercle, naviguez vers la page Circles, selectionnez un cercle ouvert au recrutement, et cliquez sur 'Demander a rejoindre'. Les membres existants voteront pour approuver votre candidature."
+              question: t('about.faq.q2.question'),
+              answer: t('about.faq.q2.answer')
             },
             {
-              question: "Combien coute la creation d'un cercle ?",
-              answer: "La creation d'un cercle est gratuite. Seuls les frais de transaction blockchain (gas) sont a votre charge, generalement quelques centimes en EGLD."
+              question: t('about.faq.q3.question'),
+              answer: t('about.faq.q3.answer')
             },
             {
-              question: "Que se passe-t-il si un membre ne contribue pas ?",
-              answer: "Le smart contract garantit que la distribution ne peut avoir lieu que si tous les membres ont contribue. Les membres defaillants peuvent etre signales par la communaute."
+              question: t('about.faq.q4.question'),
+              answer: t('about.faq.q4.answer')
             },
             {
-              question: "Comment sont distribues les fonds ?",
-              answer: "Les fonds sont distribues selon l'ordre d'inscription des membres dans le cercle. Chaque membre recoit la cagnotte complete une fois au cours de la vie du cercle."
+              question: t('about.faq.q5.question'),
+              answer: t('about.faq.q5.answer')
             },
             {
-              question: "Quels sont les frais ?",
-              answer: "X-CIRCLE-X preleve 3% de frais sur chaque distribution. Ces frais servent a maintenir la plateforme et a financer son developpement."
+              question: t('about.faq.q6.question'),
+              answer: t('about.faq.q6.answer')
             },
             {
-              question: "Mes fonds sont-ils securises ?",
-              answer: "Oui, vos fonds sont securises par le smart contract sur la blockchain MultiversX. Personne, meme l'equipe X-CIRCLE-X, ne peut acceder a vos fonds sans votre autorisation."
+              question: t('about.faq.q7.question'),
+              answer: t('about.faq.q7.answer')
             },
             {
-              question: "Puis-je quitter un cercle en cours ?",
-              answer: "Une fois que vous avez rejoint un cercle et qu'il a demarre, vous ne pouvez pas le quitter avant la fin. Cela garantit l'integrite du systeme pour tous les membres."
+              question: t('about.faq.q8.question'),
+              answer: t('about.faq.q8.answer')
             },
             {
-              question: "Comment fonctionne le vote ?",
-              answer: "Lorsqu'un nouveau membre demande a rejoindre, tous les membres actuels peuvent voter. Une majorite de votes positifs est necessaire pour accepter le nouveau membre."
+              question: t('about.faq.q9.question'),
+              answer: t('about.faq.q9.answer')
             },
             {
-              question: "X-CIRCLE-X est-il disponible sur mainnet ?",
-              answer: "Actuellement, X-CIRCLE-X fonctionne sur le devnet de MultiversX. Le lancement sur mainnet est prevu pour bientot."
+              question: t('about.faq.q10.question'),
+              answer: t('about.faq.q10.answer')
             }
           ].map((faq, index) => (
             <FAQItem
@@ -197,13 +311,13 @@ const About = () => {
       {/* Technology Stack */}
       <section className="mb-16">
         <h2 className="text-3xl font-bold text-primary mb-8 text-center">
-          Stack Technologique
+          {t('about.techStack.title')}
         </h2>
         <div className="bg-secondary border-2 border-secondary vibe-border rounded-xl p-8">
           <div className="grid md:grid-cols-2 gap-8">
             <div>
               <h3 className="text-xl font-bold text-primary mb-4 flex items-center gap-2">
-                <span>⚡</span> Frontend
+                <span>⚡</span> {t('about.techStack.frontend')}
               </h3>
               <ul className="space-y-2 text-secondary">
                 <li className="flex items-center gap-2">
@@ -222,7 +336,7 @@ const About = () => {
             </div>
             <div>
               <h3 className="text-xl font-bold text-primary mb-4 flex items-center gap-2">
-                <span>🔗</span> Backend & Blockchain
+                <span>🔗</span> {t('about.techStack.backend')}
               </h3>
               <ul className="space-y-2 text-secondary">
                 <li className="flex items-center gap-2">
@@ -247,23 +361,23 @@ const About = () => {
       <section className="text-center">
         <div className="bg-accent bg-opacity-10 border-2 border-accent rounded-xl p-10">
           <h2 className="text-3xl font-bold text-primary mb-4">
-            Pret a commencer ?
+            {t('about.cta.title')}
           </h2>
           <p className="text-lg text-secondary mb-6 max-w-2xl mx-auto">
-            Rejoignez la revolution de l'epargne collective decentralisee. Creez votre premier cercle ou rejoignez un cercle existant des maintenant !
+            {t('about.cta.description')}
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <button
               onClick={() => navigate(RouteNamesEnum.circles)}
               className="bg-btn-primary text-btn-primary px-8 py-4 rounded-lg hover:bg-btn-hover transition-all font-semibold text-lg hover:scale-105"
             >
-              Voir les Cercles
+              {t('about.cta.viewCircles')}
             </button>
             <button
               onClick={() => navigate(RouteNamesEnum.createCircle)}
               className="bg-secondary text-primary border-2 border-secondary px-8 py-4 rounded-lg hover:bg-tertiary transition-all font-semibold text-lg"
             >
-              Creer un Cercle
+              {t('about.cta.createCircle')}
             </button>
           </div>
         </div>

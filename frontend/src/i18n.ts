@@ -5,8 +5,8 @@ import translationFR from './locales/fr/translation.json';
 import translationEN from './locales/en/translation.json';
 import translationES from './locales/es/translation.json';
 
-// Récupérer la langue sauvegardée ou utiliser 'fr' par défaut
-const savedLanguage = localStorage.getItem('language') || 'fr';
+// Récupérer la langue sauvegardée ou utiliser 'en' par défaut
+const savedLanguage = localStorage.getItem('language') || 'en';
 
 const resources = {
   fr: {
@@ -25,7 +25,7 @@ i18n
   .init({
     resources,
     lng: savedLanguage, // Langue par défaut
-    fallbackLng: 'fr', // Langue de secours si une traduction manque
+    fallbackLng: 'en', // Langue de secours si une traduction manque
     interpolation: {
       escapeValue: false // React échappe déjà les valeurs
     },

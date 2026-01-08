@@ -29,7 +29,7 @@ const Whitepaper = () => {
           Whitepaper X-CIRCLE-X
         </h1>
         <p className="text-xl text-secondary max-w-3xl mx-auto mb-4">
-          Version 2.1 - Decembre 2025
+          Version 2.2 - Janvier 2026
         </p>
         <p className="text-lg text-tertiary max-w-2xl mx-auto">
           La premiere plateforme de tontine decentralisee sur MultiversX avec le Cercle de Vie
@@ -199,17 +199,18 @@ const Whitepaper = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {[
               { name: 'Recompenses Cercle', pct: '35%', tokens: '~110M', color: 'from-purple-500 to-pink-500' },
-              { name: 'Pool Liquidite', pct: '20%', tokens: '~63M', color: 'from-blue-500 to-cyan-500' },
+              { name: 'Pool Liquidite', pct: '15%', tokens: '~47M', color: 'from-blue-500 to-cyan-500' },
               { name: 'Staking Rewards', pct: '15%', tokens: '~47M', color: 'from-green-500 to-emerald-500' },
               { name: 'Equipe', pct: '10%', tokens: '~31M', color: 'from-amber-500 to-orange-500' },
               { name: 'Tresorerie DAO', pct: '10%', tokens: '~31M', color: 'from-red-500 to-rose-500' },
+              { name: 'IDO', pct: '5%', tokens: '~16M', color: 'from-emerald-500 to-green-500', highlight: true },
               { name: 'Marketing', pct: '5%', tokens: '~16M', color: 'from-indigo-500 to-violet-500' },
               { name: 'Conseillers', pct: '3%', tokens: '~9M', color: 'from-teal-500 to-cyan-500' },
               { name: 'Airdrop', pct: '2%', tokens: '~6M', color: 'from-pink-500 to-rose-500' },
             ].map((item, i) => (
-              <div key={i} className={`bg-gradient-to-br ${item.color}/20 border border-white/10 rounded-lg p-4`}>
+              <div key={i} className={`bg-gradient-to-br ${item.color}/20 border ${item.highlight ? 'border-green-500/50 border-2' : 'border-white/10'} rounded-lg p-4`}>
                 <p className="text-primary font-bold">{item.name}</p>
-                <p className="text-2xl font-bold text-white">{item.pct}</p>
+                <p className={`text-2xl font-bold ${item.highlight ? 'text-green-400' : 'text-white'}`}>{item.pct}</p>
                 <p className="text-xs text-tertiary">{item.tokens}</p>
               </div>
             ))}

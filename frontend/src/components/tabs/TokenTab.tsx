@@ -308,7 +308,15 @@ export function TokenTab() {
         <div className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-xl p-4">
           <p className="text-gray-400 text-sm mb-1">{t('token.circulatingSupply', 'Circulating Supply')}</p>
           <p className="text-2xl font-bold text-amber-400">
-            {tokenInfo?.circulatingSupply ? formatNumber(tokenInfo.circulatingSupply) : '-'}
+            {(() => {
+              // Calculate: Total Supply - Burned = Circulating (values are in wei, 18 decimals)
+              const totalSupply = tokenInfo?.initialMinted ? BigInt(tokenInfo.initialMinted) : BigInt(0)
+              const burned = tokenInfo?.burnt ? BigInt(tokenInfo.burnt) : BigInt(0)
+              const circulating = totalSupply - burned
+              // Convert to human readable (divide by 10^18)
+              const circulatingNum = Number(circulating) / 1e18
+              return circulatingNum > 0 ? circulatingNum.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) : '-'
+            })()}
           </p>
           <p className="text-gray-500 text-xs mt-1">XCIRCLEX</p>
         </div>

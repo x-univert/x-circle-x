@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useCircleOfLife } from '../../hooks/useCircleOfLife'
 import { CIRCLE_OF_LIFE_ADDRESS, XCIRCLEX_TOKEN_ID } from '../../config/contracts'
 import { TransactionModal, TransactionStep } from '../TransactionModal'
@@ -14,6 +15,7 @@ interface Transaction {
 }
 
 export function ScCentralTab() {
+  const { t } = useTranslation()
   const {
     circleInfo,
     contractBalance,
@@ -21,6 +23,7 @@ export function ScCentralTab() {
     sc0Owner,
     activeContracts,
     rewardsInfo,
+    burnStats,
     deposit,
     refreshData,
     isLoading
@@ -185,13 +188,13 @@ export function ScCentralTab() {
       {/* SC0 Info Card */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
         <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-          <span>🏠</span> Smart Contract Central (SC0)
+          <span>🏠</span> {t('scCentral.title', 'Central Smart Contract (SC0)')}
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Address */}
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <p className="text-gray-400 text-sm mb-2">Adresse du Contrat SC0</p>
+            <p className="text-gray-400 text-sm mb-2">{t('scCentral.contractAddress', 'SC0 Contract Address')}</p>
             <p className="text-white font-mono text-xs break-all">{CIRCLE_OF_LIFE_ADDRESS}</p>
             <a
               href={`https://devnet-explorer.multiversx.com/accounts/${CIRCLE_OF_LIFE_ADDRESS}`}
@@ -199,14 +202,14 @@ export function ScCentralTab() {
               rel="noopener noreferrer"
               className="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-flex items-center gap-1"
             >
-              Voir sur Explorer &#8599;
+              {t('common.viewOnExplorer', 'View on Explorer')} &#8599;
             </a>
           </div>
 
           {/* Owner */}
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <p className="text-gray-400 text-sm mb-2">Proprietaire (Owner)</p>
-            <p className="text-white font-mono text-xs break-all">{sc0Owner || 'Chargement...'}</p>
+            <p className="text-gray-400 text-sm mb-2">{t('scCentral.owner', 'Owner')}</p>
+            <p className="text-white font-mono text-xs break-all">{sc0Owner || t('common.loading', 'Loading...')}</p>
             {sc0Owner && (
               <a
                 href={`https://devnet-explorer.multiversx.com/accounts/${sc0Owner}`}
@@ -214,7 +217,7 @@ export function ScCentralTab() {
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-flex items-center gap-1"
               >
-                Voir sur Explorer &#8599;
+                {t('common.viewOnExplorer', 'View on Explorer')} &#8599;
               </a>
             )}
           </div>
@@ -225,70 +228,70 @@ export function ScCentralTab() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-4 text-center">
           <div className="text-3xl font-bold text-white">{contractBalance || '0'}</div>
-          <div className="text-sm text-gray-400 mt-1">Balance EGLD</div>
+          <div className="text-sm text-gray-400 mt-1">{t('scCentral.balanceEgld', 'EGLD Balance')}</div>
         </div>
 
         <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-xl p-4 text-center">
           <div className="text-3xl font-bold text-white">{circleInfo?.totalMembers || 0}</div>
-          <div className="text-sm text-gray-400 mt-1">Membres Total</div>
+          <div className="text-sm text-gray-400 mt-1">{t('scCentral.totalMembers', 'Total Members')}</div>
         </div>
 
         <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-xl p-4 text-center">
           <div className="text-3xl font-bold text-white">{circleInfo?.activeMembers || 0}</div>
-          <div className="text-sm text-gray-400 mt-1">Membres Actifs</div>
+          <div className="text-sm text-gray-400 mt-1">{t('scCentral.activeMembers', 'Active Members')}</div>
         </div>
 
         <div className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-xl p-4 text-center">
           <div className="text-3xl font-bold text-white">{cycleStats?.cyclesCompleted || 0}</div>
-          <div className="text-sm text-gray-400 mt-1">Cycles Reussis</div>
+          <div className="text-sm text-gray-400 mt-1">{t('scCentral.successfulCycles', 'Successful Cycles')}</div>
         </div>
       </div>
 
       {/* Configuration */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
-        <h3 className="text-lg font-bold text-white mb-4">Configuration du Cercle</h3>
+        <h3 className="text-lg font-bold text-white mb-4">{t('scCentral.circleConfiguration', 'Circle Configuration')}</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <p className="text-gray-400 text-sm">Frais d'entree</p>
+            <p className="text-gray-400 text-sm">{t('scCentral.entryFee', 'Entry Fee')}</p>
             <p className="text-2xl font-bold text-white">{circleInfo?.entryFee || '1'} EGLD</p>
           </div>
 
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <p className="text-gray-400 text-sm">Montant Circulant</p>
+            <p className="text-gray-400 text-sm">{t('scCentral.circulatingAmount', 'Circulating Amount')}</p>
             <p className="text-2xl font-bold text-white">{circleInfo?.circulationAmount || '0.001'} EGLD</p>
           </div>
 
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <p className="text-gray-400 text-sm">Jour du Cycle</p>
-            <p className="text-2xl font-bold text-white">{circleInfo?.cycleDay || 0}</p>
+            <p className="text-gray-400 text-sm">{t('scCentral.currentCycle', 'Current Cycle')}</p>
+            <p className="text-2xl font-bold text-white">#{(cycleStats?.cyclesCompleted || 0) + 1}</p>
           </div>
         </div>
       </div>
 
       {/* Rewards Pool Info */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
-        <h3 className="text-lg font-bold text-white mb-4">Pool de Recompenses XCIRCLEX</h3>
+        <h3 className="text-lg font-bold text-white mb-4">{t('scCentral.rewardsPool', 'XCIRCLEX Rewards Pool')}</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-purple-500/20 border border-purple-500/30 rounded-xl p-4">
-            <p className="text-gray-400 text-sm">Pool Disponible</p>
+            <p className="text-gray-400 text-sm">{t('scCentral.availablePool', 'Available Pool')}</p>
             <p className="text-2xl font-bold text-purple-300">
-              {rewardsInfo?.rewardsPool ? (parseFloat(rewardsInfo.rewardsPool) / 1e18).toLocaleString('fr-FR', { maximumFractionDigits: 0 }) : '0'} XCIRCLEX
+              {rewardsInfo?.rewardsPool ? parseFloat(rewardsInfo.rewardsPool).toLocaleString('fr-FR', { maximumFractionDigits: 0 }) : '0'} XCIRCLEX
             </p>
           </div>
 
           <div className="bg-green-500/20 border border-green-500/30 rounded-xl p-4">
-            <p className="text-gray-400 text-sm">Recompense par Cycle</p>
+            <p className="text-gray-400 text-sm">{t('scCentral.rewardPerCycle', 'Reward per Cycle')}</p>
             <p className="text-2xl font-bold text-green-300">
-              {rewardsInfo?.rewardPerCycle ? (parseFloat(rewardsInfo.rewardPerCycle) / 1e18).toLocaleString('fr-FR', { maximumFractionDigits: 0 }) : '0'} XCIRCLEX
+              {rewardsInfo?.rewardPerCycle ? parseFloat(rewardsInfo.rewardPerCycle).toLocaleString('fr-FR', { maximumFractionDigits: 0 }) : '0'} XCIRCLEX
             </p>
           </div>
 
           <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-4">
-            <p className="text-gray-400 text-sm">Burn par SC</p>
+            <p className="text-gray-400 text-sm">{t('scCentral.burnPerSc', 'Burn per SC')}</p>
             <p className="text-2xl font-bold text-red-300">
-              {rewardsInfo?.burnPerSc ? (parseFloat(rewardsInfo.burnPerSc) / 1e18).toLocaleString('fr-FR', { maximumFractionDigits: 0 }) : '0'} XCIRCLEX
+              {burnStats?.burnPerSc ? parseFloat(burnStats.burnPerSc).toLocaleString('fr-FR', { maximumFractionDigits: 0 }) : '0'} XCIRCLEX
             </p>
           </div>
         </div>
@@ -296,14 +299,14 @@ export function ScCentralTab() {
 
       {/* Deposit Section */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
-        <h3 className="text-lg font-bold text-white mb-4">Deposer des EGLD dans SC0</h3>
+        <h3 className="text-lg font-bold text-white mb-4">{t('scCentral.depositEgld', 'Deposit EGLD to SC0')}</h3>
         <p className="text-gray-400 text-sm mb-4">
-          Deposez des EGLD pour alimenter le montant circulant du cercle.
+          {t('scCentral.depositDescription', 'Deposit EGLD to fund the circulating amount of the circle.')}
         </p>
 
         <div className="flex flex-col md:flex-row gap-4 items-end">
           <div className="flex-1">
-            <label className="block text-gray-400 text-sm mb-2">Montant (EGLD)</label>
+            <label className="block text-gray-400 text-sm mb-2">{t('scCentral.amount', 'Amount (EGLD)')}</label>
             <input
               type="number"
               step="0.01"
@@ -319,7 +322,7 @@ export function ScCentralTab() {
             disabled={isLoading || parseFloat(depositAmount) <= 0}
             className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 text-white font-semibold py-3 px-6 rounded-lg transition"
           >
-            Deposer
+            {t('scCentral.deposit', 'Deposit')}
           </button>
         </div>
       </div>
@@ -329,14 +332,14 @@ export function ScCentralTab() {
         {/* Outgoing Transactions (Start of cycle) */}
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
           <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <span className="text-red-400">↗</span> Transactions Sortantes (SC0 → SC1)
+            <span className="text-red-400">↗</span> {t('scCentral.outgoingTransactions', 'Outgoing Transactions (SC0 → SC1)')}
           </h3>
-          <p className="text-gray-400 text-xs mb-4">Debut de cycle quotidien</p>
+          <p className="text-gray-400 text-xs mb-4">{t('scCentral.dailyCycleStart', 'Daily cycle start')}</p>
 
           {loadingTxs ? (
-            <div className="text-center py-8 text-gray-400">Chargement...</div>
+            <div className="text-center py-8 text-gray-400">{t('common.loading', 'Loading...')}</div>
           ) : outgoingTxs.length === 0 ? (
-            <div className="text-center py-8 text-gray-400">Aucune transaction sortante</div>
+            <div className="text-center py-8 text-gray-400">{t('scCentral.noOutgoingTransactions', 'No outgoing transactions')}</div>
           ) : (
             <div className="space-y-3 max-h-80 overflow-y-auto">
               {outgoingTxs.map((tx) => (
@@ -361,7 +364,7 @@ export function ScCentralTab() {
                     rel="noopener noreferrer"
                     className="text-blue-400 hover:text-blue-300 text-xs mt-2 inline-block"
                   >
-                    Voir TX &#8599;
+                    {t('scCentral.viewTx', 'View TX')} &#8599;
                   </a>
                 </div>
               ))}
@@ -372,14 +375,14 @@ export function ScCentralTab() {
         {/* Incoming Transactions (End of cycle) */}
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
           <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <span className="text-green-400">↙</span> Transactions Entrantes (SCn → SC0)
+            <span className="text-green-400">↙</span> {t('scCentral.incomingTransactions', 'Incoming Transactions (SCn → SC0)')}
           </h3>
-          <p className="text-gray-400 text-xs mb-4">Fin de cycle quotidien</p>
+          <p className="text-gray-400 text-xs mb-4">{t('scCentral.dailyCycleEnd', 'Daily cycle end')}</p>
 
           {loadingTxs ? (
-            <div className="text-center py-8 text-gray-400">Chargement...</div>
+            <div className="text-center py-8 text-gray-400">{t('common.loading', 'Loading...')}</div>
           ) : incomingTxs.length === 0 ? (
-            <div className="text-center py-8 text-gray-400">Aucune transaction entrante</div>
+            <div className="text-center py-8 text-gray-400">{t('scCentral.noIncomingTransactions', 'No incoming transactions')}</div>
           ) : (
             <div className="space-y-3 max-h-80 overflow-y-auto">
               {incomingTxs.map((tx) => (
@@ -404,7 +407,7 @@ export function ScCentralTab() {
                     rel="noopener noreferrer"
                     className="text-blue-400 hover:text-blue-300 text-xs mt-2 inline-block"
                   >
-                    Voir TX &#8599;
+                    {t('scCentral.viewTx', 'View TX')} &#8599;
                   </a>
                 </div>
               ))}
@@ -417,24 +420,24 @@ export function ScCentralTab() {
       <TransactionModal
         isOpen={showDepositModal}
         step={depositModalStep}
-        title="Deposer des EGLD"
-        confirmTitle="Confirmer le depot"
-        confirmDescription={`Vous allez deposer ${depositAmount} EGLD dans le contrat SC0.`}
+        title={t('scCentral.depositEgldTitle', 'Deposit EGLD')}
+        confirmTitle={t('scCentral.confirmDeposit', 'Confirm Deposit')}
+        confirmDescription={t('scCentral.confirmDepositDesc', 'You are about to deposit {{amount}} EGLD to SC0 contract.', { amount: depositAmount })}
         confirmDetails={
           <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 space-y-2">
             <div className="flex justify-between">
-              <span className="text-gray-400">Montant</span>
+              <span className="text-gray-400">{t('scCentral.amountLabel', 'Amount')}</span>
               <span className="text-white font-bold">{depositAmount} EGLD</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Destination</span>
+              <span className="text-gray-400">{t('scCentral.destination', 'Destination')}</span>
               <span className="text-white font-mono text-xs">{formatAddress(CIRCLE_OF_LIFE_ADDRESS)}</span>
             </div>
           </div>
         }
-        successTitle="Depot reussi !"
-        successMessage={`Vous avez depose ${depositAmount} EGLD dans SC0.`}
-        errorMessage="Erreur lors du depot."
+        successTitle={t('scCentral.depositSuccess', 'Deposit Successful!')}
+        successMessage={t('scCentral.depositSuccessMessage', 'You have deposited {{amount}} EGLD to SC0.', { amount: depositAmount })}
+        errorMessage={t('scCentral.depositError', 'Error during deposit.')}
         transactionHash={depositTransactionHash}
         onConfirm={handleDepositConfirm}
         onClose={() => {

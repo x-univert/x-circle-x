@@ -1,6 +1,6 @@
 # X-CIRCLE-X DAO - Whitepaper
 
-## Version 2.1 - Décembre 2025
+## Version 2.2 - Janvier 2026
 
 ---
 
@@ -646,10 +646,11 @@ Le token $XCIRCLEXX est basé sur le nombre **π (Pi)**, symbole mathématique u
 | Allocation                                | Pourcentage | Tokens | Vesting                     | Utilisation                               |
 | ----------------------------------------- | ----------- | ------ | --------------------------- | ----------------------------------------- |
 | **Récompenses Cercle de Vie**      | 35%         | ~110M  | Émission progressive 4 ans | Récompenses cycles quotidiens            |
-| **Pool de Liquidité EGLD/XCIRCLE** | 20%         | ~63M   | Immédiat                   | Alimentée par les 1 EGLD de création SC |
+| **Pool de Liquidité EGLD/XCIRCLE** | 15%         | ~47M   | Immédiat                   | Alimentée par les 1 EGLD de création SC |
 | **Staking Rewards (360°)**         | 15%         | ~47M   | Décroissant sur 30 mois    | Rendement staking                         |
 | **Équipe fondatrice**              | 10%         | ~31M   | 24 mois (cliff 6 mois)      | Motivation long-terme                     |
 | **Trésorerie DAO**                 | 10%         | ~31M   | Contrôlé par gouvernance  | Développement, partenariats              |
+| **IDO (Initial DEX Offering)**     | 5%          | ~16M   | Immédiat                   | Vente publique - Objectif 360 EGLD       |
 | **Marketing & Growth**              | 5%          | ~16M   | 12 mois                     | Acquisition utilisateurs                  |
 | **Conseillers**                     | 3%          | ~9M    | 12 mois (cliff 3 mois)      | Expertise stratégique                    |
 | **Airdrop initial**                 | 2%          | ~6M    | Immédiat                   | Early adopters                            |
@@ -1114,16 +1115,18 @@ La pool sera déployée sur **xExchange** (DEX officiel MultiversX) avec :
 │  ÉTAPE 1 : Seed Pool (Équipe)                              │
 │  ─────────────────────────────────────────                  │
 │  • Dépôt initial : 5-10 EGLD + équivalent XCIRCLEX         │
-│  • Ratio recommandé : 1 EGLD = 1,000,000 XCIRCLEX          │
+│  • Ratio recommandé : 1 EGLD = 50,000 XCIRCLEX             │
 │  • Objectif : Permettre les premiers échanges              │
-│  • Prix initial : ~$0.00005 par XCIRCLEX                   │
+│  • Prix initial : ~$0.001 par XCIRCLEX (si EGLD=$50)       │
 │                                                             │
 │  ÉTAPE 2 : IDO sur xLaunchpad ou Launchpad Partenaire      │
 │  ─────────────────────────────────────────                  │
-│  • Allocation IDO : 2% du supply (~6.3M XCIRCLEX)          │
-│  • Prix IDO : Légèrement supérieur au seed (+20-50%)       │
-│  • Ratio IDO : 1 EGLD = 800,000 XCIRCLEX                   │
+│  • Allocation IDO : 5% du supply (~15.7M XCIRCLEX)         │
+│  • Objectif de levée : 360 EGLD minimum                    │
+│  • Ratio IDO : 1 EGLD = 43,633 XCIRCLEX                    │
 │  • Fonds levés → 100% vers Pool de Liquidité               │
+│  • Durée : 14 jours                                        │
+│  • Min/Max par wallet : 0.5 - 20 EGLD                      │
 │                                                             │
 │  ÉTAPE 3 : Ajout Progressif Post-IDO                       │
 │  ─────────────────────────────────────────                  │
@@ -1135,33 +1138,62 @@ La pool sera déployée sur **xExchange** (DEX officiel MultiversX) avec :
 └─────────────────────────────────────────────────────────────┘
 ```
 
+#### Configuration IDO Détaillée
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    PARAMÈTRES IDO                            │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  📊 ALLOCATION                                              │
+│  • Tokens alloués : 15,707,963 XCIRCLEX (5% du supply)     │
+│  • Source : Pris sur l'allocation Pool de Liquidité        │
+│                                                             │
+│  💰 OBJECTIFS                                               │
+│  • Hard Cap : 360 EGLD (objectif minimum)                  │
+│  • Soft Cap : 180 EGLD (50%)                               │
+│                                                             │
+│  📈 TAUX DE CONVERSION                                      │
+│  • 1 EGLD = 43,633 XCIRCLEX                                │
+│  • Prix : ~$0.00115 par XCIRCLEX (si EGLD=$50)             │
+│                                                             │
+│  👤 LIMITES PAR PARTICIPANT                                 │
+│  • Minimum : 0.5 EGLD                                      │
+│  • Maximum : 20 EGLD                                       │
+│                                                             │
+│  ⏱️ DURÉE                                                   │
+│  • 14 jours de vente publique                              │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
 #### Ratio EGLD/XCIRCLEX Recommandé
 
 | Phase        | Ratio                  | Prix XCIRCLEX (si EGLD=$50) | Justification                   |
 | ------------ | ---------------------- | ----------------------------- | -------------------------------- |
-| **Seed**     | 1 EGLD = 1,000,000 XCX | $0.00005                      | Prix attractif early adopters    |
-| **IDO**      | 1 EGLD = 800,000 XCX   | $0.0000625                    | +25% vs seed, reward IDO         |
-| **Listing**  | 1 EGLD = 600,000 XCX   | $0.0000833                    | +33% vs IDO, lancement réel    |
-| **Cible M6** | 1 EGLD = 100,000 XCX   | $0.0005                       | 10x depuis IDO si adoption OK    |
+| **Seed**     | 1 EGLD = 50,000 XCX    | $0.001                        | Prix attractif early adopters    |
+| **IDO**      | 1 EGLD = 43,633 XCX    | $0.00115                      | Prix IDO pour lever 360 EGLD     |
+| **Listing**  | 1 EGLD = 40,000 XCX    | $0.00125                      | +8% vs IDO, lancement réel      |
+| **Cible M6** | 1 EGLD = 20,000 XCX    | $0.0025                       | 2x depuis IDO si adoption OK     |
 
 #### Calcul de Liquidité Nécessaire
 
 ```
 Pour un lancement sain sur xExchange :
 
-MINIMUM RECOMMANDÉ :
-• Pool initiale : 50 EGLD + 50M XCIRCLEX
-• Valeur totale : ~$5,000 (si EGLD=$50)
-• Slippage acceptable pour trades < 1 EGLD
+MINIMUM RECOMMANDÉ (Post-IDO) :
+• Pool initiale : 360 EGLD + ~15.7M XCIRCLEX (fonds IDO)
+• Valeur totale : ~$36,000 (si EGLD=$50)
+• Slippage acceptable pour trades < 5 EGLD
 
 OBJECTIF PHASE 1 (3 mois) :
-• Pool cible : 500 EGLD + 300M XCIRCLEX
+• Pool cible : 500 EGLD + 20M XCIRCLEX
 • Valeur totale : ~$50,000
 • Slippage < 1% pour trades jusqu'à 10 EGLD
 
 OBJECTIF PHASE 2 (6 mois) :
-• Pool cible : 2,000 EGLD + 200M XCIRCLEX
-• Valeur totale : ~$200,000
+• Pool cible : 1,500 EGLD + 50M XCIRCLEX
+• Valeur totale : ~$150,000
 • Liquidité profonde pour trading actif
 ```
 
@@ -1668,7 +1700,7 @@ Le cercle est la forme parfaite. π en est l'âme mathématique. **X-CIRCLE-X** 
 
 ---
 
-**Document vivant - Dernière mise à jour : Décembre 2025**
+**Document vivant - Dernière mise à jour : Janvier 2026**
 
 *Ce whitepaper est un document évolutif qui sera mis à jour régulièrement par la communauté.*
 

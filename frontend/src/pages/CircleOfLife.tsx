@@ -1,6 +1,7 @@
 import { useGetIsLoggedIn, useGetAccountInfo } from 'lib'
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
 import { TransactionModal, TransactionStep } from '../components/TransactionModal'
 import { useCircleOfLife } from '../hooks/useCircleOfLife'
 import { CIRCLE_OF_LIFE_ADDRESS } from '../config/contracts'
@@ -18,6 +19,7 @@ const ScCentralTab = lazy(() => import('../components/tabs/ScCentralTab').then(m
 const StakingTab = lazy(() => import('../components/tabs/StakingTab').then(m => ({ default: m.StakingTab })))
 
 function CircleOfLife() {
+  const { t } = useTranslation()
   const isLoggedIn = useGetIsLoggedIn()
   const { address } = useGetAccountInfo()
   const navigate = useNavigate()
@@ -622,8 +624,16 @@ function CircleOfLife() {
   }
 
   const getDayName = (day: number): string => {
-    const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
-    return day >= 0 && day < 7 ? days[day] : 'Inconnu'
+    const days = [
+      t('days.sunday', 'Sunday'),
+      t('days.monday', 'Monday'),
+      t('days.tuesday', 'Tuesday'),
+      t('days.wednesday', 'Wednesday'),
+      t('days.thursday', 'Thursday'),
+      t('days.friday', 'Friday'),
+      t('days.saturday', 'Saturday')
+    ]
+    return day >= 0 && day < 7 ? days[day] : t('days.unknown', 'Unknown')
   }
 
   const formatTimeRemaining = () => {
@@ -707,14 +717,14 @@ function CircleOfLife() {
         {/* Header */}
         <div className="text-center mb-4 sm:mb-6">
           <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-2">
-            &#x1F300; Cercle de Vie
+            &#x1F300; {t('circleOfLife.title', 'Circle of Life')}
           </h1>
           <p className="text-sm sm:text-xl text-gray-300 mb-4 sm:mb-6">
-            Ecosysteme de Smart Contracts Circulaires
+            {t('circle.ecosystem', 'Circular Smart Contracts Ecosystem')}
           </p>
           {isPaused && (
             <div className="mb-4 inline-block bg-red-500/20 border border-red-500/50 text-red-300 px-4 py-2 rounded-lg">
-              Le contrat est actuellement en pause
+              {t('circle.contractPaused', 'The contract is currently paused')}
             </div>
           )}
         </div>
@@ -728,16 +738,16 @@ function CircleOfLife() {
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-2xl max-w-md text-center">
               <div className="text-6xl mb-4">&#x1F300;</div>
               <h2 className="text-2xl font-semibold text-white mb-4">
-                Connexion requise
+                {t('circle.connectionRequired', 'Connection Required')}
               </h2>
               <p className="text-gray-200 mb-6">
-                Connectez-vous pour rejoindre le Cercle de Vie et participer aux transactions circulaires.
+                {t('circle.connectToJoin', 'Connect to join the Circle of Life and participate in circular transactions.')}
               </p>
               <button
                 onClick={() => navigate(RouteNamesEnum.unlock)}
                 className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200"
               >
-                Se connecter
+                {t('common.connect', 'Connect')}
               </button>
             </div>
           </div>
@@ -778,7 +788,7 @@ function CircleOfLife() {
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <div className="animate-spin text-4xl mb-2">&#x1F300;</div>
-              <p className="text-gray-400">Chargement...</p>
+              <p className="text-gray-400">{t('common.loading')}</p>
             </div>
           </div>
         }>
@@ -798,7 +808,7 @@ function CircleOfLife() {
           {/* Circle Visualization */}
           <div className="lg:col-span-2 bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 shadow-xl w-full overflow-hidden">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 mb-4">
-              <h2 className="text-lg sm:text-xl font-bold text-white">Visualisation du Cercle</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-white">{t('circle.visualization', 'Circle Visualization')}</h2>
               <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-end">
                 {/* Zoom controls - compact on mobile */}
                 <div className="flex items-center gap-0.5 sm:gap-1 bg-white/10 rounded-lg p-0.5 sm:p-1">
@@ -831,7 +841,7 @@ function CircleOfLife() {
                   disabled={isLoading}
                   className="text-xs sm:text-sm text-gray-300 hover:text-white transition px-2 sm:px-3 py-1 bg-white/10 rounded-lg whitespace-nowrap"
                 >
-                  {isLoading ? '...' : 'Actualiser'}
+                  {isLoading ? '...' : t('circle.refresh', 'Refresh')}
                 </button>
               </div>
             </div>
@@ -1456,32 +1466,32 @@ function CircleOfLife() {
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex-shrink-0 bg-gradient-to-r from-green-500 to-green-600"></div>
-                <span className="text-gray-300 text-xs sm:text-sm">Actif</span>
+                <span className="text-gray-300 text-xs sm:text-sm">{t('circle.legend.active', 'Active')}</span>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex-shrink-0 bg-gradient-to-r from-amber-500 to-amber-600"></div>
-                <span className="text-gray-300 text-xs sm:text-sm">Tour</span>
+                <span className="text-gray-300 text-xs sm:text-sm">{t('circle.legend.turn', 'Turn')}</span>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex-shrink-0 bg-gradient-to-r from-blue-500 to-blue-600"></div>
-                <span className="text-gray-300 text-xs sm:text-sm">Moi</span>
+                <span className="text-gray-300 text-xs sm:text-sm">{t('circle.legend.me', 'Me')}</span>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex-shrink-0 bg-gradient-to-r from-blue-400 to-blue-500"></div>
-                <span className="text-gray-300 text-xs sm:text-sm">Pre-signe</span>
+                <span className="text-gray-300 text-xs sm:text-sm">{t('circle.legend.preSigned', 'Pre-signed')}</span>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex-shrink-0 bg-gradient-to-r from-green-300 to-green-500"></div>
-                <span className="text-gray-300 text-xs sm:text-sm">Signe</span>
+                <span className="text-gray-300 text-xs sm:text-sm">{t('circle.legend.signed', 'Signed')}</span>
               </div>
             </div>
 
             {/* Cycle Complete Banner */}
             {isCycleComplete && (
               <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-green-500/20 border border-green-500/50 rounded-lg sm:rounded-xl text-center">
-                <p className="text-green-300 font-bold text-base sm:text-lg">Cycle #{cycleDay} Termine!</p>
+                <p className="text-green-300 font-bold text-base sm:text-lg">{t('circle.cycleCompleted', 'Cycle')} #{cycleDay} {t('circle.completed', 'Completed')}!</p>
                 <p className="text-green-200/80 text-xs sm:text-sm mt-1">
-                  Les fonds ({circulationAmount} EGLD) sont revenus au SC0.
+                  {t('circle.fundsReturned', 'Funds')} ({circulationAmount} EGLD) {t('circle.returnedToSC0', 'returned to SC0')}.
                 </p>
               </div>
             )}
@@ -1497,7 +1507,7 @@ function CircleOfLife() {
                     disabled={isPaused || isLoading}
                     className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition"
                   >
-                    Rejoindre le Cercle ({creationFee} EGLD)
+                    {t('circle.joinCircle', 'Join the Circle')} ({creationFee} EGLD)
                   </button>
                 ) : (
                   <>
@@ -1511,7 +1521,7 @@ function CircleOfLife() {
                             disabled={isPaused || isLoading}
                             className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition animate-pulse"
                           >
-                            Signer le Transfert (C&apos;est votre tour!)
+                            {t('circle.signTransfer', 'Sign Transfer')} ({t('circle.itsYourTurn', "It's your turn")}!)
                           </button>
                         )}
 
@@ -1522,7 +1532,7 @@ function CircleOfLife() {
                             disabled={isPaused || isLoading}
                             className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition"
                           >
-                            Pre-signer a l&apos;avance
+                            {t('circle.preSignInAdvance', 'Pre-sign in advance')}
                           </button>
                         )}
 
@@ -1530,10 +1540,10 @@ function CircleOfLife() {
                         {hasPreSigned && !isMyTurn && !hasSignedThisCycle && (
                           <div className="p-3 bg-blue-500/20 border border-blue-500/30 rounded-lg">
                             <p className="text-blue-300 text-sm text-center">
-                              Vous avez deja pre-signe
+                              {t('circle.alreadyPreSigned', 'You have already pre-signed')}
                             </p>
                             <p className="text-blue-400/70 text-xs text-center mt-1">
-                              Le transfert s&apos;executera automatiquement quand ce sera votre tour
+                              {t('circle.transferAutoExecute', 'The transfer will execute automatically when it is your turn')}
                             </p>
                           </div>
                         )}
@@ -1542,10 +1552,10 @@ function CircleOfLife() {
                         {hasSignedThisCycle && !isMyTurn && (
                           <div className="p-3 bg-green-500/20 border border-green-500/30 rounded-lg">
                             <p className="text-green-300 text-sm text-center">
-                              &#x2713; Votre tour est termine pour ce cycle
+                              &#x2713; {t('circle.turnCompleted', 'Your turn is completed for this cycle')}
                             </p>
                             <p className="text-green-400/70 text-xs text-center mt-1">
-                              Vous avez deja signe et transfere
+                              {t('circle.alreadySignedTransferred', 'You have already signed and transferred')}
                             </p>
                           </div>
                         )}
@@ -1556,10 +1566,10 @@ function CircleOfLife() {
                     {!isMyScBanned && (
                       <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg space-y-3">
                         <div className="flex items-center justify-between">
-                          <h4 className="text-purple-300 font-semibold text-sm">Auto-Signature</h4>
+                          <h4 className="text-purple-300 font-semibold text-sm">{t('circle.autoSign', 'Auto-Signature')}</h4>
                           {(autoSignStatus.isPermanent || autoSignStatus.remainingCycles > 0) && (
                             <span className="px-2 py-1 bg-purple-500/30 text-purple-300 text-xs rounded-full">
-                              {autoSignStatus.isPermanent ? 'Permanent' : `${autoSignStatus.remainingCycles} cycles restants`}
+                              {autoSignStatus.isPermanent ? t('circle.permanent', 'Permanent') : `${autoSignStatus.remainingCycles} ${t('circle.cyclesRemaining', 'cycles remaining')}`}
                             </span>
                           )}
                         </div>
@@ -1568,10 +1578,10 @@ function CircleOfLife() {
                         {autoSignStatus.isPermanent && (
                           <div className="p-2 bg-purple-500/20 rounded-lg">
                             <p className="text-purple-300 text-xs text-center">
-                              Auto-signature permanente activee
+                              {t('circle.permanentAutoSignActive', 'Permanent auto-sign enabled')}
                             </p>
                             <p className="text-purple-400/70 text-xs text-center mt-1">
-                              Vos cycles seront signes automatiquement indefiniment
+                              {t('circle.cyclesSignedIndefinitely', 'Your cycles will be signed automatically indefinitely')}
                             </p>
                           </div>
                         )}
@@ -1579,17 +1589,17 @@ function CircleOfLife() {
                         {!autoSignStatus.isPermanent && autoSignStatus.remainingCycles > 0 && (
                           <div className="p-2 bg-purple-500/20 rounded-lg">
                             <p className="text-purple-300 text-xs text-center">
-                              Auto-signature active pour {autoSignStatus.remainingCycles} cycle{autoSignStatus.remainingCycles > 1 ? 's' : ''}
+                              {t('circle.autoSignActiveFor', 'Auto-sign active for')} {autoSignStatus.remainingCycles} {t('circle.cycle', 'cycle')}{autoSignStatus.remainingCycles > 1 ? 's' : ''}
                             </p>
                             <p className="text-purple-400/70 text-xs text-center mt-1">
-                              Vos cycles seront signes automatiquement
+                              {t('circle.cyclesSignedAuto', 'Your cycles will be signed automatically')}
                             </p>
                           </div>
                         )}
 
                         {!autoSignStatus.isPermanent && autoSignStatus.remainingCycles === 0 && (
                           <p className="text-purple-400/70 text-xs text-center">
-                            Activez l&apos;auto-signature pour ne plus avoir a signer manuellement chaque jour
+                            {t('circle.enableAutoSign', 'Enable auto-sign so you do not have to sign manually every day')}
                           </p>
                         )}
 
@@ -1619,7 +1629,7 @@ function CircleOfLife() {
                                 disabled={isPaused || isLoading}
                                 className="flex-1 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 disabled:opacity-50 text-white font-semibold py-2 px-3 rounded-lg transition text-sm"
                               >
-                                Desactiver
+                                {t('circle.disable', 'Disable')}
                               </button>
                             </>
                           )}
@@ -1631,10 +1641,10 @@ function CircleOfLife() {
                     {!cycleHolder && !isCycleComplete && (
                       <div className="p-3 bg-orange-500/20 border border-orange-500/30 rounded-lg">
                         <p className="text-orange-300 text-sm text-center">
-                          Le cycle quotidien n&apos;est pas encore demarre
+                          {t('circle.cycleNotStarted', 'The daily cycle has not started yet')}
                         </p>
                         <p className="text-orange-400/70 text-xs text-center mt-1">
-                          Attendez qu&apos;un membre demarre le cycle pour pouvoir pre-signer ou signer
+                          {t('circle.waitForStart', 'Wait for a member to start the cycle to pre-sign or sign')}
                         </p>
                       </div>
                     )}
@@ -1644,19 +1654,19 @@ function CircleOfLife() {
                       <div className="flex justify-between items-center">
                         <div>
                           <p className={`${isMyScBanned ? 'text-red-300' : isActive ? 'text-green-300' : 'text-gray-300'} text-sm`}>
-                            Vous etes membre du cercle
+                            {t('circle.youAreMember', 'You are a member of the circle')}
                           </p>
                           <p className={`${isMyScBanned ? 'text-red-400/70' : isActive ? 'text-green-400/70' : 'text-gray-400/70'} text-xs mt-1 font-mono`}>
                             {formatAddress(myContract)}
                           </p>
                           {isMyScBanned && banEndDate && (
                             <p className="text-red-400 text-xs mt-1">
-                              Fin du ban: {banEndDate}
+                              {t('circle.banEnd', 'Ban ends')}: {banEndDate}
                             </p>
                           )}
                         </div>
                         <div className={`px-2 py-1 rounded text-xs font-semibold ${isMyScBanned ? 'bg-red-500/30 text-red-300' : isActive ? 'bg-green-500/30 text-green-300' : 'bg-gray-500/30 text-gray-300'}`}>
-                          {isMyScBanned ? 'Banni' : isActive ? 'Actif' : 'Inactif'}
+                          {isMyScBanned ? t('circle.banned', 'Banned') : isActive ? t('circle.active', 'Active') : t('circle.inactive', 'Inactive')}
                         </div>
                       </div>
                     </div>
@@ -1668,7 +1678,7 @@ function CircleOfLife() {
                         disabled={isPaused || isLoading}
                         className="w-full bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 disabled:opacity-50 text-white font-semibold py-2 px-4 rounded-lg transition text-sm"
                       >
-                        Desactiver mon point
+                        {t('circle.deactivatePoint', 'Deactivate my node')}
                       </button>
                     ) : isMyScBanned ? (
                       <div className="space-y-2">
@@ -1676,10 +1686,10 @@ function CircleOfLife() {
                           disabled={true}
                           className="w-full bg-gradient-to-r from-red-800 to-red-900 opacity-50 cursor-not-allowed text-white font-semibold py-2 px-4 rounded-lg transition text-sm"
                         >
-                          Reactiver mon point (Banni)
+                          {t('circle.reactivatePointBanned', 'Reactivate my node (Banned)')}
                         </button>
                         <p className="text-center text-xs text-red-400">
-                          Vous ne pouvez pas reactiver votre point pendant la periode de ban
+                          {t('circle.cannotReactivateBan', 'You cannot reactivate your node during the ban period')}
                         </p>
                       </div>
                     ) : (
@@ -1688,7 +1698,7 @@ function CircleOfLife() {
                         disabled={isPaused || isLoading}
                         className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 text-white font-semibold py-2 px-4 rounded-lg transition text-sm"
                       >
-                        Reactiver mon point
+                        {t('circle.reactivatePoint', 'Reactivate my node')}
                       </button>
                     )}
                   </>
@@ -1702,18 +1712,18 @@ function CircleOfLife() {
                       disabled={isPaused || isLoading}
                       className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition"
                     >
-                      Demarrer le Cycle Quotidien
+                      {t('circle.startDailyCycle', 'Start Daily Cycle')}
                       {starterBonusInfo.percentage > 0 && (
                         <span className="ml-2 text-cyan-200 text-sm">&#x2B50; +{(starterBonusInfo.percentage / 100).toFixed(0)}%</span>
                       )}
                     </button>
                     {starterBonusInfo.percentage > 0 && (
                       <p className="text-cyan-400 text-xs text-center">
-                        Bonus: +{starterBonusInfo.potentialBonus} XCX pour demarrer!
+                        {t('circle.bonusForStart', 'Bonus')}: +{starterBonusInfo.potentialBonus} XCX {t('circle.toStart', 'to start')}!
                       </p>
                     )}
                     <p className="text-center text-xs text-gray-400">
-                      Lancez le cycle pour commencer les transferts
+                      {t('circle.launchCycleTransfers', 'Launch the cycle to start the transfers')}
                     </p>
                   </div>
                 )}
@@ -1722,10 +1732,10 @@ function CircleOfLife() {
                 {cycleHolder && !isCycleInTimeout && (
                   <div className="p-3 bg-green-500/20 border border-green-500/30 rounded-lg">
                     <p className="text-green-300 text-sm text-center font-semibold">
-                      Cycle en cours
+                      {t('circle.cycleInProgress', 'Cycle in progress')}
                     </p>
                     <p className="text-green-400/70 text-xs text-center mt-1">
-                      Le cycle quotidien est actif - les membres peuvent signer
+                      {t('circle.cycleActiveMembers', 'The daily cycle is active - members can sign')}
                     </p>
                   </div>
                 )}
@@ -1735,10 +1745,10 @@ function CircleOfLife() {
                   <div className="space-y-3">
                     <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
                       <p className="text-red-300 text-sm text-center font-semibold">
-                        Cycle en Timeout!
+                        {t('circle.cycleTimeout', 'Cycle in Timeout')}!
                       </p>
                       <p className="text-red-400/70 text-xs text-center mt-1">
-                        Le cycle du jour #{cycleDay} n&apos;a pas ete complete a temps
+                        {t('circle.cycleNotCompleted', 'Cycle')} #{cycleDay} {t('circle.notCompletedOnTime', 'was not completed on time')}
                       </p>
                     </div>
                     <button
@@ -1746,10 +1756,10 @@ function CircleOfLife() {
                       disabled={isPaused || isLoading}
                       className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition"
                     >
-                      Declarer Cycle Echoue (Bannir le SC responsable)
+                      {t('circle.declareCycleFailed', 'Declare Cycle Failed (Ban the responsible SC)')}
                     </button>
                     <p className="text-center text-xs text-red-400/70">
-                      Le SC qui bloque sera banni pour 7 jours
+                      {t('circle.scBanned7Days', 'The blocking SC will be banned for 7 days')}
                     </p>
                   </div>
                 )}
@@ -1758,10 +1768,10 @@ function CircleOfLife() {
                 {isCycleComplete && (
                   <div className="p-3 bg-purple-500/20 border border-purple-500/30 rounded-lg">
                     <p className="text-purple-300 text-sm text-center font-semibold">
-                      Cycle #{cycleDay} termine!
+                      {t('circle.cycle', 'Cycle')} #{cycleDay} {t('circle.completed', 'completed')}!
                     </p>
                     <p className="text-purple-400/70 text-xs text-center mt-1">
-                      Tous les membres ont signe. Prochain cycle demain.
+                      {t('circle.allMembersSigned', 'All members have signed. Next cycle tomorrow.')}
                     </p>
                   </div>
                 )}
@@ -1774,7 +1784,7 @@ function CircleOfLife() {
                     disabled={isPaused || isLoading}
                     className="w-full bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition"
                   >
-                    Executer les {pendingAutoTransfers} transfert(s) en 1 clic
+                    {t('circle.executeTransfers', 'Execute {{count}} transfer(s) in 1 click', { count: pendingAutoTransfers })}
                   </button>
                 )}
 
@@ -1782,35 +1792,35 @@ function CircleOfLife() {
                   onClick={() => navigate('/dashboard')}
                   className="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-4 rounded-lg transition"
                 >
-                  Mon Dashboard
+                  {t('circle.myDashboard', 'My Dashboard')}
                 </button>
               </div>
             </div>
 
             {/* Comment ca marche - Liste verticale */}
             <div className="mt-4 sm:mt-6 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6">
-              <h3 className="text-base sm:text-lg font-bold text-white mb-3 sm:mb-4">Comment ca marche ?</h3>
+              <h3 className="text-base sm:text-lg font-bold text-white mb-3 sm:mb-4">{t('circle.howItWorks', 'How does it work?')}</h3>
 
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <span className="bg-purple-500/30 text-purple-300 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</span>
-                  <span className="text-gray-300 text-sm">Payez {creationFee} EGLD pour creer votre smart contract</span>
+                  <span className="text-gray-300 text-sm">{t('circle.step1', 'Pay {{fee}} EGLD to create your smart contract', { fee: creationFee })}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="bg-purple-500/30 text-purple-300 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">2</span>
-                  <span className="text-gray-300 text-sm">SC0 devient co-proprietaire avec vous</span>
+                  <span className="text-gray-300 text-sm">{t('circle.step2', 'SC0 becomes co-owner with you')}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="bg-purple-500/30 text-purple-300 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">3</span>
-                  <span className="text-gray-300 text-sm">Chaque jour, {circulationAmount} EGLD transite entre les SC</span>
+                  <span className="text-gray-300 text-sm">{t('circle.step3', 'Every day, {{amount}} EGLD transits between SCs', { amount: circulationAmount })}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="bg-purple-500/30 text-purple-300 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">4</span>
-                  <span className="text-gray-300 text-sm">Signez avant minuit (UTC) pour valider le transfert</span>
+                  <span className="text-gray-300 text-sm">{t('circle.step4', 'Sign before midnight (UTC) to validate the transfer')}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="bg-purple-500/30 text-purple-300 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">5</span>
-                  <span className="text-gray-300 text-sm">Si vous ne signez pas, les fonds vont a SC0</span>
+                  <span className="text-gray-300 text-sm">{t('circle.step5', 'If you do not sign, funds go to SC0')}</span>
                 </div>
               </div>
             </div>
@@ -1821,24 +1831,24 @@ function CircleOfLife() {
 
             {/* Cycle Status */}
             <div className="bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 shadow-xl">
-              <h3 className="text-lg font-bold text-white mb-4">Statut du Cercle</h3>
+              <h3 className="text-lg font-bold text-white mb-4">{t('circle.circleStatus', 'Circle Status')}</h3>
 
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Contrats totaux</span>
+                  <span className="text-gray-400">{t('circle.totalContracts', 'Total contracts')}</span>
                   <span className="text-white font-semibold">{totalContracts}</span>
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Contrats actifs</span>
+                  <span className="text-gray-400">{t('circle.activeContracts', 'Active contracts')}</span>
                   <span className="text-white font-semibold">{activeContractsCount}</span>
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Position actuelle</span>
+                  <span className="text-gray-400">{t('circle.currentPosition', 'Current position')}</span>
                   <span className="text-white font-semibold">
                     {isCycleComplete
-                      ? 'Cycle termine'
+                      ? t('circle.cycleFinished', 'Cycle finished')
                       : actualCurrentPosition >= 0
                         ? `SC${actualCurrentPosition + 1} / ${activeContractsCount}`
                         : 'N/A'}
@@ -1849,16 +1859,16 @@ function CircleOfLife() {
                 {cycleHolder && (
                   <div className="p-3 bg-amber-500/20 border border-amber-500/30 rounded-lg">
                     <div className="flex justify-between items-center">
-                      <span className="text-amber-300 text-sm">Detenteur du cycle</span>
+                      <span className="text-amber-300 text-sm">{t('circle.cycleHolder', 'Cycle holder')}</span>
                       <span className="text-amber-100 font-mono text-xs">
                         {formatAddress(cycleHolder)}
                       </span>
                     </div>
                     <p className="text-amber-200/70 text-xs mt-1">
-                      {cycleHolder === myContract ? 'C\'est VOTRE tour de signer!' :
+                      {cycleHolder === myContract ? t('circle.itsYourTurnToSign', "It's YOUR turn to sign!") :
                        activeContracts.indexOf(cycleHolder) >= 0
-                         ? `SC${activeContracts.indexOf(cycleHolder) + 1} doit signer`
-                         : 'Cycle termine'}
+                         ? `SC${activeContracts.indexOf(cycleHolder) + 1} ${t('circle.mustSign', 'must sign')}`
+                         : t('circle.cycleFinished', 'Cycle finished')}
                     </p>
                   </div>
                 )}
@@ -1866,18 +1876,18 @@ function CircleOfLife() {
                 {!cycleHolder && cycleDay > 0 && (
                   <div className="p-3 bg-green-500/20 border border-green-500/30 rounded-lg">
                     <p className="text-green-300 text-sm text-center">
-                      Cycle du jour #{cycleDay} termine!
+                      {t('circle.todayCycleFinished', "Today's cycle")} #{cycleDay} {t('circle.finished', 'finished')}!
                     </p>
                   </div>
                 )}
 
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Montant circulant</span>
+                  <span className="text-gray-400">{t('circle.circulatingAmount', 'Circulating amount')}</span>
                   <span className="text-white font-semibold">{circulationAmount} EGLD</span>
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Prochain cycle (UTC)</span>
+                  <span className="text-gray-400">{t('circle.nextCycleUTC', 'Next cycle (UTC)')}</span>
                   <span className="text-orange-400 font-semibold">{formatTimeRemaining()}</span>
                 </div>
 
@@ -1885,9 +1895,9 @@ function CircleOfLife() {
                 {activeContractsCount > 0 && (
                   <div className="mt-4">
                     <div className="flex justify-between text-xs text-gray-400 mb-1">
-                      <span>Progression</span>
+                      <span>{t('circle.progress', 'Progress')}</span>
                       <span className={isCycleComplete ? 'text-green-400 font-bold' : ''}>
-                        {progressPercentage}%{isCycleComplete && ' - Termine!'}
+                        {progressPercentage}%{isCycleComplete && ` - ${t('circle.finished', 'Finished')}!`}
                       </span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-2">
@@ -1902,7 +1912,7 @@ function CircleOfLife() {
                     </div>
                     {isCycleComplete && (
                       <p className="text-green-400 text-xs mt-2 text-center animate-pulse">
-                        Le cycle est complet! Les fonds sont revenus au centre (SC0)
+                        {t('circle.cycleCompleteMessage', 'The cycle is complete! Funds have returned to the center (SC0)')}
                       </p>
                     )}
                   </div>
@@ -1912,12 +1922,12 @@ function CircleOfLife() {
 
             {/* Cycle Statistics */}
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
-              <h3 className="text-lg font-bold text-white mb-4">Statistiques des Cycles</h3>
+              <h3 className="text-lg font-bold text-white mb-4">{t('circle.cycleStatistics', 'Cycle Statistics')}</h3>
 
               <div className="space-y-4">
                 {/* Total cycles */}
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Total des cycles</span>
+                  <span className="text-gray-400">{t('circle.totalCycles', 'Total cycles')}</span>
                   <span className="text-white font-semibold">{cycleStats.totalCycles}</span>
                 </div>
 
@@ -1926,13 +1936,13 @@ function CircleOfLife() {
                   {/* Completed */}
                   <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold text-green-400">{cycleStats.cyclesCompleted}</div>
-                    <div className="text-xs text-green-300">Reussis</div>
+                    <div className="text-xs text-green-300">{t('circle.successful', 'Successful')}</div>
                   </div>
 
                   {/* Failed */}
                   <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold text-red-400">{cycleStats.cyclesFailed}</div>
-                    <div className="text-xs text-red-300">Echoues</div>
+                    <div className="text-xs text-red-300">{t('circle.failed', 'Failed')}</div>
                   </div>
                 </div>
 
@@ -1940,7 +1950,7 @@ function CircleOfLife() {
                 {cycleStats.totalCycles > 0 && (
                   <div>
                     <div className="flex justify-between text-xs text-gray-400 mb-1">
-                      <span>Taux de reussite</span>
+                      <span>{t('circle.successRate', 'Success rate')}</span>
                       <span className={cycleStats.cyclesCompleted / cycleStats.totalCycles >= 0.8 ? 'text-green-400' : cycleStats.cyclesCompleted / cycleStats.totalCycles >= 0.5 ? 'text-yellow-400' : 'text-red-400'}>
                         {Math.round((cycleStats.cyclesCompleted / cycleStats.totalCycles) * 100)}%
                       </span>
@@ -1958,15 +1968,15 @@ function CircleOfLife() {
                       </div>
                     </div>
                     <div className="flex justify-between text-xs mt-1">
-                      <span className="text-green-400">{cycleStats.cyclesCompleted} reussis</span>
-                      <span className="text-red-400">{cycleStats.cyclesFailed} echoues</span>
+                      <span className="text-green-400">{cycleStats.cyclesCompleted} {t('circle.successful', 'successful')}</span>
+                      <span className="text-red-400">{cycleStats.cyclesFailed} {t('circle.failed', 'failed')}</span>
                     </div>
                   </div>
                 )}
 
                 {cycleStats.totalCycles === 0 && (
                   <p className="text-gray-400 text-sm text-center py-2">
-                    Aucun cycle termine pour le moment
+                    {t('circle.noCyclesYet', 'No cycles completed yet')}
                   </p>
                 )}
               </div>
@@ -1976,13 +1986,13 @@ function CircleOfLife() {
             {myContract && (
               <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 shadow-xl overflow-hidden">
                 <h3 className="text-base sm:text-lg font-bold text-white mb-3 sm:mb-4 flex items-center gap-2">
-                  <span>&#x1F3C6;</span> <span className="truncate">Recompenses XCIRCLEX</span>
+                  <span>&#x1F3C6;</span> <span className="truncate">{t('circle.xcirclexRewards', 'XCIRCLEX Rewards')}</span>
                 </h3>
 
                 <div className="space-y-3 sm:space-y-4">
                   {/* Current day */}
                   <div className="flex justify-between items-center gap-2">
-                    <span className="text-gray-400 text-sm sm:text-base">Jour (UTC)</span>
+                    <span className="text-gray-400 text-sm sm:text-base">{t('circle.dayUTC', 'Day (UTC)')}</span>
                     <span className={`font-semibold text-sm sm:text-base ${canClaim.isSunday ? 'text-green-400' : 'text-white'}`}>
                       {getDayName(dayOfWeek)}
                       {canClaim.isSunday && ' ✓'}
@@ -1991,7 +2001,7 @@ function CircleOfLife() {
 
                   {/* Pending rewards */}
                   <div className="flex justify-between items-center gap-2">
-                    <span className="text-gray-400 text-sm sm:text-base truncate">Mes recompenses</span>
+                    <span className="text-gray-400 text-sm sm:text-base truncate">{t('circle.myRewards', 'My rewards')}</span>
                     <span className={`font-bold text-sm sm:text-lg flex-shrink-0 ${parseFloat(pendingRewards) > 0 ? 'text-yellow-400' : 'text-gray-400'}`}>
                       {pendingRewards} XCX
                     </span>
@@ -1999,7 +2009,7 @@ function CircleOfLife() {
 
                   {/* Reward per cycle */}
                   <div className="flex justify-between items-center gap-2">
-                    <span className="text-gray-400 text-sm sm:text-base truncate">Recompense/cycle</span>
+                    <span className="text-gray-400 text-sm sm:text-base truncate">{t('circle.rewardPerCycle', 'Reward/cycle')}</span>
                     <span className="text-white text-sm sm:text-base flex-shrink-0">{rewardsInfo.rewardPerCycle} XCX</span>
                   </div>
 
@@ -2007,7 +2017,7 @@ function CircleOfLife() {
                   {myContract && (
                     <div className="mt-2 p-2 sm:p-3 bg-gradient-to-r from-yellow-500/10 to-green-500/10 border border-yellow-500/30 rounded-lg overflow-hidden">
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 mb-2">
-                        <span className="text-yellow-300 font-semibold text-sm sm:text-base truncate">Recompense potentielle</span>
+                        <span className="text-yellow-300 font-semibold text-sm sm:text-base truncate">{t('circle.potentialReward', 'Potential reward')}</span>
                         <span className="text-green-400 font-bold text-base sm:text-lg">
                           {(() => {
                             const scCount = activeContracts.length || 1;
@@ -2034,7 +2044,7 @@ function CircleOfLife() {
                           <div className={`flex justify-between items-center gap-2 ${starterBonusInfo.cycleStarter === address ? 'text-cyan-400' : 'text-gray-500'}`}>
                             <span className="truncate">
                               + Starter (+{(starterBonusInfo.percentage / 100).toFixed(1)}%)
-                              {starterBonusInfo.cycleStarter !== address && <span className="ml-1 text-gray-600">(inactif)</span>}
+                              {starterBonusInfo.cycleStarter !== address && <span className="ml-1 text-gray-600">({t('circle.inactive', 'inactive')})</span>}
                             </span>
                             <span className="flex-shrink-0">
                               {starterBonusInfo.cycleStarter === address
@@ -2051,13 +2061,13 @@ function CircleOfLife() {
                         )}
                         {depositBonusInfo.bonusPercent > 0 && (
                           <div className="flex justify-between items-center text-amber-400 gap-2">
-                            <span className="truncate">+ Depot (+{depositBonusInfo.bonusPercent}%)</span>
+                            <span className="truncate">+ {t('circle.deposit', 'Deposit')} (+{depositBonusInfo.bonusPercent}%)</span>
                             <span className="flex-shrink-0">+{(((parseFloat(rewardsInfo.rewardPerCycle) || 0) / (activeContracts.length || 1)) * depositBonusInfo.bonusBps / 10000).toFixed(2)}</span>
                           </div>
                         )}
                         {!pioneerInfo.isPioneer && depositBonusInfo.bonusPercent === 0 && starterBonusInfo.percentage === 0 && (
                           <div className="text-gray-500 text-center text-xs">
-                            Deposez EGLD ou devenez pionnier!
+                            {t('circle.depositOrPioneer', 'Deposit EGLD or become a pioneer!')}
                           </div>
                         )}
                         <div className="flex justify-between items-center text-green-300 font-semibold pt-1 border-t border-green-500/20">
@@ -2083,26 +2093,26 @@ function CircleOfLife() {
 
                   {/* Total distributed */}
                   <div className="flex justify-between items-center gap-2 text-xs sm:text-sm">
-                    <span className="text-gray-500 truncate">Total distribue</span>
+                    <span className="text-gray-500 truncate">{t('circle.totalDistributed', 'Total distributed')}</span>
                     <span className="text-gray-400 flex-shrink-0">{rewardsInfo.totalRewardsDistributed} XCX</span>
                   </div>
 
                   {/* Burn Stats Section */}
                   <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-red-500/20">
                     <h4 className="text-red-400 font-semibold mb-2 flex items-center gap-2 text-sm sm:text-base">
-                      <span>&#x1F525;</span> Burn
+                      <span>&#x1F525;</span> {t('circle.burn', 'Burn')}
                     </h4>
                     <div className="space-y-2 text-xs sm:text-sm">
                       <div className="flex justify-between items-center gap-2">
-                        <span className="text-gray-400 truncate">Burn/SC/cycle</span>
+                        <span className="text-gray-400 truncate">{t('circle.burnPerScCycle', 'Burn/SC/cycle')}</span>
                         <span className="text-red-300 flex-shrink-0">{burnStats.burnPerSc} XCX</span>
                       </div>
                       <div className="flex justify-between items-center gap-2">
-                        <span className="text-gray-400 truncate">Prochain burn</span>
+                        <span className="text-gray-400 truncate">{t('circle.nextBurn', 'Next burn')}</span>
                         <span className="text-red-400 flex-shrink-0">{burnStats.estimatedNextBurn} XCX</span>
                       </div>
                       <div className="flex justify-between items-center gap-2">
-                        <span className="text-gray-500 truncate">Total brule</span>
+                        <span className="text-gray-500 truncate">{t('circle.totalBurned', 'Total burned')}</span>
                         <span className="text-red-500 font-bold flex-shrink-0">{burnStats.totalBurned} XCX</span>
                       </div>
                     </div>
@@ -2112,35 +2122,35 @@ function CircleOfLife() {
                   {starterBonusInfo.percentage > 0 && (
                     <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-cyan-500/20">
                       <h4 className="text-cyan-400 font-semibold mb-2 flex items-center gap-2 text-sm sm:text-base">
-                        <span>&#x2B50;</span> Starter
+                        <span>&#x2B50;</span> {t('circle.starter', 'Starter')}
                       </h4>
                       <div className="space-y-2 text-xs sm:text-sm">
                         <div className="flex justify-between items-center gap-2">
-                          <span className="text-gray-400 truncate">Bonus</span>
+                          <span className="text-gray-400 truncate">{t('circle.bonus', 'Bonus')}</span>
                           <span className="text-cyan-300 font-bold flex-shrink-0">+{(starterBonusInfo.percentage / 100).toFixed(1)}%</span>
                         </div>
                         <div className="flex justify-between items-center gap-2">
-                          <span className="text-gray-400 truncate">Potentiel</span>
+                          <span className="text-gray-400 truncate">{t('circle.potential', 'Potential')}</span>
                           <span className="text-cyan-400 flex-shrink-0">
                             {starterBonusInfo.potentialBonus} XCX
                           </span>
                         </div>
                         {starterBonusInfo.cycleStarter && (
                           <div className="flex justify-between items-center gap-2">
-                            <span className="text-gray-400 truncate">Demarre par</span>
+                            <span className="text-gray-400 truncate">{t('circle.startedBy', 'Started by')}</span>
                             <span className={`font-mono text-xs flex-shrink-0 ${starterBonusInfo.cycleStarter === address ? 'text-green-400 font-bold' : 'text-cyan-300'}`}>
-                              {starterBonusInfo.cycleStarter === address ? 'VOUS!' : formatAddress(starterBonusInfo.cycleStarter)}
+                              {starterBonusInfo.cycleStarter === address ? t('circle.you', 'YOU') + '!' : formatAddress(starterBonusInfo.cycleStarter)}
                             </span>
                           </div>
                         )}
                         <div className="flex justify-between items-center gap-2">
-                          <span className="text-gray-500 truncate">Total distribue</span>
+                          <span className="text-gray-500 truncate">{t('circle.totalDistributed', 'Total distributed')}</span>
                           <span className="text-cyan-500 flex-shrink-0">{starterBonusInfo.totalDistributed} XCX</span>
                         </div>
                       </div>
                       {!cycleHolder && !starterBonusInfo.cycleStarter && (
                         <p className="text-cyan-400/70 text-xs mt-2 text-center">
-                          Demarrez le cycle pour le bonus!
+                          {t('circle.startCycleForBonus', 'Start the cycle for the bonus!')}
                         </p>
                       )}
                     </div>
@@ -2149,64 +2159,64 @@ function CircleOfLife() {
                   {/* π × 360 Halving System */}
                   <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-purple-500/20">
                     <h4 className="text-purple-400 font-semibold mb-2 flex items-center gap-2 text-sm sm:text-base">
-                      <span>&#x03C0;</span> <span className="truncate">Systeme &#x03C0;x360</span>
+                      <span>&#x03C0;</span> <span className="truncate">{t('circle.piSystem', 'System πx360')}</span>
                     </h4>
                     <div className="space-y-2 text-xs sm:text-sm">
                       <div className="flex justify-between items-center gap-2">
-                        <span className="text-gray-400 truncate">Recompense</span>
+                        <span className="text-gray-400 truncate">{t('circle.reward', 'Reward')}</span>
                         <span className="text-purple-300 font-bold flex-shrink-0">{optionFInfo.currentReward || rewardsInfo.rewardPerCycle} XCX</span>
                       </div>
                       <div className="flex justify-between items-center gap-2">
-                        <span className="text-gray-400 truncate">Ere</span>
-                        <span className="text-purple-300 flex-shrink-0">Ere {optionFInfo.currentEra}</span>
+                        <span className="text-gray-400 truncate">{t('circle.era', 'Era')}</span>
+                        <span className="text-purple-300 flex-shrink-0">{t('circle.era', 'Era')} {optionFInfo.currentEra}</span>
                       </div>
                       <div className="flex justify-between items-center gap-2">
-                        <span className="text-gray-400 truncate">Halving</span>
-                        <span className="text-purple-400 flex-shrink-0">Dans {optionFInfo.cyclesUntilHalving} cycles</span>
+                        <span className="text-gray-400 truncate">{t('circle.halving', 'Halving')}</span>
+                        <span className="text-purple-400 flex-shrink-0">{t('circle.in', 'In')} {optionFInfo.cyclesUntilHalving} {t('circle.cycles', 'cycles')}</span>
                       </div>
                       <div className="flex justify-between items-center gap-2">
-                        <span className="text-gray-400 truncate">Cercle complet</span>
+                        <span className="text-gray-400 truncate">{t('circle.fullCircle', 'Full circle')}</span>
                         <span className="text-purple-300 flex-shrink-0">#{optionFInfo.nextCircleComplete}</span>
                       </div>
                       <div className="flex justify-between items-center gap-2">
-                        <span className="text-gray-400 truncate">Bonus &#x03C0;%</span>
+                        <span className="text-gray-400 truncate">{t('circle.piBonus', 'Bonus π%')}</span>
                         <span className="text-pink-400 font-bold flex-shrink-0">+{optionFInfo.piBonusAmount || ((parseFloat(rewardsInfo.rewardPerCycle) * 0.0314).toFixed(2))} XCX</span>
                       </div>
                     </div>
                     <p className="text-purple-400/60 text-xs mt-2 text-center">
-                      Halving /360 cycles - Bonus +3.14% aux #360, #720...
+                      {t('circle.halvingInfo', 'Halving /360 cycles - Bonus +3.14% at #360, #720...')}
                     </p>
                   </div>
 
                   {/* Pioneer Bonus Section */}
                   <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-emerald-500/20">
                     <h4 className="text-emerald-400 font-semibold mb-2 flex items-center gap-2 text-sm sm:text-base">
-                      <span>&#x1F31F;</span> <span className="truncate">Pionnier &#x03C0;%</span>
+                      <span>&#x1F31F;</span> <span className="truncate">{t('circle.pioneerPi', 'Pioneer π%')}</span>
                     </h4>
                     <div className="space-y-2 text-xs sm:text-sm">
                       {/* User Pioneer Status */}
                       <div className="flex justify-between items-center gap-2">
-                        <span className="text-gray-400 truncate">Statut</span>
+                        <span className="text-gray-400 truncate">{t('circle.status', 'Status')}</span>
                         {pioneerInfo.isPioneer ? (
                           <span className="text-emerald-400 font-bold flex items-center gap-1 flex-shrink-0">
                             <span className="animate-pulse">&#x2B50;</span> #{pioneerInfo.index}
                           </span>
                         ) : (
-                          <span className="text-gray-500 flex-shrink-0">Non pionnier</span>
+                          <span className="text-gray-500 flex-shrink-0">{t('circle.notPioneer', 'Not a pioneer')}</span>
                         )}
                       </div>
 
                       {/* Pioneer Bonus */}
                       {pioneerInfo.isPioneer && (
                         <div className="flex justify-between items-center gap-2">
-                          <span className="text-gray-400 truncate">Bonus</span>
+                          <span className="text-gray-400 truncate">{t('circle.bonus', 'Bonus')}</span>
                           <span className="text-emerald-300 font-bold flex-shrink-0">+{(pioneerInfo.bonusPercentage / 100).toFixed(2)}%</span>
                         </div>
                       )}
 
                       {/* Pioneer Slots */}
                       <div className="flex justify-between items-center gap-2">
-                        <span className="text-gray-400 truncate">Places</span>
+                        <span className="text-gray-400 truncate">{t('circle.slots', 'Slots')}</span>
                         <span className={`font-semibold flex-shrink-0 ${pioneerInfo.remainingSlots > 0 ? 'text-emerald-300' : 'text-gray-500'}`}>
                           {pioneerInfo.totalPioneers}/360
                         </span>
@@ -2215,7 +2225,7 @@ function CircleOfLife() {
                       {/* Remaining slots */}
                       {pioneerInfo.remainingSlots > 0 && (
                         <div className="flex justify-between items-center gap-2">
-                          <span className="text-gray-400 truncate">Restantes</span>
+                          <span className="text-gray-400 truncate">{t('circle.remaining', 'Remaining')}</span>
                           <span className="text-emerald-400 font-bold flex-shrink-0">{pioneerInfo.remainingSlots}</span>
                         </div>
                       )}
@@ -2229,24 +2239,24 @@ function CircleOfLife() {
                           />
                         </div>
                         <p className="text-emerald-400/60 text-xs mt-1 text-center">
-                          {((pioneerInfo.totalPioneers / 360) * 100).toFixed(1)}% attribuees
+                          {((pioneerInfo.totalPioneers / 360) * 100).toFixed(1)}% {t('circle.allocated', 'allocated')}
                         </p>
                       </div>
                     </div>
                     <p className="text-emerald-400/60 text-xs mt-2 text-center">
-                      360 premiers SC = +3.14% permanent
+                      {t('circle.first360SC', 'First 360 SC = +3.14% permanent')}
                     </p>
                   </div>
 
                   {/* Deposit Bonus Section */}
                   <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-amber-500/20">
                     <h4 className="text-amber-400 font-semibold mb-2 flex items-center gap-2 text-sm sm:text-base">
-                      <span>&#x1F4B0;</span> <span className="truncate">Depot EGLD</span>
+                      <span>&#x1F4B0;</span> <span className="truncate">{t('circle.depositEGLD', 'EGLD Deposit')}</span>
                     </h4>
                     <div className="space-y-2 text-xs sm:text-sm">
                       {/* Deposit bonus info */}
                       <div className="flex justify-between items-center gap-2">
-                        <span className="text-gray-400 truncate">Depots</span>
+                        <span className="text-gray-400 truncate">{t('circle.deposits', 'Deposits')}</span>
                         <span className={`font-semibold flex-shrink-0 ${parseFloat(depositBonusInfo.totalDeposits) > 0 ? 'text-amber-300' : 'text-gray-500'}`}>
                           {parseFloat(depositBonusInfo.totalDeposits).toFixed(2)} EGLD
                         </span>
@@ -2254,7 +2264,7 @@ function CircleOfLife() {
 
                       {/* Current bonus */}
                       <div className="flex justify-between items-center gap-2">
-                        <span className="text-gray-400 truncate">Bonus</span>
+                        <span className="text-gray-400 truncate">{t('circle.bonus', 'Bonus')}</span>
                         <span className={`font-bold flex-shrink-0 ${depositBonusInfo.bonusPercent > 0 ? 'text-amber-400' : 'text-gray-500'}`}>
                           +{depositBonusInfo.bonusPercent}%
                         </span>
@@ -2262,7 +2272,7 @@ function CircleOfLife() {
 
                       {/* Max bonus */}
                       <div className="flex justify-between items-center gap-2">
-                        <span className="text-gray-400 truncate">Max</span>
+                        <span className="text-gray-400 truncate">{t('circle.max', 'Max')}</span>
                         <span className="text-amber-300/70 flex-shrink-0">+{depositBonusInfo.maxBonusPercent}%</span>
                       </div>
 
@@ -2288,10 +2298,10 @@ function CircleOfLife() {
                   {!canClaim.isSunday && parseFloat(pendingRewards) > 0 && (
                     <div className="p-3 bg-orange-500/20 border border-orange-500/30 rounded-lg">
                       <p className="text-orange-300 text-sm text-center">
-                        &#x23F0; Les recompenses peuvent etre reclamees uniquement le dimanche (UTC)
+                        &#x23F0; {t('circle.claimOnlySunday', 'Rewards can only be claimed on Sunday (UTC)')}
                       </p>
                       <p className="text-orange-200 text-xs text-center mt-1">
-                        Dimanche UTC = Dimanche 01:00 heure francaise
+                        {t('circle.sundayUTCNote', 'Sunday UTC = Sunday 01:00 French time')}
                       </p>
                     </div>
                   )}
@@ -2299,7 +2309,7 @@ function CircleOfLife() {
                   {canClaim.isSunday && parseFloat(pendingRewards) > 0 && (
                     <div className="p-3 bg-green-500/20 border border-green-500/30 rounded-lg">
                       <p className="text-green-300 text-sm text-center">
-                        &#x2705; C&apos;est dimanche (UTC) ! Vous pouvez reclamer vos recompenses
+                        &#x2705; {t('circle.itsSundayClaim', "It's Sunday (UTC)! You can claim your rewards")}
                       </p>
                     </div>
                   )}
@@ -2316,9 +2326,9 @@ function CircleOfLife() {
                   >
                     {canClaim.isSunday
                       ? parseFloat(pendingRewards) > 0
-                        ? `Reclamer ${pendingRewards} XCIRCLEX`
-                        : 'Aucune recompense a reclamer'
-                      : `Disponible dimanche (${pendingRewards} XCIRCLEX)`}
+                        ? `${t('circle.claim', 'Claim')} ${pendingRewards} XCIRCLEX`
+                        : t('circle.noRewardsToClaim', 'No rewards to claim')
+                      : `${t('circle.availableSunday', 'Available Sunday')} (${pendingRewards} XCIRCLEX)`}
                   </button>
                 </div>
               </div>
@@ -2328,22 +2338,22 @@ function CircleOfLife() {
             {preSignedMembers.length > 0 && (
               <div className="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6">
                 <h3 className="text-lg font-bold text-blue-300 mb-3">
-                  Pre-signatures ({preSignedMembers.length})
+                  {t('circle.preSignatures', 'Pre-signatures')} ({preSignedMembers.length})
                 </h3>
                 <p className="text-blue-200/70 text-sm mb-3">
-                  Ces membres ont pre-signe. Leur transfert s&apos;executera automatiquement.
+                  {t('circle.preSignaturesDesc', 'These members have pre-signed. Their transfer will execute automatically.')}
                 </p>
                 <div className="space-y-2">
                   {preSignedMembers.slice(0, 5).map((member, index) => (
                     <div key={member} className="flex items-center gap-2 text-sm">
                       <span className="text-blue-400">&#x2713;</span>
                       <span className="text-blue-200 font-mono">{formatAddress(member)}</span>
-                      {member === address && <span className="text-blue-400 text-xs">(vous)</span>}
+                      {member === address && <span className="text-blue-400 text-xs">({t('circle.you', 'you')})</span>}
                     </div>
                   ))}
                   {preSignedMembers.length > 5 && (
                     <p className="text-blue-300/50 text-xs">
-                      +{preSignedMembers.length - 5} autres...
+                      +{preSignedMembers.length - 5} {t('circle.others', 'others')}...
                     </p>
                   )}
                 </div>
@@ -2356,20 +2366,20 @@ function CircleOfLife() {
         {/* Contracts List */}
         <div className="mt-8 bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
           <h2 className="text-xl font-bold text-white mb-4">
-            Smart Contracts Actifs ({activeContracts.length})
+            {t('circle.activeSmartContracts', 'Active Smart Contracts')} ({activeContracts.length})
           </h2>
 
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="text-left text-gray-400 border-b border-white/10">
-                  <th className="pb-3 pr-4">Position</th>
-                  <th className="pb-3 pr-4">Adresse du Contrat</th>
-                  <th className="pb-3 pr-4">Proprietaire</th>
-                  <th className="pb-3 pr-4">Cycles Reussis</th>
-                  <th className="pb-3 pr-4">Cycles Echoues</th>
-                  <th className="pb-3 pr-4">Statut</th>
-                  <th className="pb-3">Tour</th>
+                  <th className="pb-3 pr-4">{t('circle.position', 'Position')}</th>
+                  <th className="pb-3 pr-4">{t('circle.contractAddress', 'Contract Address')}</th>
+                  <th className="pb-3 pr-4">{t('circle.owner', 'Owner')}</th>
+                  <th className="pb-3 pr-4">{t('circle.successfulCycles', 'Successful Cycles')}</th>
+                  <th className="pb-3 pr-4">{t('circle.failedCycles', 'Failed Cycles')}</th>
+                  <th className="pb-3 pr-4">{t('circle.status', 'Status')}</th>
+                  <th className="pb-3">{t('circle.turn', 'Turn')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -2400,7 +2410,7 @@ function CircleOfLife() {
                           {formatAddress(contractAddr)}
                         </a>
                         {isMyContractNode && (
-                          <span className="ml-2 text-xs text-blue-400">(votre SC)</span>
+                          <span className="ml-2 text-xs text-blue-400">({t('circle.yourSC', 'your SC')})</span>
                         )}
                       </td>
                       <td className="py-3 pr-4">
@@ -2412,7 +2422,7 @@ function CircleOfLife() {
                             className={`font-mono text-sm hover:text-blue-400 transition ${isMyAccount ? 'text-blue-400' : 'text-gray-400'}`}
                           >
                             {formatAddress(ownerAddress)}
-                            {isMyAccount && <span className="ml-1 text-xs">(vous)</span>}
+                            {isMyAccount && <span className="ml-1 text-xs">({t('circle.you', 'you')})</span>}
                           </a>
                         ) : (
                           <span className="text-gray-500 text-sm">-</span>
@@ -2428,24 +2438,24 @@ function CircleOfLife() {
                       </td>
                       <td className="py-3 pr-4">
                         <span className="px-2 py-1 rounded text-xs font-semibold bg-green-500/20 text-green-300">
-                          Actif
+                          {t('circle.active', 'Active')}
                         </span>
                       </td>
                       <td className="py-3">
                         {isCycleComplete ? (
                           <span className="px-2 py-1 rounded text-xs font-semibold bg-green-500/20 text-green-300">
-                            Signe &#x2713;
+                            {t('circle.signed', 'Signed')} &#x2713;
                           </span>
                         ) : isCurrent ? (
                           <span className="px-2 py-1 rounded text-xs font-semibold bg-amber-500/20 text-amber-300 animate-pulse">
-                            Tour actuel
+                            {t('circle.currentTurn', 'Current turn')}
                           </span>
                         ) : hasSigned ? (
                           <span className="px-2 py-1 rounded text-xs font-semibold bg-green-500/20 text-green-300">
-                            Signe &#x2713;
+                            {t('circle.signed', 'Signed')} &#x2713;
                           </span>
                         ) : (
-                          <span className="text-gray-500 text-sm">En attente</span>
+                          <span className="text-gray-500 text-sm">{t('circle.waiting', 'Waiting')}</span>
                         )}
                       </td>
                     </tr>
@@ -2457,8 +2467,8 @@ function CircleOfLife() {
 
           {activeContracts.length === 0 && (
             <div className="text-center py-8">
-              <p className="text-gray-400">Aucun smart contract actif pour le moment</p>
-              <p className="text-gray-500 text-sm mt-2">Soyez le premier a rejoindre le Cercle de Vie !</p>
+              <p className="text-gray-400">{t('circle.noActiveContracts', 'No active smart contracts yet')}</p>
+              <p className="text-gray-500 text-sm mt-2">{t('circle.beFirstToJoin', 'Be the first to join the Circle of Life!')}</p>
             </div>
           )}
         </div>
@@ -2467,19 +2477,19 @@ function CircleOfLife() {
         {inactiveContracts.length > 0 && (
           <div className="mt-6 bg-white/5 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-gray-500/20">
             <h2 className="text-xl font-bold text-gray-400 mb-4">
-              Smart Contracts Inactifs ({inactiveContracts.length})
+              {t('circle.inactiveSmartContracts', 'Inactive Smart Contracts')} ({inactiveContracts.length})
             </h2>
 
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="text-left text-gray-500 border-b border-white/10">
-                    <th className="pb-3 pr-4">Contrat</th>
-                    <th className="pb-3 pr-4">Adresse du Contrat</th>
-                    <th className="pb-3 pr-4">Proprietaire</th>
-                    <th className="pb-3 pr-4">Cycles Reussis</th>
-                    <th className="pb-3 pr-4">Cycles Echoues</th>
-                    <th className="pb-3">Statut</th>
+                    <th className="pb-3 pr-4">{t('circle.contract', 'Contract')}</th>
+                    <th className="pb-3 pr-4">{t('circle.contractAddress', 'Contract Address')}</th>
+                    <th className="pb-3 pr-4">{t('circle.owner', 'Owner')}</th>
+                    <th className="pb-3 pr-4">{t('circle.successfulCycles', 'Successful Cycles')}</th>
+                    <th className="pb-3 pr-4">{t('circle.failedCycles', 'Failed Cycles')}</th>
+                    <th className="pb-3">{t('circle.status', 'Status')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2508,7 +2518,7 @@ function CircleOfLife() {
                             {formatAddress(contractAddr)}
                           </a>
                           {isMyContractNode && (
-                            <span className="ml-2 text-xs text-blue-400">(votre SC)</span>
+                            <span className="ml-2 text-xs text-blue-400">({t('circle.yourSC', 'your SC')})</span>
                           )}
                         </td>
                         <td className="py-3 pr-4">
@@ -2520,7 +2530,7 @@ function CircleOfLife() {
                               className={`font-mono text-sm hover:text-blue-400 transition ${isMyAccount ? 'text-blue-400' : 'text-gray-500'}`}
                             >
                               {formatAddress(ownerAddress)}
-                              {isMyAccount && <span className="ml-1 text-xs">(vous)</span>}
+                              {isMyAccount && <span className="ml-1 text-xs">({t('circle.you', 'you')})</span>}
                             </a>
                           ) : (
                             <span className="text-gray-500 text-sm">-</span>
@@ -2538,15 +2548,15 @@ function CircleOfLife() {
                           {isBannedSc ? (
                             <div>
                               <span className="px-2 py-1 rounded text-xs font-semibold bg-red-500/20 text-red-400">
-                                Banni
+                                {t('circle.banned', 'Banned')}
                               </span>
                               <p className="text-red-400/70 text-xs mt-1">
-                                jusqu&apos;au {banUntilDate}
+                                {t('circle.until', 'until')} {banUntilDate}
                               </p>
                             </div>
                           ) : (
                             <span className="px-2 py-1 rounded text-xs font-semibold bg-gray-500/20 text-gray-400">
-                              Inactif
+                              {t('circle.inactive', 'Inactive')}
                             </span>
                           )}
                         </td>
@@ -2558,10 +2568,10 @@ function CircleOfLife() {
             </div>
 
             <p className="text-gray-500 text-sm mt-4 text-center">
-              Les contrats inactifs ne participent pas aux cycles quotidiens.
+              {t('circle.inactiveContractsNote', 'Inactive contracts do not participate in daily cycles.')}
               {inactiveContracts.some(c => scStats.get(c)?.isBanned) && (
                 <span className="text-red-400 block mt-1">
-                  Les contrats bannis ne peuvent pas etre reactives avant la fin du ban (7 jours).
+                  {t('circle.bannedContractsNote', 'Banned contracts cannot be reactivated until the ban ends (7 days).')}
                 </span>
               )}
             </p>
@@ -2572,7 +2582,7 @@ function CircleOfLife() {
         <div className="mt-8 bg-white/5 rounded-xl p-4 border border-white/10">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <p className="text-gray-400 text-sm">Smart Contract Circle of Life Center (SC0)</p>
+              <p className="text-gray-400 text-sm">{t('circle.sc0Info', 'Smart Contract Circle of Life Center (SC0)')}</p>
               <p className="text-white font-mono text-xs md:text-sm break-all">{CIRCLE_OF_LIFE_ADDRESS}</p>
             </div>
             <a
@@ -2581,7 +2591,7 @@ function CircleOfLife() {
               rel="noopener noreferrer"
               className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 transition"
             >
-              Voir sur Explorer &#8599;
+              {t('circle.viewOnExplorer', 'View on Explorer')} &#8599;
             </a>
           </div>
         </div>

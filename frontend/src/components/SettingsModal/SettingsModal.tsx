@@ -50,11 +50,11 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
 
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
     const saved = localStorage.getItem('themeMode') as ThemeMode;
-    return saved || 'auto';
+    return saved || 'xcirclex';
   });
 
   const [language, setLanguage] = useState<Language>(() => {
-    return i18n.language as Language || 'fr';
+    return i18n.language as Language || 'en';
   });
 
   const [selectedNetwork, setSelectedNetwork] = useState<Network>(() => {
