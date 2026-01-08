@@ -193,7 +193,8 @@
       "Bash(python -c:*)",
       "Bash(powershell.exe -Command \"Invoke-RestMethod -Uri ''https://devnet-api.multiversx.com/vm-values/query'' -Method Post -ContentType ''application/json'' -Body ''{\"\"scAddress\"\": \"\"erd1qqqqqqqqqqqqqpgq5h7twxcl5fd0fwkfujxsnj7v6ww8ezd2flfqxnd5lt\"\", \"\"funcName\"\": \"\"getIdoInfo\"\", \"\"args\"\": []}'' | ConvertTo-Json -Depth 5\")",
       "Bash(powershell.exe -Command \"Invoke-RestMethod -Uri ''https://devnet-api.multiversx.com/vm-values/query'' -Method Post -ContentType ''application/json'' -Body ''{\"\"scAddress\"\": \"\"erd1qqqqqqqqqqqqqpgq5h7twxcl5fd0fwkfujxsnj7v6ww8ezd2flfqxnd5lt\"\", \"\"funcName\"\": \"\"getTotalRaised\"\", \"\"args\"\": []}'' | ConvertTo-Json -Depth 5\")",
-      "Bash(powershell.exe -Command \"Invoke-RestMethod -Uri ''https://devnet-api.multiversx.com/vm-values/query'' -Method Post -ContentType ''application/json'' -Body ''{\"\"scAddress\"\": \"\"erd1qqqqqqqqqqqqqpgq5h7twxcl5fd0fwkfujxsnj7v6ww8ezd2flfqxnd5lt\"\", \"\"funcName\"\": \"\"getTimeRemaining\"\", \"\"args\"\": []}'' | ConvertTo-Json -Depth 5\")"
+      "Bash(powershell.exe -Command \"Invoke-RestMethod -Uri ''https://devnet-api.multiversx.com/vm-values/query'' -Method Post -ContentType ''application/json'' -Body ''{\"\"scAddress\"\": \"\"erd1qqqqqqqqqqqqqpgq5h7twxcl5fd0fwkfujxsnj7v6ww8ezd2flfqxnd5lt\"\", \"\"funcName\"\": \"\"getTimeRemaining\"\", \"\"args\"\": []}'' | ConvertTo-Json -Depth 5\")",
+      "Bash(git push)"
     ],
     "deny": [],
     "ask": []

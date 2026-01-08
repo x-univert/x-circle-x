@@ -804,6 +804,91 @@
     "againstBtn": "EN CONTRA",
     "votingInProgress": "Votacion en progreso..."
   },
+  "ido": {
+    "pageTitle": "XCIRCLEX IDO",
+    "subtitle": "Oferta Inicial DEX - Participa en el lanzamiento del token XCIRCLEX y unete al ecosistema X-CIRCLE-X",
+    "connectPrompt": "Participa en la IDO de XCIRCLEX",
+    "connectDescription": "Conecta tu wallet MultiversX para participar en la venta inicial de tokens",
+    "connectWallet": "Conectar Wallet",
+    "status": {
+      "notStarted": "Proximamente",
+      "active": "Activa",
+      "ended": "Finalizada",
+      "finalized": "Finalizada",
+      "cancelled": "Cancelada",
+      "unknown": "Desconocido"
+    },
+    "timer": {
+      "timeRemaining": "Tiempo restante",
+      "startsIn": "Comienza en",
+      "ended": "IDO Finalizada",
+      "finished": "FINALIZADA"
+    },
+    "info": {
+      "title": "Informacion de la IDO",
+      "progress": "Progreso",
+      "softCap": "Soft Cap",
+      "hardCap": "Hard Cap",
+      "reached": "Alcanzado!",
+      "rate": "Tasa",
+      "participants": "Participantes",
+      "allocation": "Asignacion IDO",
+      "minMax": "Min/Max"
+    },
+    "participate": {
+      "title": "Participar",
+      "yourBalance": "Tu saldo",
+      "yourContribution": "Tu contribucion",
+      "tokensToReceive": "Tokens a recibir",
+      "amount": "Cantidad (EGLD)",
+      "contribute": "Contribuir",
+      "contributing": "Transaccion en progreso...",
+      "idoNotStarted": "La IDO aun no ha comenzado",
+      "claimTokens": "Reclamar tus tokens",
+      "claiming": "Transaccion en progreso...",
+      "requestRefund": "Solicitar reembolso",
+      "refunding": "Transaccion en progreso...",
+      "alreadyClaimed": "Tokens ya reclamados!",
+      "alreadyRefunded": "Ya reembolsado!",
+      "waitingFinalization": "Esperando finalizacion...",
+      "noContribution": "Sin contribucion a procesar"
+    },
+    "tokenomics": {
+      "title": "Distribucion de Tokens (Tokenomics)",
+      "circleRewards": "Recompensas Circulo de Vida",
+      "liquidityPool": "Pool de Liquidez",
+      "stakingRewards": "Recompensas de Staking",
+      "team": "Equipo (24 meses)",
+      "daoTreasury": "Tesoreria DAO",
+      "idoYou": "IDO (Tu!)",
+      "marketing": "Marketing (12 meses)",
+      "advisors": "Asesores",
+      "airdrop": "Airdrop",
+      "summary": "IDO: 5% = ~15.7M XCIRCLEX | Objetivo: 360 EGLD | Tasa: 1 EGLD = 43,633 XCIRCLEX"
+    },
+    "protection": {
+      "title": "Protecciones para Inversores",
+      "lockedLiquidity": "Liquidez Bloqueada",
+      "lockedLiquidityDesc": "La liquidez inicial esta bloqueada por al menos 12 meses via nuestro LP Locker. Sin posibilidad de rug pull.",
+      "antiWhale": "Anti-Ballena",
+      "antiWhaleDesc": "Maximo 2% del supply por wallet para evitar concentracion excesiva.",
+      "teamVesting": "Vesting del Equipo",
+      "teamVestingDesc": "Tokens del equipo bloqueados 24 meses con cliff de 6 meses. Alineacion a largo plazo."
+    },
+    "contract": {
+      "idoContract": "Contrato IDO",
+      "contractExplorer": "Explorador de Contrato",
+      "tokenExplorer": "Explorador de Token"
+    },
+    "errors": {
+      "loadingError": "Error al cargar datos",
+      "contributionError": "Error durante la contribucion",
+      "claimError": "Error al reclamar tokens",
+      "refundError": "Error durante el reembolso",
+      "minContribution": "La contribucion minima es {{amount}} EGLD",
+      "maxContribution": "La contribucion maxima es {{amount}} EGLD"
+    }
+  },
   "days": {
     "sunday": "Domingo",
     "monday": "Lunes",

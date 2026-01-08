@@ -1,11 +1,13 @@
 import { useGetIsLoggedIn, useGetAccountInfo } from 'lib'
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { IDO_CONFIG, XCIRCLEX_TOKEN_ID, IDO_CONTRACT_ADDRESS } from '../config/contracts'
 import * as idoService from '../services/idoService'
 import { Contribution, IdoStatus, IdoInfo } from '../services/idoService'
 
 function IDO() {
+  const { t } = useTranslation()
   const isLoggedIn = useGetIsLoggedIn()
   const { address } = useGetAccountInfo()
   const navigate = useNavigate()
@@ -57,7 +59,7 @@ function IDO() {
       }
     } catch (err) {
       console.error('Error fetching IDO data:', err)
-      setError('Erreur lors du chargement des donnees')
+      setError(t('ido.errors.loadingError'))
     } finally {
       setIsLoadingData(false)
     }
@@ -83,12 +85,12 @@ function IDO() {
 
   // Format time remaining
   const formatTimeRemaining = (seconds: number) => {
-    if (seconds <= 0) return 'TERMINEE'
+    if (seconds <= 0) return t('ido.timer.finished')
     const days = Math.floor(seconds / (24 * 60 * 60))
     const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60))
     const minutes = Math.floor((seconds % (60 * 60)) / 60)
     const secs = seconds % 60
-    return `${days}j ${hours}h ${minutes}m ${secs}s`
+    return `${days}d ${hours}h ${minutes}m ${secs}s`
   }
 
   // Calculate tokens for contribution
@@ -102,11 +104,11 @@ function IDO() {
 
     const amount = parseFloat(contributionAmount)
     if (!amount || amount < IDO_CONFIG.minContribution) {
-      setError(`Minimum contribution is ${IDO_CONFIG.minContribution} EGLD`)
+      setError(t('ido.errors.minContribution', { amount: IDO_CONFIG.minContribution }))
       return
     }
     if (amount > IDO_CONFIG.maxContribution) {
-      setError(`Maximum contribution is ${IDO_CONFIG.maxContribution} EGLD`)
+      setError(t('ido.errors.maxContribution', { amount: IDO_CONFIG.maxContribution }))
       return
     }
 
@@ -118,7 +120,7 @@ function IDO() {
       await fetchData() // Refresh data
     } catch (err) {
       console.error('Error contributing:', err)
-      setError('Erreur lors de la contribution')
+      setError(t('ido.errors.contributionError'))
     } finally {
       setIsLoading(false)
     }
@@ -134,7 +136,7 @@ function IDO() {
       await fetchData() // Refresh data
     } catch (err) {
       console.error('Error claiming tokens:', err)
-      setError('Erreur lors de la reclamation des tokens')
+      setError(t('ido.errors.claimError'))
     } finally {
       setIsLoading(false)
     }
@@ -150,7 +152,7 @@ function IDO() {
       await fetchData() // Refresh data
     } catch (err) {
       console.error('Error requesting refund:', err)
-      setError('Erreur lors du remboursement')
+      setError(t('ido.errors.refundError'))
     } finally {
       setIsLoading(false)
     }
@@ -172,12 +174,12 @@ function IDO() {
   // Get status display
   const getStatusDisplay = (status: IdoStatus) => {
     switch (status) {
-      case 'NotStarted': return { text: 'Bientot', color: 'text-yellow-400', bg: 'bg-yellow-400/20' }
-      case 'Active': return { text: 'En cours', color: 'text-green-400', bg: 'bg-green-400/20' }
-      case 'Ended': return { text: 'Terminee', color: 'text-blue-400', bg: 'bg-blue-400/20' }
-      case 'Finalized': return { text: 'Finalisee', color: 'text-purple-400', bg: 'bg-purple-400/20' }
-      case 'Cancelled': return { text: 'Annulee', color: 'text-red-400', bg: 'bg-red-400/20' }
-      default: return { text: 'Inconnu', color: 'text-gray-400', bg: 'bg-gray-400/20' }
+      case 'NotStarted': return { text: t('ido.status.notStarted'), color: 'text-yellow-400', bg: 'bg-yellow-400/20' }
+      case 'Active': return { text: t('ido.status.active'), color: 'text-green-400', bg: 'bg-green-400/20' }
+      case 'Ended': return { text: t('ido.status.ended'), color: 'text-blue-400', bg: 'bg-blue-400/20' }
+      case 'Finalized': return { text: t('ido.status.finalized'), color: 'text-purple-400', bg: 'bg-purple-400/20' }
+      case 'Cancelled': return { text: t('ido.status.cancelled'), color: 'text-red-400', bg: 'bg-red-400/20' }
+      default: return { text: t('ido.status.unknown'), color: 'text-gray-400', bg: 'bg-gray-400/20' }
     }
   }
 
@@ -189,16 +191,16 @@ function IDO() {
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-2xl max-w-md text-center">
           <div className="text-6xl mb-4">&#128640;</div>
           <h2 className="text-2xl font-semibold text-white mb-4">
-            Participez a l'IDO XCIRCLEX
+            {t('ido.connectPrompt')}
           </h2>
           <p className="text-gray-200 mb-6">
-            Connectez votre wallet MultiversX pour participer a la vente initiale de tokens
+            {t('ido.connectDescription')}
           </p>
           <button
             onClick={() => navigate('/unlock')}
             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200"
           >
-            Connecter Wallet
+            {t('ido.connectWallet')}
           </button>
         </div>
       </div>
@@ -212,14 +214,14 @@ function IDO() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-4 mb-4">
             <h1 className="text-5xl font-bold text-white">
-              XCIRCLEX IDO
+              {t('ido.pageTitle')}
             </h1>
             <span className={`${statusDisplay.bg} ${statusDisplay.color} px-4 py-1 rounded-full text-sm font-semibold`}>
               {statusDisplay.text}
             </span>
           </div>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Initial DEX Offering - Participez au lancement du token XCIRCLEX et rejoignez l'ecosysteme X-CIRCLE-X
+            {t('ido.subtitle')}
           </p>
         </div>
 
@@ -240,10 +242,10 @@ function IDO() {
             {/* Countdown Timer */}
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/10 mb-8 text-center">
               <h2 className="text-lg text-gray-300 mb-2">
-                {idoStatus === 'Active' ? 'Temps restant' : idoStatus === 'NotStarted' ? 'Debut dans' : 'IDO Terminee'}
+                {idoStatus === 'Active' ? t('ido.timer.timeRemaining') : idoStatus === 'NotStarted' ? t('ido.timer.startsIn') : t('ido.timer.ended')}
               </h2>
               <div className="text-4xl md:text-5xl font-bold text-white">
-                {timeRemaining > 0 ? formatTimeRemaining(timeRemaining) : 'TERMINEE'}
+                {timeRemaining > 0 ? formatTimeRemaining(timeRemaining) : t('ido.timer.finished')}
               </div>
             </div>
 
@@ -251,12 +253,12 @@ function IDO() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
               {/* IDO Info Card */}
               <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/10">
-                <h2 className="text-2xl font-bold text-white mb-6">Informations IDO</h2>
+                <h2 className="text-2xl font-bold text-white mb-6">{t('ido.info.title')}</h2>
 
                 {/* Progress Bar */}
                 <div className="mb-6">
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="text-gray-400">Progression</span>
+                    <span className="text-gray-400">{t('ido.info.progress')}</span>
                     <span className="text-white">{totalRaised.toFixed(2)} / {hardCap} EGLD</span>
                   </div>
                   <div className="w-full bg-white/10 rounded-full h-4 overflow-hidden">
@@ -267,28 +269,28 @@ function IDO() {
                   </div>
                   <div className="flex justify-between text-xs mt-1">
                     <span className={softCapReached ? 'text-green-400' : 'text-gray-500'}>
-                      Soft Cap: {softCap} EGLD {softCapReached && '(Atteint!)'}
+                      {t('ido.info.softCap')}: {softCap} EGLD {softCapReached && `(${t('ido.info.reached')})`}
                     </span>
-                    <span className="text-gray-500">Hard Cap: {hardCap} EGLD</span>
+                    <span className="text-gray-500">{t('ido.info.hardCap')}: {hardCap} EGLD</span>
                   </div>
                 </div>
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-white/5 rounded-lg p-4">
-                    <div className="text-gray-400 text-sm">Taux</div>
+                    <div className="text-gray-400 text-sm">{t('ido.info.rate')}</div>
                     <div className="text-white font-bold text-lg">1 EGLD = {formatNumber(IDO_CONFIG.rate)} XCX</div>
                   </div>
                   <div className="bg-white/5 rounded-lg p-4">
-                    <div className="text-gray-400 text-sm">Participants</div>
+                    <div className="text-gray-400 text-sm">{t('ido.info.participants')}</div>
                     <div className="text-white font-bold text-lg">{idoInfo?.totalParticipants || 0}</div>
                   </div>
                   <div className="bg-white/5 rounded-lg p-4">
-                    <div className="text-gray-400 text-sm">Allocation IDO</div>
+                    <div className="text-gray-400 text-sm">{t('ido.info.allocation')}</div>
                     <div className="text-white font-bold text-lg">{formatNumber(IDO_CONFIG.allocation)} XCX</div>
                   </div>
                   <div className="bg-white/5 rounded-lg p-4">
-                    <div className="text-gray-400 text-sm">Min/Max</div>
+                    <div className="text-gray-400 text-sm">{t('ido.info.minMax')}</div>
                     <div className="text-white font-bold text-lg">{IDO_CONFIG.minContribution} - {IDO_CONFIG.maxContribution} EGLD</div>
                   </div>
                 </div>
@@ -296,20 +298,20 @@ function IDO() {
 
               {/* Contribute Card */}
               <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/10">
-                <h2 className="text-2xl font-bold text-white mb-6">Participer</h2>
+                <h2 className="text-2xl font-bold text-white mb-6">{t('ido.participate.title')}</h2>
 
                 {/* User Stats */}
                 <div className="bg-white/5 rounded-lg p-4 mb-6">
                   <div className="flex justify-between mb-2">
-                    <span className="text-gray-400">Votre solde</span>
+                    <span className="text-gray-400">{t('ido.participate.yourBalance')}</span>
                     <span className="text-white font-semibold">{parseFloat(userEgldBalance).toFixed(4)} EGLD</span>
                   </div>
                   <div className="flex justify-between mb-2">
-                    <span className="text-gray-400">Votre contribution</span>
+                    <span className="text-gray-400">{t('ido.participate.yourContribution')}</span>
                     <span className="text-white font-semibold">{parseFloat(userContribution?.amountEgld || '0').toFixed(4)} EGLD</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Tokens a recevoir</span>
+                    <span className="text-gray-400">{t('ido.participate.tokensToReceive')}</span>
                     <span className="text-green-400 font-semibold">{formatNumber(parseFloat(userContribution?.tokensToReceive || '0'))} XCIRCLEX</span>
                   </div>
                 </div>
@@ -319,7 +321,7 @@ function IDO() {
                   <>
                     {/* Contribution Input */}
                     <div className="mb-6">
-                      <label className="block text-gray-300 text-sm mb-2">Montant (EGLD)</label>
+                      <label className="block text-gray-300 text-sm mb-2">{t('ido.participate.amount')}</label>
                       <div className="relative">
                         <input
                           type="number"
@@ -361,7 +363,7 @@ function IDO() {
                       disabled={isLoading || !contributionAmount || !canContribute || idoStatus === 'NotStarted'}
                       className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-4 px-6 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-lg"
                     >
-                      {isLoading ? 'Transaction en cours...' : idoStatus === 'NotStarted' ? 'IDO pas encore commencee' : 'Contribuer'}
+                      {isLoading ? t('ido.participate.contributing') : idoStatus === 'NotStarted' ? t('ido.participate.idoNotStarted') : t('ido.participate.contribute')}
                     </button>
                   </>
                 ) : idoStatus === 'Finalized' && userContribution && !userContribution.claimed && parseFloat(userContribution.amountEgld) > 0 ? (
@@ -370,7 +372,7 @@ function IDO() {
                     disabled={isLoading}
                     className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-4 px-6 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-lg"
                   >
-                    {isLoading ? 'Transaction en cours...' : 'Reclamer vos tokens'}
+                    {isLoading ? t('ido.participate.claiming') : t('ido.participate.claimTokens')}
                   </button>
                 ) : idoStatus === 'Cancelled' && userContribution && !userContribution.refunded && parseFloat(userContribution.amountEgld) > 0 ? (
                   <button
@@ -378,20 +380,20 @@ function IDO() {
                     disabled={isLoading}
                     className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-4 px-6 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-lg"
                   >
-                    {isLoading ? 'Transaction en cours...' : 'Demander remboursement'}
+                    {isLoading ? t('ido.participate.refunding') : t('ido.participate.requestRefund')}
                   </button>
                 ) : userContribution?.claimed ? (
                   <div className="text-center py-4">
-                    <p className="text-green-400 text-lg">Tokens deja reclames!</p>
+                    <p className="text-green-400 text-lg">{t('ido.participate.alreadyClaimed')}</p>
                   </div>
                 ) : userContribution?.refunded ? (
                   <div className="text-center py-4">
-                    <p className="text-yellow-400 text-lg">Deja rembourse!</p>
+                    <p className="text-yellow-400 text-lg">{t('ido.participate.alreadyRefunded')}</p>
                   </div>
                 ) : (
                   <div className="text-center py-4">
                     <p className="text-gray-400">
-                      {idoStatus === 'Ended' ? 'En attente de finalisation...' : 'Pas de contribution a traiter'}
+                      {idoStatus === 'Ended' ? t('ido.participate.waitingFinalization') : t('ido.participate.noContribution')}
                     </p>
                   </div>
                 )}
@@ -400,84 +402,84 @@ function IDO() {
 
             {/* Tokenomics Summary */}
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/10 mb-8">
-              <h2 className="text-2xl font-bold text-white mb-6">Distribution des Tokens (Tokenomics)</h2>
+              <h2 className="text-2xl font-bold text-white mb-6">{t('ido.tokenomics.title')}</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 <div className="bg-white/5 rounded-lg p-4 text-center">
                   <div className="text-3xl mb-2">&#128142;</div>
                   <div className="text-2xl font-bold text-white">35%</div>
-                  <div className="text-gray-400 text-sm">Recompenses Cercle de Vie</div>
+                  <div className="text-gray-400 text-sm">{t('ido.tokenomics.circleRewards')}</div>
                 </div>
                 <div className="bg-white/5 rounded-lg p-4 text-center">
                   <div className="text-3xl mb-2">&#128176;</div>
                   <div className="text-2xl font-bold text-white">15%</div>
-                  <div className="text-gray-400 text-sm">Pool de Liquidite</div>
+                  <div className="text-gray-400 text-sm">{t('ido.tokenomics.liquidityPool')}</div>
                 </div>
                 <div className="bg-white/5 rounded-lg p-4 text-center">
                   <div className="text-3xl mb-2">&#128200;</div>
                   <div className="text-2xl font-bold text-white">15%</div>
-                  <div className="text-gray-400 text-sm">Staking Rewards</div>
+                  <div className="text-gray-400 text-sm">{t('ido.tokenomics.stakingRewards')}</div>
                 </div>
                 <div className="bg-white/5 rounded-lg p-4 text-center">
                   <div className="text-3xl mb-2">&#128101;</div>
                   <div className="text-2xl font-bold text-white">10%</div>
-                  <div className="text-gray-400 text-sm">Equipe (24 mois)</div>
+                  <div className="text-gray-400 text-sm">{t('ido.tokenomics.team')}</div>
                 </div>
                 <div className="bg-white/5 rounded-lg p-4 text-center">
                   <div className="text-3xl mb-2">&#127970;</div>
                   <div className="text-2xl font-bold text-white">10%</div>
-                  <div className="text-gray-400 text-sm">Tresorerie DAO</div>
+                  <div className="text-gray-400 text-sm">{t('ido.tokenomics.daoTreasury')}</div>
                 </div>
                 <div className="bg-white/5 rounded-lg p-4 text-center border-2 border-green-500/50">
                   <div className="text-3xl mb-2">&#128640;</div>
                   <div className="text-2xl font-bold text-green-400">5%</div>
-                  <div className="text-gray-400 text-sm">IDO (Vous!)</div>
+                  <div className="text-gray-400 text-sm">{t('ido.tokenomics.idoYou')}</div>
                 </div>
                 <div className="bg-white/5 rounded-lg p-4 text-center">
                   <div className="text-3xl mb-2">&#128226;</div>
                   <div className="text-2xl font-bold text-white">5%</div>
-                  <div className="text-gray-400 text-sm">Marketing (12 mois)</div>
+                  <div className="text-gray-400 text-sm">{t('ido.tokenomics.marketing')}</div>
                 </div>
                 <div className="bg-white/5 rounded-lg p-4 text-center">
                   <div className="text-3xl mb-2">&#128188;</div>
                   <div className="text-2xl font-bold text-white">3%</div>
-                  <div className="text-gray-400 text-sm">Conseillers</div>
+                  <div className="text-gray-400 text-sm">{t('ido.tokenomics.advisors')}</div>
                 </div>
                 <div className="bg-white/5 rounded-lg p-4 text-center">
                   <div className="text-3xl mb-2">&#127873;</div>
                   <div className="text-2xl font-bold text-white">2%</div>
-                  <div className="text-gray-400 text-sm">Airdrop</div>
+                  <div className="text-gray-400 text-sm">{t('ido.tokenomics.airdrop')}</div>
                 </div>
               </div>
               <div className="mt-4 bg-green-500/10 border border-green-500/30 rounded-lg p-4">
                 <p className="text-green-400 text-center">
-                  <strong>IDO:</strong> 5% = ~15.7M XCIRCLEX | <strong>Objectif:</strong> 360 EGLD | <strong>Taux:</strong> 1 EGLD = 43,633 XCIRCLEX
+                  {t('ido.tokenomics.summary')}
                 </p>
               </div>
             </div>
 
             {/* Protection Features */}
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/10">
-              <h2 className="text-2xl font-bold text-white mb-6">Protections pour les Investisseurs</h2>
+              <h2 className="text-2xl font-bold text-white mb-6">{t('ido.protection.title')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="flex items-start gap-4">
                   <div className="text-4xl">&#128274;</div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-1">Liquidite Lockee</h3>
-                    <p className="text-gray-400 text-sm">La liquidite initiale est verrouillee 12 mois minimum via notre LP Locker. Pas de rug pull possible.</p>
+                    <h3 className="text-lg font-semibold text-white mb-1">{t('ido.protection.lockedLiquidity')}</h3>
+                    <p className="text-gray-400 text-sm">{t('ido.protection.lockedLiquidityDesc')}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
                   <div className="text-4xl">&#128051;</div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-1">Anti-Whale</h3>
-                    <p className="text-gray-400 text-sm">Maximum 2% du supply par wallet pour eviter la concentration excessive.</p>
+                    <h3 className="text-lg font-semibold text-white mb-1">{t('ido.protection.antiWhale')}</h3>
+                    <p className="text-gray-400 text-sm">{t('ido.protection.antiWhaleDesc')}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
                   <div className="text-4xl">&#128337;</div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-1">Vesting Equipe</h3>
-                    <p className="text-gray-400 text-sm">Tokens equipe bloques 24 mois avec cliff de 6 mois. Alignement long-terme.</p>
+                    <h3 className="text-lg font-semibold text-white mb-1">{t('ido.protection.teamVesting')}</h3>
+                    <p className="text-gray-400 text-sm">{t('ido.protection.teamVestingDesc')}</p>
                   </div>
                 </div>
               </div>
@@ -487,7 +489,7 @@ function IDO() {
             <div className="mt-8 bg-white/5 rounded-xl p-4 border border-white/10">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                  <p className="text-gray-400 text-sm">Contrat IDO</p>
+                  <p className="text-gray-400 text-sm">{t('ido.contract.idoContract')}</p>
                   <p className="text-white font-mono text-xs md:text-sm">{IDO_CONTRACT_ADDRESS}</p>
                 </div>
                 <div className="flex gap-4">
@@ -497,7 +499,7 @@ function IDO() {
                     rel="noopener noreferrer"
                     className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 transition"
                   >
-                    Contrat Explorer &#8599;
+                    {t('ido.contract.contractExplorer')} &#8599;
                   </a>
                   <a
                     href={`https://devnet-explorer.multiversx.com/tokens/${XCIRCLEX_TOKEN_ID}`}
@@ -505,7 +507,7 @@ function IDO() {
                     rel="noopener noreferrer"
                     className="text-green-400 hover:text-green-300 text-sm flex items-center gap-1 transition"
                   >
-                    Token Explorer &#8599;
+                    {t('ido.contract.tokenExplorer')} &#8599;
                   </a>
                 </div>
               </div>

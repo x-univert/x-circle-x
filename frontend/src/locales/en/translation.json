@@ -804,6 +804,91 @@
     "againstBtn": "AGAINST",
     "votingInProgress": "Voting in progress..."
   },
+  "ido": {
+    "pageTitle": "XCIRCLEX IDO",
+    "subtitle": "Initial DEX Offering - Participate in the XCIRCLEX token launch and join the X-CIRCLE-X ecosystem",
+    "connectPrompt": "Participate in the XCIRCLEX IDO",
+    "connectDescription": "Connect your MultiversX wallet to participate in the initial token sale",
+    "connectWallet": "Connect Wallet",
+    "status": {
+      "notStarted": "Coming Soon",
+      "active": "Active",
+      "ended": "Ended",
+      "finalized": "Finalized",
+      "cancelled": "Cancelled",
+      "unknown": "Unknown"
+    },
+    "timer": {
+      "timeRemaining": "Time remaining",
+      "startsIn": "Starts in",
+      "ended": "IDO Ended",
+      "finished": "FINISHED"
+    },
+    "info": {
+      "title": "IDO Information",
+      "progress": "Progress",
+      "softCap": "Soft Cap",
+      "hardCap": "Hard Cap",
+      "reached": "Reached!",
+      "rate": "Rate",
+      "participants": "Participants",
+      "allocation": "IDO Allocation",
+      "minMax": "Min/Max"
+    },
+    "participate": {
+      "title": "Participate",
+      "yourBalance": "Your balance",
+      "yourContribution": "Your contribution",
+      "tokensToReceive": "Tokens to receive",
+      "amount": "Amount (EGLD)",
+      "contribute": "Contribute",
+      "contributing": "Transaction in progress...",
+      "idoNotStarted": "IDO not started yet",
+      "claimTokens": "Claim your tokens",
+      "claiming": "Transaction in progress...",
+      "requestRefund": "Request refund",
+      "refunding": "Transaction in progress...",
+      "alreadyClaimed": "Tokens already claimed!",
+      "alreadyRefunded": "Already refunded!",
+      "waitingFinalization": "Waiting for finalization...",
+      "noContribution": "No contribution to process"
+    },
+    "tokenomics": {
+      "title": "Token Distribution (Tokenomics)",
+      "circleRewards": "Circle of Life Rewards",
+      "liquidityPool": "Liquidity Pool",
+      "stakingRewards": "Staking Rewards",
+      "team": "Team (24 months)",
+      "daoTreasury": "DAO Treasury",
+      "idoYou": "IDO (You!)",
+      "marketing": "Marketing (12 months)",
+      "advisors": "Advisors",
+      "airdrop": "Airdrop",
+      "summary": "IDO: 5% = ~15.7M XCIRCLEX | Target: 360 EGLD | Rate: 1 EGLD = 43,633 XCIRCLEX"
+    },
+    "protection": {
+      "title": "Investor Protections",
+      "lockedLiquidity": "Locked Liquidity",
+      "lockedLiquidityDesc": "Initial liquidity is locked for at least 12 months via our LP Locker. No rug pull possible.",
+      "antiWhale": "Anti-Whale",
+      "antiWhaleDesc": "Maximum 2% of supply per wallet to prevent excessive concentration.",
+      "teamVesting": "Team Vesting",
+      "teamVestingDesc": "Team tokens locked for 24 months with 6-month cliff. Long-term alignment."
+    },
+    "contract": {
+      "idoContract": "IDO Contract",
+      "contractExplorer": "Contract Explorer",
+      "tokenExplorer": "Token Explorer"
+    },
+    "errors": {
+      "loadingError": "Error loading data",
+      "contributionError": "Error during contribution",
+      "claimError": "Error claiming tokens",
+      "refundError": "Error during refund",
+      "minContribution": "Minimum contribution is {{amount}} EGLD",
+      "maxContribution": "Maximum contribution is {{amount}} EGLD"
+    }
+  },
   "days": {
     "sunday": "Sunday",
     "monday": "Monday",
