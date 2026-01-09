@@ -12,5 +12,6 @@ export enum RouteNamesEnum {
   unlock = '/unlock',
   about = '/about',
   whitepaper = '/whitepaper',
-  disclaimer = '/disclaimer'
+  disclaimer = '/disclaimer',
+  profile = '/profile'
 }

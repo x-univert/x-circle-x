@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { useGetAccount } from 'lib';
 import { useUserProfile } from 'hooks/useUserProfile';
 import { useGetHerotag } from 'hooks/useGetHerotag';
+import { getLocalProfile, ExtendedUserProfile } from '../../services/profileService';
 
 interface UserAvatarProps {
   address?: string;
@@ -30,13 +32,46 @@ export const UserAvatar = ({
   const { address: connectedAddress } = useGetAccount();
   const address = propAddress || connectedAddress;
 
-  const { profile } = useUserProfile(address);
-  const { herotag } = useGetHerotag(address);
+  const { profile: oldProfile } = useUserProfile(address);
+  const { herotag, profileUrl } = useGetHerotag(address);
+  const [extendedProfile, setExtendedProfile] = useState<ExtendedUserProfile | null>(null);
 
-  // Générer les initiales à partir du prénom/nom ou de l'adresse
+  // Charger le profil etendu depuis le nouveau systeme
+  useEffect(() => {
+    if (address) {
+      const profile = getLocalProfile(address);
+      setExtendedProfile(profile);
+    }
+  }, [address]);
+
+  // Obtenir l'URL de l'avatar (nouveau systeme prioritaire)
+  const getAvatarUrl = (): string | undefined => {
+    // Nouveau systeme de profil (NFT ou upload)
+    if (extendedProfile?.avatarUrl && (extendedProfile.avatarType === 'upload' || extendedProfile.avatarType === 'nft')) {
+      return extendedProfile.avatarUrl;
+    }
+    // Ancien systeme de profil
+    if (oldProfile?.profileImage) {
+      return oldProfile.profileImage;
+    }
+    // Fallback: xPortal profile picture
+    if (profileUrl) {
+      return profileUrl;
+    }
+    return undefined;
+  };
+
+  // Generer les initiales a partir du nom ou de l'adresse
   const getInitials = () => {
-    if (profile.firstName && profile.lastName) {
-      return `${profile.firstName[0]}${profile.lastName[0]}`.toUpperCase();
+    if (extendedProfile?.displayName) {
+      const parts = extendedProfile.displayName.trim().split(' ');
+      if (parts.length >= 2) {
+        return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+      }
+      return extendedProfile.displayName.substring(0, 2).toUpperCase();
+    }
+    if (oldProfile?.firstName && oldProfile?.lastName) {
+      return `${oldProfile.firstName[0]}${oldProfile.lastName[0]}`.toUpperCase();
     }
     if (address) {
       return address.substring(0, 2).toUpperCase();
@@ -44,7 +79,7 @@ export const UserAvatar = ({
     return '??';
   };
 
-  // Générer une couleur basée sur l'adresse
+  // Generer une couleur basee sur l'adresse
   const getColorFromAddress = (addr: string | undefined) => {
     if (!addr) return 'bg-gray-500';
 
@@ -65,15 +100,16 @@ export const UserAvatar = ({
     return colors[hash % colors.length];
   };
 
+  const avatarUrl = getAvatarUrl();
   const displayName = showHerotag && herotag ? `@${herotag}` : null;
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       {/* Avatar */}
-      <div className={`${sizeClasses[size]} rounded-full overflow-hidden flex items-center justify-center font-semibold text-white ${profile.profileImage ? '' : getColorFromAddress(address)}`}>
-        {profile.profileImage ? (
+      <div className={`${sizeClasses[size]} rounded-full overflow-hidden flex items-center justify-center font-semibold text-white ${avatarUrl ? '' : getColorFromAddress(address)}`}>
+        {avatarUrl ? (
           <img
-            src={profile.profileImage}
+            src={avatarUrl}
             alt="Profile"
             className="w-full h-full object-cover"
           />

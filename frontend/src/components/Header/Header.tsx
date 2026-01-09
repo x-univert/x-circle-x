@@ -142,7 +142,6 @@ export const Header = () => {
     { labelKey: 'header.circleOfLife', route: RouteNamesEnum.home, icon: '🌀' },
     { labelKey: 'header.dashboard', route: RouteNamesEnum.dashboard, icon: '📊' },
     { labelKey: 'home.circles', route: RouteNamesEnum.circles, icon: '⭕' },
-    { labelKey: 'header.staking', route: RouteNamesEnum.staking, icon: '💰' },
     { labelKey: 'header.ido', route: RouteNamesEnum.ido, icon: '🚀' },
     { labelKey: 'header.vesting', route: RouteNamesEnum.vesting, icon: '🔒' }
   ];
@@ -304,7 +303,7 @@ export const Header = () => {
             >
               {() => (
                 <button
-                  onClick={() => navigate(RouteNamesEnum.dashboard)}
+                  onClick={() => navigate(RouteNamesEnum.profile)}
                   className={classNames(
                     'relative z-1 cursor-pointer hover:opacity-80 transition-opacity',
                     'ml-2'
