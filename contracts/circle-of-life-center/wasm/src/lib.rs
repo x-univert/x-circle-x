@@ -6,9 +6,9 @@
 
 // Init:                                 1
 // Upgrade:                              1
-// Endpoints:                          100
+// Endpoints:                          108
 // Async Callback (empty):               1
-// Total number of exported functions: 103
+// Total number of exported functions: 111
 
 #![no_std]
 
@@ -27,6 +27,14 @@ multiversx_sc_wasm_adapter::endpoints! {
         unpause => unpause
         setEntryFee => set_entry_fee
         setCirculationAmount => set_circulation_amount
+        setDistributionEnabled => set_distribution_enabled
+        setDaoContract => set_dao_contract
+        setXExchangePair => set_xexchange_pair
+        setWegldContract => set_wegld_contract
+        setLpLocker => set_lp_locker
+        setSlippageTolerance => set_slippage_tolerance
+        withdrawPendingLiquidity => withdraw_pending_liquidity
+        distributeExistingEgld => distribute_existing_egld
         setRewardToken => set_reward_token
         setRewardPerCycle => set_reward_per_cycle
         depositRewards => deposit_rewards

@@ -31,17 +31,30 @@
 
 ---
 
-### 2. XCIRCLEX DAO Contract
+### 2. XCIRCLEX DAO Contract (Legacy v1)
 
 | Propriete | Valeur |
 |-----------|--------|
 | **Adresse** | `erd1qqqqqqqqqqqqqpgq35zrtzej655v2czk5plzaa6hp4wluun7flfql80l9d` |
-| **Description** | Gouvernance decentralisee avec propositions, votes et tresorerie |
-| **Metadata** | Payable (peut recevoir des tokens) |
-| **Fonctions principales** | createProposal, vote, depositToTreasury, getVotingPower |
-| **Staking integre** | Oui - Les tokens stakes comptent pour le pouvoir de vote |
+| **Description** | Ancien DAO - Ne recoit que XCIRCLEX |
+| **Statut** | DEPRECATED - Migrer vers DAO-v2 |
 
 **Explorer:** https://devnet-explorer.multiversx.com/accounts/erd1qqqqqqqqqqqqqpgq35zrtzej655v2czk5plzaa6hp4wluun7flfql80l9d
+
+---
+
+### 2b. XCIRCLEX DAO-v2 Contract (Nouveau)
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Adresse** | `erd1qqqqqqqqqqqqqpgq90jjjlwjfg2s45y8mxm6xgweavdhyxw8flfqaatay7` |
+| **Description** | Nouveau DAO payable - Recoit EGLD + XCIRCLEX |
+| **Metadata** | Payable (peut recevoir EGLD et tokens) |
+| **Fonctions principales** | createProposal, vote, depositToTreasury, depositEgldToTreasury, receiveFromCircleOfLife |
+| **Staking integre** | Oui - Les tokens stakes comptent pour le pouvoir de vote |
+| **Distribution** | Recoit 30% des EGLD distribues par SC0 |
+
+**Explorer:** https://devnet-explorer.multiversx.com/accounts/erd1qqqqqqqqqqqqqpgq90jjjlwjfg2s45y8mxm6xgweavdhyxw8flfqaatay7
 
 ---
 
@@ -135,7 +148,8 @@
 ```
 XCIRCLEX_TOKEN_ID=XCIRCLEX-3b9d57
 STAKING_CONTRACT=erd1qqqqqqqqqqqqqpgqd5r76rsws9kvzcdsxqqgjlrjlw90x44uflfq386xhw
-DAO_CONTRACT=erd1qqqqqqqqqqqqqpgq35zrtzej655v2czk5plzaa6hp4wluun7flfql80l9d
+DAO_CONTRACT_V1=erd1qqqqqqqqqqqqqpgq35zrtzej655v2czk5plzaa6hp4wluun7flfql80l9d
+DAO_CONTRACT_V2=erd1qqqqqqqqqqqqqpgq90jjjlwjfg2s45y8mxm6xgweavdhyxw8flfqaatay7
 VESTING_CONTRACT=erd1qqqqqqqqqqqqqpgqc00rmsjfsk6prqwpcjggxzmdeus0vwa0flfqhxgel0
 CIRCLE_MANAGER=erd1qqqqqqqqqqqqqpgq4v9m37smxz06p858t5mzdzc69tu6pvlsflfqwf7tf8
 CIRCLE_OF_LIFE=erd1qqqqqqqqqqqqqpgqa6yjeghz6c38cdmk4z0xhsd2jdus0m74flfq0df5xn

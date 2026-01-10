@@ -1,0 +1,15 @@
+[package]
+name = "xcirclex-dao-v2"
+version = "0.1.0"
+authors = ["xCircle Team"]
+edition = "2021"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies.multiversx-sc]
+version = "0.62.0"
+
+[dev-dependencies.multiversx-sc-scenario]
+version = "0.62.0"

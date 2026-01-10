@@ -39,6 +39,22 @@ const ONE_EGLD: u64 = 1_000_000_000_000_000_000;
 /// Bonus par EGLD déposé en BPS (1 EGLD = 1% = 100 BPS)
 const DEPOSIT_BONUS_PER_EGLD_BPS: u64 = 100;
 
+/// ============================================================================
+/// CONSTANTES DE DISTRIBUTION EGLD (V4)
+/// ============================================================================
+/// Pourcentage pour le treasury SC0 (montant circulant) - 314 BPS = 3.14%
+const TREASURY_PERCENTAGE_BPS: u64 = 314;
+/// Pourcentage pour la liquidité (du restant après treasury) - 7000 BPS = 70%
+const LIQUIDITY_PERCENTAGE_BPS: u64 = 7000;
+/// Pourcentage pour le DAO (du restant après treasury) - 3000 BPS = 30%
+const DAO_PERCENTAGE_BPS: u64 = 3000;
+/// Slippage par défaut pour xExchange - 100 BPS = 1%
+const DEFAULT_SLIPPAGE_BPS: u64 = 100;
+/// Slippage minimum - 50 BPS = 0.5%
+const MIN_SLIPPAGE_BPS: u64 = 50;
+/// Slippage maximum - 1000 BPS = 10%
+const MAX_SLIPPAGE_BPS: u64 = 1000;
+
 #[multiversx_sc::contract]
 pub trait CircleOfLifeCenter {
 
@@ -86,6 +102,10 @@ pub trait CircleOfLifeCenter {
             !self.member_contract(&caller).is_empty(),
             "Must be a member to deposit for bonus"
         );
+
+        // === DISTRIBUTION V4 ===
+        // Distribuer les EGLD: 3.14% treasury, 70% liquidite, 30% DAO
+        self.process_egld_distribution(&payment);
 
         // Accumuler les depots EGLD pour le bonus (1 EGLD = 1%)
         let current_deposits = self.member_egld_deposits(&caller).get();
@@ -142,6 +162,106 @@ pub trait CircleOfLifeCenter {
     fn set_circulation_amount(&self, new_amount: BigUint) {
         self.require_owner();
         self.circulation_amount().set(&new_amount);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ADMIN - DISTRIBUTION V4 CONFIGURATION
+    // ═══════════════════════════════════════════════════════════════
+
+    /// Active ou desactive la distribution automatique des EGLD
+    #[endpoint(setDistributionEnabled)]
+    fn set_distribution_enabled(&self, enabled: bool) {
+        self.require_owner();
+        self.distribution_enabled().set(enabled);
+    }
+
+    /// Configure l'adresse du contrat DAO V2
+    #[endpoint(setDaoContract)]
+    fn set_dao_contract(&self, dao_address: ManagedAddress) {
+        self.require_owner();
+        self.dao_contract_address().set(&dao_address);
+    }
+
+    /// Configure l'adresse de la paire xExchange XCIRCLEX/WEGLD
+    #[endpoint(setXExchangePair)]
+    fn set_xexchange_pair(&self, pair_address: ManagedAddress) {
+        self.require_owner();
+        self.xexchange_pair_address().set(&pair_address);
+    }
+
+    /// Configure l'adresse du contrat WEGLD
+    #[endpoint(setWegldContract)]
+    fn set_wegld_contract(&self, wegld_address: ManagedAddress, wegld_token: TokenIdentifier) {
+        self.require_owner();
+        self.wegld_contract_address().set(&wegld_address);
+        self.wegld_token_id().set(&wegld_token);
+    }
+
+    /// Configure l'adresse du LP Locker
+    #[endpoint(setLpLocker)]
+    fn set_lp_locker(&self, locker_address: ManagedAddress) {
+        self.require_owner();
+        self.lp_locker_address().set(&locker_address);
+    }
+
+    /// Configure le slippage tolerance pour xExchange (en BPS, 100 = 1%)
+    #[endpoint(setSlippageTolerance)]
+    fn set_slippage_tolerance(&self, slippage_bps: u64) {
+        self.require_owner();
+        require!(
+            slippage_bps >= MIN_SLIPPAGE_BPS && slippage_bps <= MAX_SLIPPAGE_BPS,
+            "Slippage doit etre entre 0.5% et 10%"
+        );
+        self.slippage_tolerance_bps().set(slippage_bps);
+    }
+
+    /// Retire les EGLD accumules pour la liquidite (traitement manuel)
+    #[endpoint(withdrawPendingLiquidity)]
+    fn withdraw_pending_liquidity(&self, to: ManagedAddress) {
+        self.require_owner();
+
+        let pending = self.pending_liquidity_egld().get();
+        require!(pending > BigUint::zero(), "Pas de liquidite en attente");
+
+        self.pending_liquidity_egld().set(BigUint::zero());
+        self.send().direct_egld(&to, &pending);
+
+        self.liquidity_withdrawn_event(&to, &pending);
+    }
+
+    /// Distribue les EGLD existants dans SC0 selon la formule V4
+    /// 3.14% treasury (reste), 70% liquidite, 30% DAO
+    /// Utilise le solde EGLD actuel du contrat (moins le montant circulant requis)
+    #[endpoint(distributeExistingEgld)]
+    fn distribute_existing_egld(&self, amount: BigUint) {
+        self.require_owner();
+
+        // Verifier que la distribution est configuree
+        require!(
+            self.distribution_enabled().get(),
+            "Distribution non activee"
+        );
+        require!(
+            !self.dao_contract_address().is_empty(),
+            "DAO non configure"
+        );
+
+        // Verifier le solde disponible
+        let sc_balance = self.blockchain().get_sc_balance(&EgldOrEsdtTokenIdentifier::egld(), 0);
+        let circulation = self.circulation_amount().get();
+        let available = if sc_balance > circulation {
+            &sc_balance - &circulation
+        } else {
+            BigUint::zero()
+        };
+
+        require!(amount <= available, "Montant depasse le solde disponible");
+        require!(amount > BigUint::zero(), "Montant doit etre > 0");
+
+        // Distribuer selon la formule V4
+        self.process_egld_distribution(&amount);
+
+        self.existing_egld_distributed_event(&amount);
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -562,6 +682,54 @@ pub trait CircleOfLifeCenter {
     fn nft_contract(&self) -> SingleValueMapper<ManagedAddress>;
 
     // ═══════════════════════════════════════════════════════════════
+    // STORAGE - DISTRIBUTION V4 (DAO + LIQUIDITÉ)
+    // ═══════════════════════════════════════════════════════════════
+
+    /// Adresse du contrat DAO V2 (recoit 30% des EGLD apres treasury)
+    #[storage_mapper("dao_contract_address")]
+    fn dao_contract_address(&self) -> SingleValueMapper<ManagedAddress>;
+
+    /// Adresse de la paire xExchange XCIRCLEX/WEGLD
+    #[storage_mapper("xexchange_pair_address")]
+    fn xexchange_pair_address(&self) -> SingleValueMapper<ManagedAddress>;
+
+    /// Adresse du contrat WEGLD pour wrapping
+    #[storage_mapper("wegld_contract_address")]
+    fn wegld_contract_address(&self) -> SingleValueMapper<ManagedAddress>;
+
+    /// Token ID du WEGLD
+    #[storage_mapper("wegld_token_id")]
+    fn wegld_token_id(&self) -> SingleValueMapper<TokenIdentifier>;
+
+    /// Adresse du LP Locker pour verrouiller les LP tokens
+    #[storage_mapper("lp_locker_address")]
+    fn lp_locker_address(&self) -> SingleValueMapper<ManagedAddress>;
+
+    /// Slippage tolerance en BPS (default 100 = 1%)
+    #[storage_mapper("slippage_tolerance_bps")]
+    fn slippage_tolerance_bps(&self) -> SingleValueMapper<u64>;
+
+    /// Distribution activee (true = active, false = desactivee)
+    #[storage_mapper("distribution_enabled")]
+    fn distribution_enabled(&self) -> SingleValueMapper<bool>;
+
+    /// Total distribue au treasury (3.14%)
+    #[storage_mapper("total_distributed_treasury")]
+    fn total_distributed_treasury(&self) -> SingleValueMapper<BigUint>;
+
+    /// Total distribue a la liquidite (70% du restant)
+    #[storage_mapper("total_distributed_liquidity")]
+    fn total_distributed_liquidity(&self) -> SingleValueMapper<BigUint>;
+
+    /// Total distribue au DAO (30% du restant)
+    #[storage_mapper("total_distributed_dao")]
+    fn total_distributed_dao(&self) -> SingleValueMapper<BigUint>;
+
+    /// EGLD en attente pour la liquidite (accumule avant swap)
+    #[storage_mapper("pending_liquidity_egld")]
+    fn pending_liquidity_egld(&self) -> SingleValueMapper<BigUint>;
+
+    // ═══════════════════════════════════════════════════════════════
     // REJOINDRE LE CERCLE - Deployer un vrai SC
     // ═══════════════════════════════════════════════════════════════
 
@@ -590,6 +758,10 @@ pub trait CircleOfLifeCenter {
             !self.peripheral_template().is_empty(),
             "Template non configure"
         );
+
+        // === DISTRIBUTION V4 ===
+        // Distribuer les frais d'entree: 3.14% treasury, 70% liquidite, 30% DAO
+        self.process_egld_distribution(&payment);
 
         let template = self.peripheral_template().get();
         let sc0_address = self.blockchain().get_sc_address();
@@ -1169,6 +1341,118 @@ pub trait CircleOfLifeCenter {
 
     #[proxy]
     fn nft_proxy(&self, sc_address: ManagedAddress) -> nft_proxy::Proxy<Self::Api>;
+
+    #[proxy]
+    fn dao_proxy(&self, sc_address: ManagedAddress) -> dao_proxy::Proxy<Self::Api>;
+
+    #[proxy]
+    fn wegld_proxy(&self, sc_address: ManagedAddress) -> wegld_proxy::Proxy<Self::Api>;
+
+    #[proxy]
+    fn xexchange_proxy(&self, sc_address: ManagedAddress) -> xexchange_proxy::Proxy<Self::Api>;
+
+    #[proxy]
+    fn lp_locker_proxy(&self, sc_address: ManagedAddress) -> lp_locker_proxy::Proxy<Self::Api>;
+
+    // ═══════════════════════════════════════════════════════════════
+    // DISTRIBUTION V4 - HELPERS
+    // ═══════════════════════════════════════════════════════════════
+
+    /// Calcule la distribution des EGLD recus
+    /// Retourne (treasury_amount, liquidity_amount, dao_amount)
+    fn calculate_distribution(&self, total: &BigUint) -> (BigUint, BigUint, BigUint) {
+        // 3.14% pour treasury
+        let treasury = total * TREASURY_PERCENTAGE_BPS / BPS_BASE;
+
+        // Reste apres treasury (96.86%)
+        let remaining = total - &treasury;
+
+        // 70% du reste pour liquidite
+        let liquidity = &remaining * LIQUIDITY_PERCENTAGE_BPS / BPS_BASE;
+
+        // 30% du reste pour DAO
+        let dao = &remaining * DAO_PERCENTAGE_BPS / BPS_BASE;
+
+        (treasury, liquidity, dao)
+    }
+
+    /// Traite la distribution du treasury (3.14% reste dans SC0)
+    fn process_treasury_distribution(&self, amount: &BigUint) {
+        if amount == &BigUint::zero() {
+            return;
+        }
+
+        // Le treasury reste simplement dans SC0 comme montant circulant
+        let current = self.total_distributed_treasury().get();
+        self.total_distributed_treasury().set(&(&current + amount));
+
+        self.treasury_distribution_event(amount);
+    }
+
+    /// Envoie les EGLD au DAO V2
+    fn send_to_dao(&self, amount: &BigUint) {
+        if amount == &BigUint::zero() {
+            return;
+        }
+
+        if self.dao_contract_address().is_empty() {
+            // Si pas de DAO configure, accumuler dans SC0
+            return;
+        }
+
+        let dao_address = self.dao_contract_address().get();
+
+        // Appeler le DAO pour recevoir les EGLD
+        self.dao_proxy(dao_address.clone())
+            .receive_from_circle_of_life()
+            .with_egld_transfer(amount.clone())
+            .execute_on_dest_context::<()>();
+
+        // Tracker la distribution
+        let current = self.total_distributed_dao().get();
+        self.total_distributed_dao().set(&(&current + amount));
+
+        self.dao_distribution_event(&dao_address, amount);
+    }
+
+    /// Accumule les EGLD pour la liquidite (swap + LP plus tard)
+    fn accumulate_for_liquidity(&self, amount: &BigUint) {
+        if amount == &BigUint::zero() {
+            return;
+        }
+
+        // Pour simplifier V1: accumuler les EGLD pour traitement manuel
+        // V2 implementera le swap automatique via xExchange
+        let current = self.pending_liquidity_egld().get();
+        self.pending_liquidity_egld().set(&(&current + amount));
+
+        let total = self.total_distributed_liquidity().get();
+        self.total_distributed_liquidity().set(&(&total + amount));
+
+        self.liquidity_accumulated_event(amount);
+    }
+
+    /// Traite la distribution complete d'un paiement EGLD
+    fn process_egld_distribution(&self, payment: &BigUint) {
+        // Verifier si la distribution est activee
+        if !self.distribution_enabled().get() {
+            return;
+        }
+
+        // Calculer les montants
+        let (treasury, liquidity, dao) = self.calculate_distribution(payment);
+
+        // 1. Treasury (3.14%) - reste dans SC0
+        self.process_treasury_distribution(&treasury);
+
+        // 2. DAO (30% du restant)
+        self.send_to_dao(&dao);
+
+        // 3. Liquidite (70% du restant) - accumule pour traitement
+        self.accumulate_for_liquidity(&liquidity);
+
+        self.distribution_processed_event(payment, &treasury, &liquidity, &dao);
+    }
 
     // ═══════════════════════════════════════════════════════════════
     // GESTION DES STATUTS
@@ -2293,6 +2577,34 @@ pub trait CircleOfLifeCenter {
 
     #[event("pioneer_indices_initialized")]
     fn pioneer_indices_initialized_event(&self, #[indexed] total_count: u64);
+
+    // ═══════════════════════════════════════════════════════════════
+    // EVENTS - DISTRIBUTION V4
+    // ═══════════════════════════════════════════════════════════════
+
+    #[event("treasury_distribution")]
+    fn treasury_distribution_event(&self, #[indexed] amount: &BigUint);
+
+    #[event("dao_distribution")]
+    fn dao_distribution_event(&self, #[indexed] dao_address: &ManagedAddress, #[indexed] amount: &BigUint);
+
+    #[event("liquidity_accumulated")]
+    fn liquidity_accumulated_event(&self, #[indexed] amount: &BigUint);
+
+    #[event("liquidity_withdrawn")]
+    fn liquidity_withdrawn_event(&self, #[indexed] to: &ManagedAddress, #[indexed] amount: &BigUint);
+
+    #[event("distribution_processed")]
+    fn distribution_processed_event(
+        &self,
+        #[indexed] total: &BigUint,
+        #[indexed] treasury: &BigUint,
+        #[indexed] liquidity: &BigUint,
+        dao: &BigUint
+    );
+
+    #[event("existing_egld_distributed")]
+    fn existing_egld_distributed_event(&self, #[indexed] amount: &BigUint);
 }
 
 // Module proxy pour appeler les contrats peripheriques
@@ -2317,5 +2629,79 @@ mod nft_proxy {
     pub trait NftContract {
         #[endpoint(updateMemberCycles)]
         fn update_member_cycles(&self, member: ManagedAddress, cycles: u64);
+    }
+}
+
+// Module proxy pour appeler le DAO V2
+mod dao_proxy {
+    multiversx_sc::imports!();
+
+    #[multiversx_sc::proxy]
+    pub trait DaoV2Contract {
+        /// Recevoir EGLD depuis Circle of Life Center
+        #[payable("EGLD")]
+        #[endpoint(receiveFromCircleOfLife)]
+        fn receive_from_circle_of_life(&self);
+    }
+}
+
+// Module proxy pour le contrat WEGLD (wrap/unwrap)
+mod wegld_proxy {
+    multiversx_sc::imports!();
+
+    #[multiversx_sc::proxy]
+    pub trait WegldContract {
+        /// Wrap EGLD en WEGLD
+        #[payable("EGLD")]
+        #[endpoint(wrapEgld)]
+        fn wrap_egld(&self);
+
+        /// Unwrap WEGLD en EGLD
+        #[payable("*")]
+        #[endpoint(unwrapEgld)]
+        fn unwrap_egld(&self);
+    }
+}
+
+// Module proxy pour xExchange pair (swap + liquidity)
+mod xexchange_proxy {
+    multiversx_sc::imports!();
+
+    #[multiversx_sc::proxy]
+    pub trait XExchangePairContract {
+        /// Swap tokens avec input fixe
+        #[payable("*")]
+        #[endpoint(swapTokensFixedInput)]
+        fn swap_tokens_fixed_input(
+            &self,
+            token_out: TokenIdentifier,
+            amount_out_min: BigUint,
+        );
+
+        /// Ajouter de la liquidite
+        #[payable("*")]
+        #[endpoint(addLiquidity)]
+        fn add_liquidity(
+            &self,
+            first_token_amount_min: BigUint,
+            second_token_amount_min: BigUint,
+        );
+
+        /// Obtenir les reserves de la paire
+        #[view(getReservesAndTotalSupply)]
+        fn get_reserves_and_total_supply(&self) -> MultiValue3<BigUint, BigUint, BigUint>;
+    }
+}
+
+// Module proxy pour le LP Locker
+mod lp_locker_proxy {
+    multiversx_sc::imports!();
+
+    #[multiversx_sc::proxy]
+    pub trait LpLockerContract {
+        /// Verrouiller des LP tokens
+        #[payable("*")]
+        #[endpoint(lockLpTokens)]
+        fn lock_lp_tokens(&self, lock_duration_days: u64);
     }
 }
