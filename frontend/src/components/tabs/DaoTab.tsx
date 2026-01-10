@@ -641,23 +641,23 @@ export function DaoTab() {
                       )}
 
                       {/* Proposer */}
-                      <div className="text-xs text-gray-500 mb-3">
-                        {t('daoTab.proposedBy', 'Proposed by')}: <span className="text-gray-400 font-mono">{formatAddress(proposal.proposer)}</span>
+                      <div className="text-xs mb-3">
+                        <span className="text-white">{t('daoTab.proposedBy', 'Proposed by')}:</span> <span className="text-gray-400 font-mono break-all">{proposal.proposer}</span>
                       </div>
 
                       {/* Transfer Details - show for TransferFunds, AddMember, RemoveMember */}
                       {(proposal.proposalType === 0 || proposal.proposalType === 2 || proposal.proposalType === 3) && proposal.targetAddress && (
                         <div className="bg-white/5 border border-white/10 rounded-lg p-3 mb-3">
                           <div className="text-xs space-y-2">
-                            <div className="flex justify-between items-center">
-                              <span className="text-gray-500">
+                            <div className="flex flex-col gap-1">
+                              <span className="text-white">
                                 {proposal.proposalType === 0 ? t('daoTab.beneficiary', 'Beneficiary') : t('daoTab.member', 'Member')}:
                               </span>
-                              <span className="text-white font-mono">{formatAddress(proposal.targetAddress)}</span>
+                              <span className="text-gray-400 font-mono break-all">{proposal.targetAddress}</span>
                             </div>
                             {proposal.proposalType === 0 && parseFloat(proposal.amount) > 0 && (
                               <div className="flex justify-between items-center">
-                                <span className="text-gray-500">{t('daoTab.amount', 'Amount')}:</span>
+                                <span className="text-white">{t('daoTab.amount', 'Amount')}:</span>
                                 <span className="text-amber-400 font-semibold">{formatNumber(proposal.amount)} XCIRCLEX</span>
                               </div>
                             )}
@@ -681,8 +681,8 @@ export function DaoTab() {
                             style={{ width: `${againstPercentage}%` }}
                           />
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          {t('daoTab.total', 'Total')}: {formatNumber(totalVotes.toString())} {t('daoTab.votes', 'votes')}
+                        <div className="text-xs mt-1">
+                          <span className="text-white">{t('daoTab.total', 'Total')}:</span> <span className="text-gray-300">{formatNumber(totalVotes.toString())} {t('daoTab.votes', 'votes')}</span>
                         </div>
                       </div>
 
