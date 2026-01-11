@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useGetAccountInfo, useGetPendingTransactions } from 'lib';
 import * as circleOfLifeService from '../services/circleOfLifeService';
-import { CircleInfo, CycleStats, ScStats, RewardsInfo, CanClaimResult, BurnStats, AutoSignStatus, StarterBonusInfo, OptionFInfo, PioneerInfo, DepositBonusInfo } from '../services/circleOfLifeService';
+import { CircleInfo, CycleStats, ScStats, RewardsInfo, CanClaimResult, BurnStats, AutoSignStatus, StarterBonusInfo, OptionFInfo, PioneerInfo, DepositBonusInfo, DistributionStats } from '../services/circleOfLifeService';
 
 export interface UseCircleOfLifeReturn {
   // State
@@ -63,6 +63,9 @@ export interface UseCircleOfLifeReturn {
 
   // Deposit bonus info (1 EGLD = 1%, max 360%)
   depositBonusInfo: DepositBonusInfo;
+
+  // Distribution stats (EGLD distribution: 3.14% treasury, 70% liquidity, 30% DAO)
+  distributionStats: DistributionStats;
 
   // Actions
   joinCircle: (entryFee?: string) => Promise<any>;
@@ -204,6 +207,14 @@ export const useCircleOfLife = (): UseCircleOfLifeReturn => {
     maxBonusPercent: 360
   });
 
+  // Distribution stats state (EGLD distribution: 3.14% treasury, 70% liquidity, 30% DAO)
+  const [distributionStats, setDistributionStats] = useState<DistributionStats>({
+    totalDistributedTreasury: '0',
+    totalDistributedDao: '0',
+    pendingLiquidityEgld: '0',
+    distributionEnabled: false
+  });
+
   /**
    * Charge les donnees essentielles rapidement (pour affichage initial)
    */
@@ -253,7 +264,8 @@ export const useCircleOfLife = (): UseCircleOfLifeReturn => {
         dayOfWeekResult,
         burnStatsResult,
         starterBonusInfoResult,
-        optionFInfoResult
+        optionFInfoResult,
+        distributionStatsResult
       ] = await Promise.all([
         circleOfLifeService.getAllContracts(),
         circleOfLifeService.getContractBalance(),
@@ -267,7 +279,8 @@ export const useCircleOfLife = (): UseCircleOfLifeReturn => {
         circleOfLifeService.getDayOfWeek(),
         circleOfLifeService.getBurnStats(),
         circleOfLifeService.getStarterBonusInfo(),
-        circleOfLifeService.getOptionFInfo()
+        circleOfLifeService.getOptionFInfo(),
+        circleOfLifeService.getDistributionStats()
       ]);
 
       setAllContractsState(allContractsResult);
@@ -283,6 +296,7 @@ export const useCircleOfLife = (): UseCircleOfLifeReturn => {
       setBurnStats(burnStatsResult);
       setStarterBonusInfo(starterBonusInfoResult);
       setOptionFInfo(optionFInfoResult);
+      setDistributionStats(distributionStatsResult);
 
       // Fetch peripheral balances for active contracts
       if (contractsResult && contractsResult.length > 0) {
@@ -762,6 +776,9 @@ export const useCircleOfLife = (): UseCircleOfLifeReturn => {
 
     // Deposit bonus info (1 EGLD = 1%, max 360%)
     depositBonusInfo,
+
+    // Distribution stats (EGLD distribution: 3.14% treasury, 70% liquidity, 30% DAO)
+    distributionStats,
 
     // Actions
     joinCircle,

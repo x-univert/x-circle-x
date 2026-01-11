@@ -6,9 +6,9 @@
 
 // Init:                                 1
 // Upgrade:                              1
-// Endpoints:                          108
+// Endpoints:                          112
 // Async Callback (empty):               1
-// Total number of exported functions: 111
+// Total number of exported functions: 115
 
 #![no_std]
 
@@ -113,6 +113,10 @@ multiversx_sc_wasm_adapter::endpoints! {
         getTotalBurned => get_total_burned
         getBurnPerSc => get_burn_per_sc
         getBurnStats => get_burn_stats
+        getTotalDistributedTreasury => get_total_distributed_treasury
+        getTotalDistributedDao => get_total_distributed_dao
+        getPendingLiquidityEgld => get_pending_liquidity_egld
+        isDistributionEnabled => is_distribution_enabled
         getStarterBonusInfo => get_starter_bonus_info
         getStarterBonusPercentage => get_starter_bonus_percentage
         getCycleStarter => get_cycle_starter

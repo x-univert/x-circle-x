@@ -352,6 +352,13 @@ export function DaoTab() {
             </div>
           </div>
           <p className="text-purple-300 text-sm">XCIRCLEX</p>
+          {/* EGLD Treasury */}
+          <div className="mt-3 pt-3 border-t border-purple-500/30">
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400 text-sm">EGLD Treasury</span>
+              <span className="text-cyan-300 font-semibold">{formatNumber(daoStats?.egldTreasuryBalance || '0')} EGLD</span>
+            </div>
+          </div>
         </div>
 
         {/* Proposals */}

@@ -2274,6 +2274,34 @@ pub trait CircleOfLifeCenter {
     }
 
     // ═══════════════════════════════════════════════════════════════
+    // VIEWS - DISTRIBUTION STATS
+    // ═══════════════════════════════════════════════════════════════
+
+    /// Retourne le total distribue au treasury (3.14%)
+    #[view(getTotalDistributedTreasury)]
+    fn get_total_distributed_treasury(&self) -> BigUint {
+        self.total_distributed_treasury().get()
+    }
+
+    /// Retourne le total distribue au DAO (30% du restant)
+    #[view(getTotalDistributedDao)]
+    fn get_total_distributed_dao(&self) -> BigUint {
+        self.total_distributed_dao().get()
+    }
+
+    /// Retourne les EGLD en attente pour la liquidite (70% du restant)
+    #[view(getPendingLiquidityEgld)]
+    fn get_pending_liquidity_egld(&self) -> BigUint {
+        self.pending_liquidity_egld().get()
+    }
+
+    /// Verifie si la distribution est activee
+    #[view(isDistributionEnabled)]
+    fn is_distribution_enabled(&self) -> bool {
+        self.distribution_enabled().get()
+    }
+
+    // ═══════════════════════════════════════════════════════════════
     // VIEWS - STARTER BONUS
     // ═══════════════════════════════════════════════════════════════
 

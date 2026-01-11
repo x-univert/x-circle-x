@@ -2311,6 +2311,111 @@ export const getAllBonuses = async (memberAddress: string): Promise<AllBonusesIn
   }
 };
 
+// ==================== DISTRIBUTION STATS ====================
+
+export interface DistributionStats {
+  totalDistributedTreasury: string;  // 3.14% reste dans SC0
+  totalDistributedDao: string;       // 30% du restant va au DAO
+  pendingLiquidityEgld: string;      // 70% du restant en attente pour LP
+  distributionEnabled: boolean;
+}
+
+/**
+ * Get total EGLD distributed to treasury (3.14%)
+ */
+export const getTotalDistributedTreasury = async (): Promise<string> => {
+  try {
+    const returnData = await queryContract('getTotalDistributedTreasury');
+    if (!returnData || returnData.length === 0 || !returnData[0]) {
+      return '0';
+    }
+    const hex = base64ToHex(returnData[0]);
+    return parseBigUint(hex);
+  } catch (error) {
+    console.error('Error fetching total distributed treasury:', error);
+    return '0';
+  }
+};
+
+/**
+ * Get total EGLD distributed to DAO (30% of remaining after 3.14%)
+ */
+export const getTotalDistributedDao = async (): Promise<string> => {
+  try {
+    const returnData = await queryContract('getTotalDistributedDao');
+    if (!returnData || returnData.length === 0 || !returnData[0]) {
+      return '0';
+    }
+    const hex = base64ToHex(returnData[0]);
+    return parseBigUint(hex);
+  } catch (error) {
+    console.error('Error fetching total distributed DAO:', error);
+    return '0';
+  }
+};
+
+/**
+ * Get pending EGLD for liquidity (70% of remaining after 3.14%)
+ */
+export const getPendingLiquidityEgld = async (): Promise<string> => {
+  try {
+    const returnData = await queryContract('getPendingLiquidityEgld');
+    if (!returnData || returnData.length === 0 || !returnData[0]) {
+      return '0';
+    }
+    const hex = base64ToHex(returnData[0]);
+    return parseBigUint(hex);
+  } catch (error) {
+    console.error('Error fetching pending liquidity EGLD:', error);
+    return '0';
+  }
+};
+
+/**
+ * Check if distribution is enabled
+ */
+export const isDistributionEnabled = async (): Promise<boolean> => {
+  try {
+    const returnData = await queryContract('isDistributionEnabled');
+    if (!returnData || returnData.length === 0) {
+      return false;
+    }
+    return returnData[0] === 'AQ==';
+  } catch (error) {
+    console.error('Error checking distribution enabled:', error);
+    return false;
+  }
+};
+
+/**
+ * Get all distribution stats
+ */
+export const getDistributionStats = async (): Promise<DistributionStats> => {
+  try {
+    const [treasury, dao, liquidity, enabled] = await Promise.all([
+      getTotalDistributedTreasury(),
+      getTotalDistributedDao(),
+      getPendingLiquidityEgld(),
+      isDistributionEnabled()
+    ]);
+
+    return {
+      totalDistributedTreasury: treasury,
+      totalDistributedDao: dao,
+      pendingLiquidityEgld: liquidity,
+      distributionEnabled: enabled
+    };
+  } catch (error) {
+    console.error('Error fetching distribution stats:', error);
+    return {
+      totalDistributedTreasury: '0',
+      totalDistributedDao: '0',
+      pendingLiquidityEgld: '0',
+      distributionEnabled: false
+    };
+  }
+};
+
 // ==================== LEGACY ALIASES (pour compatibilite) ====================
 export const createPeripheralContract = joinCircle;
 export const getActiveMembers = getActiveContracts; // Alias pour compatibilite

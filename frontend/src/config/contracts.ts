@@ -20,9 +20,13 @@ export const STAKING_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgqd5r76rsws9kvzcdsxqq
 // Team (10%), Marketing (5%), Advisors (3%)
 export const VESTING_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgqc00rmsjfsk6prqwpcjggxzmdeus0vwa0flfqhxgel0';
 
-// XCIRCLEX DAO Contract - Deploye le 6 decembre 2025
-// Governance: propositions, votes, treasury, timelock (payable)
-export const DAO_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgq35zrtzej655v2czk5plzaa6hp4wluun7flfql80l9d';
+// XCIRCLEX DAO Contract V2 - Deploye le 11 janvier 2026
+// Governance: propositions, votes, treasury XCIRCLEX + EGLD, timelock (payable)
+// Recoit 30% des EGLD distribues par SC0
+export const DAO_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgq90jjjlwjfg2s45y8mxm6xgweavdhyxw8flfqaatay7';
+
+// Ancien DAO v1 (deprecated)
+export const DAO_V1_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgq35zrtzej655v2czk5plzaa6hp4wluun7flfql80l9d';
 
 // XCIRCLEX NFT Contract V2 - NFT evolutif avec IPFS et 10% royalties
 // Deploye le 17 decembre 2025 sur Devnet

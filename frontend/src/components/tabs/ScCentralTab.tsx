@@ -24,6 +24,7 @@ export function ScCentralTab() {
     activeContracts,
     rewardsInfo,
     burnStats,
+    distributionStats,
     deposit,
     refreshData,
     isLoading
@@ -294,6 +295,64 @@ export function ScCentralTab() {
               {burnStats?.burnPerSc ? parseFloat(burnStats.burnPerSc).toLocaleString('fr-FR', { maximumFractionDigits: 0 }) : '0'} XCIRCLEX
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* EGLD Distribution Stats */}
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
+        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <span>&#x1F4CA;</span> {t('scCentral.distributionStats', 'EGLD Distribution Stats')}
+        </h3>
+        <p className="text-gray-400 text-sm mb-4">
+          {t('scCentral.distributionDescription', 'When EGLD is deposited, it is automatically distributed: 3.14% to Treasury, 30% to DAO, 70% to Liquidity.')}
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Treasury (3.14%) */}
+          <div className="bg-gradient-to-br from-amber-500/20 to-yellow-500/20 border border-amber-500/30 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-gray-400 text-sm">{t('scCentral.treasurySc0', 'Treasury SC0')}</span>
+              <span className="text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded">3.14%</span>
+            </div>
+            <p className="text-2xl font-bold text-amber-300">
+              {parseFloat(distributionStats?.totalDistributedTreasury || '0').toFixed(4)} EGLD
+            </p>
+            <p className="text-xs text-gray-500 mt-1">{t('scCentral.remainsInSc0', 'Remains in SC0')}</p>
+          </div>
+
+          {/* DAO (30% of remaining) */}
+          <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-gray-400 text-sm">{t('scCentral.daoV2', 'DAO v2')}</span>
+              <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded">30%</span>
+            </div>
+            <p className="text-2xl font-bold text-purple-300">
+              {parseFloat(distributionStats?.totalDistributedDao || '0').toFixed(4)} EGLD
+            </p>
+            <p className="text-xs text-gray-500 mt-1">{t('scCentral.sentToDao', 'Sent to DAO Treasury')}</p>
+          </div>
+
+          {/* Liquidity (70% of remaining) */}
+          <div className="bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-gray-400 text-sm">{t('scCentral.liquidityPending', 'Liquidity (Pending)')}</span>
+              <span className="text-xs bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded">70%</span>
+            </div>
+            <p className="text-2xl font-bold text-cyan-300">
+              {parseFloat(distributionStats?.pendingLiquidityEgld || '0').toFixed(4)} EGLD
+            </p>
+            <p className="text-xs text-gray-500 mt-1">{t('scCentral.pendingForLp', 'Pending for LP creation')}</p>
+          </div>
+        </div>
+
+        {/* Distribution Status */}
+        <div className="mt-4 flex items-center gap-2">
+          <span className={`w-2 h-2 rounded-full ${distributionStats?.distributionEnabled ? 'bg-green-500' : 'bg-red-500'}`}></span>
+          <span className="text-sm text-gray-400">
+            {distributionStats?.distributionEnabled
+              ? t('scCentral.distributionActive', 'Distribution Active')
+              : t('scCentral.distributionInactive', 'Distribution Inactive')}
+          </span>
         </div>
       </div>
 

@@ -64,6 +64,7 @@ export enum ProposalStatus {
 
 export interface DaoStats {
   treasuryBalance: string;
+  egldTreasuryBalance: string;  // NEW: EGLD treasury balance
   proposalCount: number;
   minProposalThreshold: string;
   votingPeriod: number;
@@ -176,6 +177,7 @@ export const getProposalCount = async (): Promise<number> => {
 export const getDaoStats = async (): Promise<DaoStats> => {
   const [
     treasuryResult,
+    egldTreasuryResult,
     countResult,
     thresholdResult,
     votingPeriodResult,
@@ -185,6 +187,7 @@ export const getDaoStats = async (): Promise<DaoStats> => {
     tokenResult
   ] = await Promise.all([
     queryContract('getTreasuryBalance'),
+    queryContract('getEgldTreasuryBalance'),  // NEW: Get EGLD treasury
     queryContract('getProposalCount'),
     queryContract('getMinProposalThreshold'),
     queryContract('getVotingPeriod'),
@@ -196,6 +199,7 @@ export const getDaoStats = async (): Promise<DaoStats> => {
 
   return {
     treasuryBalance: treasuryResult?.[0] ? parseTokenAmount(base64ToHex(treasuryResult[0])) : '0',
+    egldTreasuryBalance: egldTreasuryResult?.[0] ? parseTokenAmount(base64ToHex(egldTreasuryResult[0])) : '0',
     proposalCount: countResult?.[0] ? parseInt(base64ToHex(countResult[0]), 16) || 0 : 0,
     minProposalThreshold: thresholdResult?.[0] ? parseTokenAmount(base64ToHex(thresholdResult[0])) : '0',
     votingPeriod: votingPeriodResult?.[0] ? parseInt(base64ToHex(votingPeriodResult[0]), 16) || 0 : 0,
