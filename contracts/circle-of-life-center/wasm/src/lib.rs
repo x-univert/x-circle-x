@@ -6,9 +6,10 @@
 
 // Init:                                 1
 // Upgrade:                              1
-// Endpoints:                          112
+// Endpoints:                          120
 // Async Callback (empty):               1
-// Total number of exported functions: 115
+// Promise callbacks:                    5
+// Total number of exported functions: 128
 
 #![no_std]
 
@@ -33,7 +34,15 @@ multiversx_sc_wasm_adapter::endpoints! {
         setWegldContract => set_wegld_contract
         setLpLocker => set_lp_locker
         setSlippageTolerance => set_slippage_tolerance
+        setLiquidityThreshold => set_liquidity_threshold
+        setLpTokenId => set_lp_token_id
+        setXcirclexTokenId => set_xcirclex_token_id
+        unlockLpTokens => unlock_lp_tokens
         withdrawPendingLiquidity => withdraw_pending_liquidity
+        processLiquidity => process_liquidity
+        resumeProcessingFromWegld => resume_processing_from_wegld
+        resumeFromAddLiquidity => resume_from_add_liquidity
+        lockPendingLpTokens => lock_pending_lp_tokens
         distributeExistingEgld => distribute_existing_egld
         setRewardToken => set_reward_token
         setRewardPerCycle => set_reward_per_cycle
@@ -132,6 +141,11 @@ multiversx_sc_wasm_adapter::endpoints! {
         getTotalEgldDeposits => get_total_egld_deposits
         getAllBonuses => get_all_bonuses
         getPendingAutoTransfers => get_pending_auto_transfers
+        wrap_egld_callback => wrap_egld_callback
+        swap_xcirclex_callback => swap_xcirclex_callback
+        add_liquidity_callback => add_liquidity_callback
+        lock_lp_callback => lock_lp_callback
+        unlock_lp_tokens_callback => unlock_lp_tokens_callback
     )
 }
 

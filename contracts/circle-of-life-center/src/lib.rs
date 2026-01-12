@@ -215,6 +215,47 @@ pub trait CircleOfLifeCenter {
         self.slippage_tolerance_bps().set(slippage_bps);
     }
 
+    /// Configure le seuil minimum pour declencher auto-processing de liquidite
+    #[endpoint(setLiquidityThreshold)]
+    fn set_liquidity_threshold(&self, threshold: BigUint) {
+        self.require_owner();
+        self.liquidity_threshold().set(&threshold);
+    }
+
+    /// Configure le LP token ID (obtenu apres premier addLiquidity)
+    #[endpoint(setLpTokenId)]
+    fn set_lp_token_id(&self, token_id: TokenIdentifier) {
+        self.require_owner();
+        self.lp_token_id().set(&token_id);
+    }
+
+    /// Configure le XCIRCLEX token ID
+    #[endpoint(setXcirclexTokenId)]
+    fn set_xcirclex_token_id(&self, token_id: TokenIdentifier) {
+        self.require_owner();
+        self.xcirclex_token_id().set(&token_id);
+    }
+
+    /// Unlock les LP tokens après expiration du lock (365 jours)
+    /// Les LP tokens seront envoyés à l'adresse spécifiée
+    #[endpoint(unlockLpTokens)]
+    fn unlock_lp_tokens(&self, lock_id: u64, recipient: ManagedAddress) {
+        self.require_owner();
+
+        require!(!self.lp_locker_address().is_empty(), "LP Locker non configure");
+
+        let locker_address = self.lp_locker_address().get();
+
+        // Appeler unlock sur le LP Locker (Promises API)
+        self.lp_locker_proxy(locker_address)
+            .unlock(lock_id)
+            .with_gas_limit(20_000_000u64)
+            
+            .with_callback(self.callbacks().unlock_lp_tokens_callback(recipient))
+            .with_extra_gas_for_callback(10_000_000u64)
+            .register_promise();
+    }
+
     /// Retire les EGLD accumules pour la liquidite (traitement manuel)
     #[endpoint(withdrawPendingLiquidity)]
     fn withdraw_pending_liquidity(&self, to: ManagedAddress) {
@@ -227,6 +268,198 @@ pub trait CircleOfLifeCenter {
         self.send().direct_egld(&to, &pending);
 
         self.liquidity_withdrawn_event(&to, &pending);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // XEXCHANGE LIQUIDITY PROCESSING
+    // ═══════════════════════════════════════════════════════════════
+
+    /// Admin: Force le processing de la liquidite en attente vers xExchange
+    /// Flow: EGLD -> wrap WEGLD -> 50% swap XCIRCLEX -> addLiquidity -> lock LP
+    #[endpoint(processLiquidity)]
+    fn process_liquidity(&self) {
+        self.require_owner();
+        self.do_process_liquidity();
+    }
+
+    /// Admin: Reprend le processing depuis l'etape WEGLD (si wrap a reussi mais callback echoue)
+    /// Utilise le WEGLD deja present dans le SC pour continuer le swap
+    #[endpoint(resumeProcessingFromWegld)]
+    fn resume_processing_from_wegld(&self) {
+        self.require_owner();
+
+        // Verifier config
+        require!(!self.wegld_token_id().is_empty(), "WEGLD token ID non configure");
+        require!(!self.xexchange_pair_address().is_empty(), "xExchange non configure");
+        require!(!self.xcirclex_token_id().is_empty(), "XCIRCLEX token ID non configure");
+        require!(!self.lp_locker_address().is_empty(), "LP Locker non configure");
+
+        // Recuperer le solde WEGLD du SC
+        let wegld_token = self.wegld_token_id().get();
+        let wegld_balance = self.blockchain().get_sc_balance(
+            &EgldOrEsdtTokenIdentifier::esdt(wegld_token.clone()), 0
+        );
+
+        require!(wegld_balance > BigUint::zero(), "Pas de WEGLD dans le SC");
+
+        // Marquer le processing comme en cours
+        self.liquidity_processing_in_progress().set(true);
+
+        // Split 50/50 le WEGLD disponible
+        let half = &wegld_balance / 2u64;
+        let other_half = &wegld_balance - &half;
+
+        // Stocker les montants pour le tracking
+        self.pending_wegld_for_swap().set(&half);
+        self.pending_wegld_for_lp().set(&other_half);
+
+        self.liquidity_processing_started_event(&wegld_balance);
+
+        // Aller directement au swap (skip wrap)
+        let xcirclex_token = self.xcirclex_token_id().get();
+        let pair_address = self.xexchange_pair_address().get();
+        let min_out = BigUint::from(1u64);
+
+        let payment = EsdtTokenPayment::new(wegld_token, 0, half);
+
+        self.xexchange_proxy(pair_address)
+            .swap_tokens_fixed_input(xcirclex_token, min_out)
+            .with_esdt_transfer(payment)
+            .with_gas_limit(30_000_000u64)
+            .with_callback(self.callbacks().swap_xcirclex_callback())
+            .with_extra_gas_for_callback(50_000_000u64)
+            .register_promise();
+    }
+
+    /// Admin: Reprend le processing depuis l'etape addLiquidity (si swap a reussi mais callback echoue)
+    /// Utilise les XCIRCLEX et WEGLD deja presents dans le SC
+    #[endpoint(resumeFromAddLiquidity)]
+    fn resume_from_add_liquidity(&self) {
+        self.require_owner();
+
+        // Verifier config
+        require!(!self.wegld_token_id().is_empty(), "WEGLD token ID non configure");
+        require!(!self.xcirclex_token_id().is_empty(), "XCIRCLEX token ID non configure");
+        require!(!self.xexchange_pair_address().is_empty(), "xExchange non configure");
+        require!(!self.lp_locker_address().is_empty(), "LP Locker non configure");
+        require!(!self.lp_token_id().is_empty(), "LP Token ID non configure");
+
+        // Recuperer les balances
+        let wegld_token = self.wegld_token_id().get();
+        let xcirclex_token = self.xcirclex_token_id().get();
+
+        let wegld_balance = self.blockchain().get_sc_balance(
+            &EgldOrEsdtTokenIdentifier::esdt(wegld_token.clone()), 0
+        );
+        let xcirclex_balance = self.blockchain().get_sc_balance(
+            &EgldOrEsdtTokenIdentifier::esdt(xcirclex_token.clone()), 0
+        );
+
+        require!(wegld_balance > BigUint::zero(), "Pas de WEGLD dans le SC");
+        require!(xcirclex_balance > BigUint::zero(), "Pas de XCIRCLEX dans le SC");
+
+        // Marquer processing en cours
+        self.liquidity_processing_in_progress().set(true);
+
+        // Stocker pour tracking
+        self.pending_xcirclex_for_lp().set(&xcirclex_balance);
+        self.pending_wegld_for_lp().set(&wegld_balance);
+
+        self.swap_executed_event(&wegld_balance, &xcirclex_balance);
+
+        // Aller directement a addLiquidity
+        let pair_address = self.xexchange_pair_address().get();
+
+        let mut payments = ManagedVec::new();
+        payments.push(EsdtTokenPayment::new(xcirclex_token, 0, xcirclex_balance));
+        payments.push(EsdtTokenPayment::new(wegld_token, 0, wegld_balance));
+
+        self.xexchange_proxy(pair_address)
+            .add_liquidity(BigUint::from(1u64), BigUint::from(1u64))
+            .with_multi_token_transfer(payments)
+            .with_gas_limit(50_000_000u64)
+            .with_callback(self.callbacks().add_liquidity_callback())
+            .with_extra_gas_for_callback(80_000_000u64)
+            .register_promise();
+    }
+
+    /// Admin: Lock les LP tokens presents dans le SC (appeler apres addLiquidity)
+    /// Note: multi-level async pas permis, donc lock manuel apres addLiquidity
+    #[endpoint(lockPendingLpTokens)]
+    fn lock_pending_lp_tokens(&self) {
+        self.require_owner();
+
+        // Verifier config
+        require!(!self.lp_token_id().is_empty(), "LP Token ID non configure");
+        require!(!self.lp_locker_address().is_empty(), "LP Locker non configure");
+
+        // Recuperer le solde LP
+        let lp_token = self.lp_token_id().get();
+        let lp_balance = self.blockchain().get_sc_balance(
+            &EgldOrEsdtTokenIdentifier::esdt(lp_token.clone()), 0
+        );
+
+        require!(lp_balance > BigUint::zero(), "Pas de LP tokens dans le SC");
+
+        // Lock pour 365 jours
+        let locker_address = self.lp_locker_address().get();
+        let lock_duration = 365u64;
+
+        let payment = EsdtTokenPayment::new(lp_token, 0, lp_balance.clone());
+
+        self.lp_locker_proxy(locker_address)
+            .lock_lp_tokens(lock_duration)
+            .with_esdt_transfer(payment)
+            .with_gas_limit(30_000_000u64)
+            .with_callback(self.callbacks().lock_lp_callback(lp_balance, lock_duration))
+            .with_extra_gas_for_callback(20_000_000u64)
+            .register_promise();
+    }
+
+    /// Fonction interne pour traiter la liquidite
+    fn do_process_liquidity(&self) {
+        let pending = self.pending_liquidity_egld().get();
+        require!(pending > BigUint::zero(), "Pas de liquidite en attente");
+
+        // Verifier qu'un processing n'est pas deja en cours
+        require!(
+            !self.liquidity_processing_in_progress().get(),
+            "Processing deja en cours"
+        );
+
+        // Verifier config
+        require!(!self.wegld_contract_address().is_empty(), "WEGLD non configure");
+        require!(!self.xexchange_pair_address().is_empty(), "xExchange non configure");
+        require!(!self.wegld_token_id().is_empty(), "WEGLD token ID non configure");
+        require!(!self.xcirclex_token_id().is_empty(), "XCIRCLEX token ID non configure");
+        require!(!self.lp_locker_address().is_empty(), "LP Locker non configure");
+
+        // Marquer le processing comme en cours
+        self.liquidity_processing_in_progress().set(true);
+
+        // Split 50/50
+        let half = &pending / 2u64;
+        let other_half = &pending - &half;
+
+        // Reset pending EGLD
+        self.pending_liquidity_egld().clear();
+
+        // Stocker les montants pour le tracking dans les callbacks
+        self.pending_wegld_for_swap().set(&half);
+        self.pending_wegld_for_lp().set(&other_half);
+
+        self.liquidity_processing_started_event(&pending);
+
+        // Etape 1: Wrap tout l'EGLD en WEGLD (utilise promises API)
+        let wegld_contract = self.wegld_contract_address().get();
+        self.wegld_proxy(wegld_contract)
+            .wrap_egld()
+            .with_egld_transfer(pending)
+            .with_gas_limit(20_000_000u64)
+            
+            .with_callback(self.callbacks().wrap_egld_callback())
+            .with_extra_gas_for_callback(50_000_000u64)
+            .register_promise();
     }
 
     /// Distribue les EGLD existants dans SC0 selon la formule V4
@@ -729,6 +962,38 @@ pub trait CircleOfLifeCenter {
     #[storage_mapper("pending_liquidity_egld")]
     fn pending_liquidity_egld(&self) -> SingleValueMapper<BigUint>;
 
+    /// Seuil minimum pour declencher auto-processing de liquidite
+    #[storage_mapper("liquidity_threshold")]
+    fn liquidity_threshold(&self) -> SingleValueMapper<BigUint>;
+
+    /// LP token ID recu apres addLiquidity
+    #[storage_mapper("lp_token_id")]
+    fn lp_token_id(&self) -> SingleValueMapper<TokenIdentifier>;
+
+    /// XCIRCLEX token ID
+    #[storage_mapper("xcirclex_token_id")]
+    fn xcirclex_token_id(&self) -> SingleValueMapper<TokenIdentifier>;
+
+    /// Tracking WEGLD temporaire pendant le process (pour swap)
+    #[storage_mapper("pending_wegld_for_swap")]
+    fn pending_wegld_for_swap(&self) -> SingleValueMapper<BigUint>;
+
+    /// Tracking WEGLD temporaire pendant le process (pour LP)
+    #[storage_mapper("pending_wegld_for_lp")]
+    fn pending_wegld_for_lp(&self) -> SingleValueMapper<BigUint>;
+
+    /// XCIRCLEX recu apres swap, en attente pour LP
+    #[storage_mapper("pending_xcirclex_for_lp")]
+    fn pending_xcirclex_for_lp(&self) -> SingleValueMapper<BigUint>;
+
+    /// LP tokens en attente de lock (apres addLiquidity)
+    #[storage_mapper("pending_lp_tokens")]
+    fn pending_lp_tokens(&self) -> SingleValueMapper<BigUint>;
+
+    /// Flag indiquant si un processing de liquidite est en cours
+    #[storage_mapper("liquidity_processing_in_progress")]
+    fn liquidity_processing_in_progress(&self) -> SingleValueMapper<bool>;
+
     // ═══════════════════════════════════════════════════════════════
     // REJOINDRE LE CERCLE - Deployer un vrai SC
     // ═══════════════════════════════════════════════════════════════
@@ -803,7 +1068,7 @@ pub trait CircleOfLifeCenter {
     // TRANSACTIONS CIRCULAIRES
     // ═══════════════════════════════════════════════════════════════
 
-    /// Demarre le cycle quotidien - envoie l'integralite du solde SC0 au premier SC
+    /// Demarre le cycle quotidien - envoie le circulation_amount au premier SC
     /// Le caller recoit un bonus XCIRCLEX si le cycle se termine avec succes
     #[endpoint(startDailyCycle)]
     fn start_daily_cycle(&self) {
@@ -818,12 +1083,12 @@ pub trait CircleOfLifeCenter {
         let active_contracts = self.get_active_contracts();
         require!(!active_contracts.is_empty(), "Aucun SC actif");
 
-        // Envoyer l'integralite du solde SC0 (pas juste circulation_amount)
-        let balance = self.blockchain().get_sc_balance(&EgldOrEsdtTokenIdentifier::egld(), 0);
-        require!(balance > BigUint::zero(), "Solde SC0 insuffisant pour demarrer le cycle");
+        // Utiliser le circulation_amount defini (pas le solde total)
+        let circulation = self.circulation_amount().get();
+        require!(circulation > BigUint::zero(), "Montant circulant non defini");
 
-        // Mettre a jour le montant circulant avec le solde actuel
-        self.circulation_amount().set(&balance);
+        let balance = self.blockchain().get_sc_balance(&EgldOrEsdtTokenIdentifier::egld(), 0);
+        require!(balance >= circulation, "Solde SC0 insuffisant pour le montant circulant");
 
         // Enregistrer qui a demarre le cycle (pour le bonus)
         self.cycle_starter().set(&caller);
@@ -832,17 +1097,17 @@ pub trait CircleOfLifeCenter {
         // donc PAS besoin de l'incrementer ici - les pre-signatures faites apres
         // la fin du cycle precedent restent valides pour ce nouveau cycle
 
-        // Envoyer l'integralite du solde au premier SC actif
+        // Envoyer uniquement le circulation_amount au premier SC actif
         let first_sc = active_contracts.get(0).clone();
-        self.send().direct_egld(&first_sc, &balance);
+        self.send().direct_egld(&first_sc, &circulation);
 
         self.current_cycle_index().set(0usize);
         self.cycle_day().set(current_day);
         self.cycle_holder().set(&first_sc);
 
-        self.cycle_started_event(current_day, &balance);
+        self.cycle_started_event(current_day, &circulation);
         self.cycle_starter_event(&caller, current_day);
-        self.transfer_event(&self.blockchain().get_sc_address(), &first_sc, &balance);
+        self.transfer_event(&self.blockchain().get_sc_address(), &first_sc, &circulation);
     }
 
     /// Pre-signe pour participer au cycle (peut etre fait a l'avance)
@@ -1415,21 +1680,35 @@ pub trait CircleOfLifeCenter {
         self.dao_distribution_event(&dao_address, amount);
     }
 
-    /// Accumule les EGLD pour la liquidite (swap + LP plus tard)
+    /// Accumule les EGLD pour la liquidite (swap + LP via xExchange)
+    /// Auto-trigger le processing si le seuil est atteint
     fn accumulate_for_liquidity(&self, amount: &BigUint) {
         if amount == &BigUint::zero() {
             return;
         }
 
-        // Pour simplifier V1: accumuler les EGLD pour traitement manuel
-        // V2 implementera le swap automatique via xExchange
         let current = self.pending_liquidity_egld().get();
-        self.pending_liquidity_egld().set(&(&current + amount));
+        let new_total = &current + amount;
+        self.pending_liquidity_egld().set(&new_total);
 
-        let total = self.total_distributed_liquidity().get();
-        self.total_distributed_liquidity().set(&(&total + amount));
+        let total_distributed = self.total_distributed_liquidity().get();
+        self.total_distributed_liquidity().set(&(&total_distributed + amount));
 
         self.liquidity_accumulated_event(amount);
+
+        // Auto-trigger le processing si le seuil est atteint et config complete
+        let threshold = self.liquidity_threshold().get();
+        if threshold > BigUint::zero()
+            && new_total >= threshold
+            && !self.liquidity_processing_in_progress().get()
+            && !self.wegld_contract_address().is_empty()
+            && !self.xexchange_pair_address().is_empty()
+            && !self.wegld_token_id().is_empty()
+            && !self.xcirclex_token_id().is_empty()
+            && !self.lp_locker_address().is_empty()
+        {
+            self.do_process_liquidity();
+        }
     }
 
     /// Traite la distribution complete d'un paiement EGLD
@@ -2633,6 +2912,220 @@ pub trait CircleOfLifeCenter {
 
     #[event("existing_egld_distributed")]
     fn existing_egld_distributed_event(&self, #[indexed] amount: &BigUint);
+
+    // ═══════════════════════════════════════════════════════════════
+    // EVENTS - XEXCHANGE LIQUIDITY PROCESSING
+    // ═══════════════════════════════════════════════════════════════
+
+    #[event("liquidity_processing_started")]
+    fn liquidity_processing_started_event(&self, #[indexed] amount: &BigUint);
+
+    #[event("wegld_wrapped")]
+    fn wegld_wrapped_event(&self, #[indexed] amount: &BigUint);
+
+    #[event("swap_executed")]
+    fn swap_executed_event(&self, #[indexed] wegld_in: &BigUint, #[indexed] xcirclex_out: &BigUint);
+
+    #[event("liquidity_added")]
+    fn liquidity_added_event(&self, #[indexed] lp_amount: &BigUint);
+
+    #[event("lp_locked")]
+    fn lp_locked_event(&self, #[indexed] amount: &BigUint, #[indexed] duration_days: u64);
+
+    #[event("lp_unlocked_and_sent")]
+    fn lp_unlocked_and_sent_event(&self, #[indexed] recipient: &ManagedAddress, #[indexed] amount: &BigUint);
+
+    #[event("liquidity_processing_completed")]
+    fn liquidity_processing_completed_event(&self);
+
+    #[event("liquidity_processing_error")]
+    fn liquidity_processing_error_event(&self, #[indexed] step: &ManagedBuffer, error: &ManagedBuffer);
+
+    // ═══════════════════════════════════════════════════════════════
+    // CALLBACKS - XEXCHANGE LIQUIDITY PROCESSING (Promises API)
+    // ═══════════════════════════════════════════════════════════════
+
+    /// Callback apres wrap EGLD -> WEGLD
+    #[promises_callback]
+    fn wrap_egld_callback(&self, #[call_result] result: ManagedAsyncCallResult<()>) {
+        match result {
+            ManagedAsyncCallResult::Ok(()) => {
+                // WEGLD recu avec succes, maintenant swap 50% pour XCIRCLEX
+                let wegld_for_swap = self.pending_wegld_for_swap().get();
+                let wegld_token = self.wegld_token_id().get();
+                let xcirclex_token = self.xcirclex_token_id().get();
+                let pair_address = self.xexchange_pair_address().get();
+
+                let total_wegld = &wegld_for_swap + &self.pending_wegld_for_lp().get();
+                self.wegld_wrapped_event(&total_wegld);
+
+                // Minimum output avec slippage (1 pour eviter 0)
+                let min_out = BigUint::from(1u64);
+
+                // Payment ESDT
+                let payment = EsdtTokenPayment::new(wegld_token, 0, wegld_for_swap);
+
+                self.xexchange_proxy(pair_address)
+                    .swap_tokens_fixed_input(xcirclex_token, min_out)
+                    .with_esdt_transfer(payment)
+                    .with_gas_limit(50_000_000u64)
+                    .with_callback(self.callbacks().swap_xcirclex_callback())
+                    .with_extra_gas_for_callback(150_000_000u64)
+                    .register_promise();
+            },
+            ManagedAsyncCallResult::Err(err) => {
+                self.liquidity_processing_error_event(
+                    &ManagedBuffer::from(b"wrap"),
+                    &err.err_msg
+                );
+                self.cleanup_failed_processing();
+            }
+        }
+    }
+
+    /// Callback apres swap WEGLD -> XCIRCLEX
+    #[promises_callback]
+    fn swap_xcirclex_callback(&self, #[call_result] result: ManagedAsyncCallResult<()>) {
+        match result {
+            ManagedAsyncCallResult::Ok(()) => {
+                // Recuperer le XCIRCLEX recu (balance du SC)
+                let xcirclex_token = self.xcirclex_token_id().get();
+                let xcirclex_balance = self.blockchain().get_sc_balance(
+                    &EgldOrEsdtTokenIdentifier::esdt(xcirclex_token.clone()), 0
+                );
+
+                let wegld_swapped = self.pending_wegld_for_swap().get();
+                self.swap_executed_event(&wegld_swapped, &xcirclex_balance);
+
+                // Stocker pour LP
+                self.pending_xcirclex_for_lp().set(&xcirclex_balance);
+
+                // Ajouter liquidite avec XCIRCLEX + WEGLD restant
+                let wegld_for_lp = self.pending_wegld_for_lp().get();
+                let wegld_token = self.wegld_token_id().get();
+                let pair_address = self.xexchange_pair_address().get();
+
+                // Multi-transfer: XCIRCLEX + WEGLD
+                let mut payments = ManagedVec::new();
+                payments.push(EsdtTokenPayment::new(xcirclex_token, 0, xcirclex_balance));
+                payments.push(EsdtTokenPayment::new(wegld_token, 0, wegld_for_lp));
+
+                self.xexchange_proxy(pair_address)
+                    .add_liquidity(BigUint::from(1u64), BigUint::from(1u64))
+                    .with_multi_token_transfer(payments)
+                    .with_gas_limit(50_000_000u64)
+                    .with_callback(self.callbacks().add_liquidity_callback())
+                    .with_extra_gas_for_callback(80_000_000u64)
+                    .register_promise();
+            },
+            ManagedAsyncCallResult::Err(err) => {
+                self.liquidity_processing_error_event(
+                    &ManagedBuffer::from(b"swap"),
+                    &err.err_msg
+                );
+                self.cleanup_failed_processing();
+            }
+        }
+    }
+
+    /// Callback apres addLiquidity
+    #[promises_callback]
+    fn add_liquidity_callback(&self, #[call_result] result: ManagedAsyncCallResult<()>) {
+        match result {
+            ManagedAsyncCallResult::Ok(()) => {
+                // Recuperer les LP tokens recus
+                let lp_token = self.lp_token_id().get();
+                let lp_balance = self.blockchain().get_sc_balance(
+                    &EgldOrEsdtTokenIdentifier::esdt(lp_token.clone()), 0
+                );
+
+                self.liquidity_added_event(&lp_balance);
+
+                // Stocker les LP tokens en attente de lock (multi-level async pas permis)
+                self.pending_lp_tokens().set(&lp_balance);
+
+                self.cleanup_processing();
+                // Note: Appeler lockPendingLpTokens() manuellement apres
+                self.liquidity_processing_completed_event();
+            },
+            ManagedAsyncCallResult::Err(err) => {
+                self.liquidity_processing_error_event(
+                    &ManagedBuffer::from(b"addLiquidity"),
+                    &err.err_msg
+                );
+                self.cleanup_failed_processing();
+            }
+        }
+    }
+
+    /// Callback apres lock LP tokens
+    #[promises_callback]
+    fn lock_lp_callback(
+        &self,
+        lp_amount: BigUint,
+        duration: u64,
+        #[call_result] result: ManagedAsyncCallResult<()>
+    ) {
+        match result {
+            ManagedAsyncCallResult::Ok(()) => {
+                self.lp_locked_event(&lp_amount, duration);
+                self.cleanup_processing();
+                self.liquidity_processing_completed_event();
+            },
+            ManagedAsyncCallResult::Err(err) => {
+                self.liquidity_processing_error_event(
+                    &ManagedBuffer::from(b"lockLp"),
+                    &err.err_msg
+                );
+                self.cleanup_failed_processing();
+            }
+        }
+    }
+
+    /// Callback apres unlock LP tokens du LP Locker
+    #[promises_callback]
+    fn unlock_lp_tokens_callback(
+        &self,
+        recipient: ManagedAddress,
+        #[call_result] result: ManagedAsyncCallResult<()>
+    ) {
+        match result {
+            ManagedAsyncCallResult::Ok(()) => {
+                // Les LP tokens ont été envoyés à SC0 par le LP Locker
+                // Maintenant on les transfère au recipient
+                let lp_token = self.lp_token_id().get();
+                let lp_balance = self.blockchain().get_sc_balance(
+                    &EgldOrEsdtTokenIdentifier::esdt(lp_token.clone()), 0
+                );
+
+                if lp_balance > BigUint::zero() {
+                    self.send().direct_esdt(&recipient, &lp_token, 0, &lp_balance);
+                    self.lp_unlocked_and_sent_event(&recipient, &lp_balance);
+                }
+            },
+            ManagedAsyncCallResult::Err(err) => {
+                self.liquidity_processing_error_event(
+                    &ManagedBuffer::from(b"unlockLp"),
+                    &err.err_msg
+                );
+            }
+        }
+    }
+
+    /// Nettoyer les storage temporaires apres processing reussi
+    fn cleanup_processing(&self) {
+        self.pending_wegld_for_swap().clear();
+        self.pending_wegld_for_lp().clear();
+        self.pending_xcirclex_for_lp().clear();
+        self.liquidity_processing_in_progress().set(false);
+    }
+
+    /// Nettoyer apres echec (garde les tokens dans le SC pour retry manuel)
+    fn cleanup_failed_processing(&self) {
+        self.liquidity_processing_in_progress().set(false);
+        // Note: Les tokens WEGLD/XCIRCLEX restent dans le SC
+        // L'admin peut les recuperer ou retenter
+    }
 }
 
 // Module proxy pour appeler les contrats peripheriques
@@ -2731,5 +3224,9 @@ mod lp_locker_proxy {
         #[payable("*")]
         #[endpoint(lockLpTokens)]
         fn lock_lp_tokens(&self, lock_duration_days: u64);
+
+        /// Déverrouiller des LP tokens après expiration
+        #[endpoint(unlock)]
+        fn unlock(&self, lock_id: u64);
     }
 }
