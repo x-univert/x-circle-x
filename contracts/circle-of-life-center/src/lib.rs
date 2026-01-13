@@ -1667,11 +1667,9 @@ pub trait CircleOfLifeCenter {
 
         let dao_address = self.dao_contract_address().get();
 
-        // Appeler le DAO pour recevoir les EGLD
-        self.dao_proxy(dao_address.clone())
-            .receive_from_circle_of_life()
-            .with_egld_transfer(amount.clone())
-            .execute_on_dest_context::<()>();
+        // Transfert direct EGLD au DAO (payable, pas d'appel de fonction)
+        // Plus economique en gas qu'un appel synchrone cross-shard
+        self.send().direct_egld(&dao_address, amount);
 
         // Tracker la distribution
         let current = self.total_distributed_dao().get();
