@@ -1679,7 +1679,7 @@ pub trait CircleOfLifeCenter {
     }
 
     /// Accumule les EGLD pour la liquidite (swap + LP via xExchange)
-    /// Auto-trigger le processing si le seuil est atteint
+    /// Note: Le processing est manuel via processLiquidity() pour eviter les problemes de gas
     fn accumulate_for_liquidity(&self, amount: &BigUint) {
         if amount == &BigUint::zero() {
             return;
@@ -1694,19 +1694,8 @@ pub trait CircleOfLifeCenter {
 
         self.liquidity_accumulated_event(amount);
 
-        // Auto-trigger le processing si le seuil est atteint et config complete
-        let threshold = self.liquidity_threshold().get();
-        if threshold > BigUint::zero()
-            && new_total >= threshold
-            && !self.liquidity_processing_in_progress().get()
-            && !self.wegld_contract_address().is_empty()
-            && !self.xexchange_pair_address().is_empty()
-            && !self.wegld_token_id().is_empty()
-            && !self.xcirclex_token_id().is_empty()
-            && !self.lp_locker_address().is_empty()
-        {
-            self.do_process_liquidity();
-        }
+        // Note: Pas d'auto-trigger - le processing est fait manuellement via processLiquidity()
+        // car les appels async cross-shard necessitent ~200M gas
     }
 
     /// Traite la distribution complete d'un paiement EGLD
