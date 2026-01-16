@@ -173,7 +173,7 @@ pub trait XCirclexIdo {
         self.contribute_event(&caller, &actual_contribution, &tokens);
     }
 
-    /// Claim tokens after IDO is finalized (soft cap reached)
+    /// Claim tokens after IDO is finalized (soft cap reached) and claim delay passed
     #[endpoint(claimTokens)]
     fn claim_tokens(&self) {
         let caller = self.blockchain().get_caller();
@@ -182,6 +182,15 @@ pub trait XCirclexIdo {
 
         let status = self.ido_status().get();
         require!(status == IdoStatus::Finalized, "IDO was cancelled or not successful");
+
+        // Check claim delay
+        let claim_delay = self.claim_delay().get();
+        if claim_delay > 0 {
+            let finalization_time = self.finalization_time().get();
+            let current_time = self.blockchain().get_block_timestamp();
+            let claim_available_at = finalization_time + claim_delay;
+            require!(current_time >= claim_available_at, "Claim not available yet. Please wait.");
+        }
 
         require!(!self.contributions(&caller).is_empty(), "No contribution found");
 
@@ -265,10 +274,13 @@ pub trait XCirclexIdo {
         let total_raised = self.total_raised().get();
         let soft_cap = self.soft_cap().get();
 
+        let current_time = self.blockchain().get_block_timestamp();
+
         if total_raised >= soft_cap {
             // Success! Soft cap reached
             self.ido_status().set(IdoStatus::Finalized);
             self.is_finalized().set(true);
+            self.finalization_time().set(current_time);
 
             // Emit success event
             self.ido_finalized_event(true, &total_raised);
@@ -276,6 +288,7 @@ pub trait XCirclexIdo {
             // Failed - soft cap not reached
             self.ido_status().set(IdoStatus::Cancelled);
             self.is_finalized().set(true);
+            self.finalization_time().set(current_time);
 
             // Emit cancelled event
             self.ido_finalized_event(false, &total_raised);
@@ -297,6 +310,80 @@ pub trait XCirclexIdo {
         self.send().direct_egld(&recipient, &balance);
 
         self.withdraw_event(&recipient, &balance);
+    }
+
+    /// Set distribution addresses for fund allocation
+    #[only_owner]
+    #[endpoint(setDistributionAddresses)]
+    fn set_distribution_addresses(
+        &self,
+        liquidity_address: ManagedAddress,
+        development_address: ManagedAddress,
+        marketing_address: ManagedAddress,
+        reserve_address: ManagedAddress,
+    ) {
+        self.liquidity_address().set(&liquidity_address);
+        self.development_address().set(&development_address);
+        self.marketing_address().set(&marketing_address);
+        self.reserve_address().set(&reserve_address);
+    }
+
+    /// Distribute raised EGLD according to predefined percentages
+    /// 80% Liquidity, 10% Development, 5% Marketing, 5% Reserve
+    #[only_owner]
+    #[endpoint(distributeFunds)]
+    fn distribute_funds(&self) {
+        require!(self.is_finalized().get(), "IDO not finalized");
+
+        let status = self.ido_status().get();
+        require!(status == IdoStatus::Finalized, "IDO was not successful");
+
+        require!(!self.liquidity_address().is_empty(), "Liquidity address not set");
+        require!(!self.development_address().is_empty(), "Development address not set");
+        require!(!self.marketing_address().is_empty(), "Marketing address not set");
+        require!(!self.reserve_address().is_empty(), "Reserve address not set");
+
+        let balance = self.blockchain().get_sc_balance(&EgldOrEsdtTokenIdentifier::egld(), 0);
+        require!(balance > 0, "No funds to distribute");
+
+        // Calculate amounts (basis points: 8000 = 80%, 1000 = 10%, 500 = 5%)
+        let liquidity_amount = &balance * 8000u64 / 10000u64;  // 80%
+        let development_amount = &balance * 1000u64 / 10000u64; // 10%
+        let marketing_amount = &balance * 500u64 / 10000u64;    // 5%
+        let reserve_amount = &balance - &liquidity_amount - &development_amount - &marketing_amount; // 5% (remainder)
+
+        // Get addresses
+        let liquidity_addr = self.liquidity_address().get();
+        let development_addr = self.development_address().get();
+        let marketing_addr = self.marketing_address().get();
+        let reserve_addr = self.reserve_address().get();
+
+        // Distribute
+        if liquidity_amount > 0 {
+            self.send().direct_egld(&liquidity_addr, &liquidity_amount);
+            self.distribution_event(&liquidity_addr, &liquidity_amount, &ManagedBuffer::from(b"liquidity"));
+        }
+        if development_amount > 0 {
+            self.send().direct_egld(&development_addr, &development_amount);
+            self.distribution_event(&development_addr, &development_amount, &ManagedBuffer::from(b"development"));
+        }
+        if marketing_amount > 0 {
+            self.send().direct_egld(&marketing_addr, &marketing_amount);
+            self.distribution_event(&marketing_addr, &marketing_amount, &ManagedBuffer::from(b"marketing"));
+        }
+        if reserve_amount > 0 {
+            self.send().direct_egld(&reserve_addr, &reserve_amount);
+            self.distribution_event(&reserve_addr, &reserve_amount, &ManagedBuffer::from(b"reserve"));
+        }
+
+        self.funds_distributed().set(true);
+    }
+
+    /// Set claim delay (time after finalization before users can claim)
+    #[only_owner]
+    #[endpoint(setClaimDelay)]
+    fn set_claim_delay(&self, delay_seconds: u64) {
+        self.claim_delay().set(delay_seconds);
     }
 
     /// Withdraw unsold tokens after finalization
@@ -475,6 +562,63 @@ pub trait XCirclexIdo {
         &egld_amount * &rate / BigUint::from(10u64).pow(18)
     }
 
+    /// Get time remaining before claim is available (0 if already available)
+    #[view(getClaimTimeRemaining)]
+    fn get_claim_time_remaining(&self) -> u64 {
+        if !self.is_finalized().get() {
+            return u64::MAX; // Not finalized yet
+        }
+
+        let status = self.ido_status().get();
+        if status != IdoStatus::Finalized {
+            return 0; // Cancelled, no claim needed
+        }
+
+        let claim_delay = self.claim_delay().get();
+        if claim_delay == 0 {
+            return 0; // No delay, claim available
+        }
+
+        let finalization_time = self.finalization_time().get();
+        let claim_available_at = finalization_time + claim_delay;
+        let current_time = self.blockchain().get_block_timestamp();
+
+        if current_time >= claim_available_at {
+            0
+        } else {
+            claim_available_at - current_time
+        }
+    }
+
+    /// Get claim available timestamp
+    #[view(getClaimAvailableAt)]
+    fn get_claim_available_at(&self) -> u64 {
+        if !self.is_finalized().get() {
+            return 0;
+        }
+        let finalization_time = self.finalization_time().get();
+        let claim_delay = self.claim_delay().get();
+        finalization_time + claim_delay
+    }
+
+    /// Check if funds have been distributed
+    #[view(areFundsDistributed)]
+    fn are_funds_distributed(&self) -> bool {
+        self.funds_distributed().get()
+    }
+
+    /// Get distribution info
+    #[view(getDistributionInfo)]
+    fn get_distribution_info(&self) -> (ManagedAddress, ManagedAddress, ManagedAddress, ManagedAddress, bool) {
+        (
+            self.liquidity_address().get(),
+            self.development_address().get(),
+            self.marketing_address().get(),
+            self.reserve_address().get(),
+            self.funds_distributed().get(),
+        )
+    }
+
     // =========================================================================
     // STORAGE
     // =========================================================================
@@ -521,6 +665,27 @@ pub trait XCirclexIdo {
     #[storage_mapper("is_finalized")]
     fn is_finalized(&self) -> SingleValueMapper<bool>;
 
+    #[storage_mapper("finalization_time")]
+    fn finalization_time(&self) -> SingleValueMapper<u64>;
+
+    #[storage_mapper("claim_delay")]
+    fn claim_delay(&self) -> SingleValueMapper<u64>;
+
+    #[storage_mapper("liquidity_address")]
+    fn liquidity_address(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[storage_mapper("development_address")]
+    fn development_address(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[storage_mapper("marketing_address")]
+    fn marketing_address(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[storage_mapper("reserve_address")]
+    fn reserve_address(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[storage_mapper("funds_distributed")]
+    fn funds_distributed(&self) -> SingleValueMapper<bool>;
+
     // =========================================================================
     // EVENTS
     // =========================================================================
@@ -559,5 +724,13 @@ pub trait XCirclexIdo {
         &self,
         #[indexed] recipient: &ManagedAddress,
         amount: &BigUint,
+    );
+
+    #[event("distribution")]
+    fn distribution_event(
+        &self,
+        #[indexed] recipient: &ManagedAddress,
+        #[indexed] amount: &BigUint,
+        category: &ManagedBuffer,
     );
 }

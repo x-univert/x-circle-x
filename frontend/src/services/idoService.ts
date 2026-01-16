@@ -517,6 +517,55 @@ export const getUserEgldBalance = async (userAddress: string): Promise<string> =
 };
 
 /**
+ * Get time remaining before claim is available
+ */
+export const getClaimTimeRemaining = async (): Promise<number> => {
+  const result = await queryContract('getClaimTimeRemaining', []);
+
+  if (!result || result.length === 0 || result[0] === '') {
+    return 0;
+  }
+
+  const hex = base64ToHex(result[0]);
+  const value = parseInt(hex, 16);
+
+  // If max u64, IDO not finalized yet
+  if (value === 0xFFFFFFFFFFFFFFFF || value > 31536000000) {
+    return -1; // Not finalized yet
+  }
+
+  return value || 0;
+};
+
+/**
+ * Get claim available timestamp
+ */
+export const getClaimAvailableAt = async (): Promise<number> => {
+  const result = await queryContract('getClaimAvailableAt', []);
+
+  if (!result || result.length === 0 || result[0] === '') {
+    return 0;
+  }
+
+  const hex = base64ToHex(result[0]);
+  return parseInt(hex, 16) || 0;
+};
+
+/**
+ * Check if funds have been distributed
+ */
+export const areFundsDistributed = async (): Promise<boolean> => {
+  const result = await queryContract('areFundsDistributed', []);
+
+  if (!result || result.length === 0 || result[0] === '') {
+    return false;
+  }
+
+  const hex = base64ToHex(result[0]);
+  return hex === '01';
+};
+
+/**
  * Check if user can contribute (not already max, IDO active)
  */
 export const canUserContribute = async (userAddress: string): Promise<{

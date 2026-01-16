@@ -857,7 +857,10 @@
       "reserve": "Reserve",
       "yourAllocation": "Votre Allocation",
       "contributed": "Contribution",
-      "toReceive": "A recevoir"
+      "toReceive": "A recevoir",
+      "claimCountdown": "Temps avant le Claim",
+      "waitingFinalization": "En attente de finalisation...",
+      "claimAvailable": "Claim disponible !"
     },
     "info": {
       "title": "Informations IDO",

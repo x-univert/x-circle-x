@@ -25,6 +25,7 @@ function IDO() {
   const [timeRemaining, setTimeRemaining] = useState(0)
   const [canContribute, setCanContribute] = useState(false)
   const [maxContribution, setMaxContribution] = useState('0')
+  const [claimTimeRemaining, setClaimTimeRemaining] = useState<number>(-1) // -1 = not finalized
 
   // Fetch all data from contract
   const fetchData = useCallback(async () => {
@@ -32,13 +33,15 @@ function IDO() {
       setIsLoadingData(true)
       setError(null)
 
-      const [info, status] = await Promise.all([
+      const [info, status, claimTime] = await Promise.all([
         idoService.getIdoInfo(),
-        idoService.getIdoStatus()
+        idoService.getIdoStatus(),
+        idoService.getClaimTimeRemaining()
       ])
 
       setIdoInfo(info)
       setIdoStatus(status)
+      setClaimTimeRemaining(claimTime)
 
       // Calculate time remaining
       const now = Math.floor(Date.now() / 1000)
@@ -71,7 +74,7 @@ function IDO() {
     return () => clearInterval(interval)
   }, [fetchData])
 
-  // Countdown timer
+  // Countdown timer for IDO end
   useEffect(() => {
     if (idoInfo && idoInfo.endTime > 0) {
       const interval = setInterval(() => {
@@ -82,6 +85,16 @@ function IDO() {
       return () => clearInterval(interval)
     }
   }, [idoInfo])
+
+  // Countdown timer for claim availability
+  useEffect(() => {
+    if (claimTimeRemaining > 0) {
+      const interval = setInterval(() => {
+        setClaimTimeRemaining(prev => Math.max(0, prev - 1))
+      }, 1000)
+      return () => clearInterval(interval)
+    }
+  }, [claimTimeRemaining])
 
   // Format time remaining
   const formatTimeRemaining = (seconds: number) => {
@@ -367,6 +380,31 @@ function IDO() {
                     </div>
                   </div>
                 </div>
+
+                {/* Claim Countdown Timer */}
+                {claimTimeRemaining !== 0 && (
+                  <div className="mt-4 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-lg p-4 border border-orange-500/30">
+                    <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+                      <span>&#9200;</span>
+                      {t('ido.nextSteps.claimCountdown', 'Temps avant le Claim')}
+                    </h3>
+                    <div className="text-center">
+                      {claimTimeRemaining === -1 ? (
+                        <div className="text-yellow-400">
+                          {t('ido.nextSteps.waitingFinalization', 'En attente de finalisation...')}
+                        </div>
+                      ) : claimTimeRemaining > 0 ? (
+                        <div className="text-3xl font-bold text-orange-400 animate-pulse">
+                          {formatTimeRemaining(claimTimeRemaining)}
+                        </div>
+                      ) : (
+                        <div className="text-2xl font-bold text-green-400">
+                          {t('ido.nextSteps.claimAvailable', 'Claim disponible !')}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Your Allocation */}
                 {userContribution && parseFloat(userContribution.amountEgld) > 0 && (
