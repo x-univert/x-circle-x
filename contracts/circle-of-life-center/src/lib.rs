@@ -597,6 +597,40 @@ pub trait CircleOfLifeCenter {
         self.rewards_pool().set(&(pool - &amount));
     }
 
+    /// Recuperer les XCIRCLEX orphelins (retournes par LP) et les ajouter au pool
+    /// Ces tokens sont dans SC0 mais pas comptabilises dans rewards_pool
+    #[endpoint(recoverOrphanXcirclex)]
+    fn recover_orphan_xcirclex(&self) {
+        self.require_owner();
+
+        require!(
+            !self.reward_token_id().is_empty(),
+            "Token de recompense non configure"
+        );
+
+        let token_id = self.reward_token_id().get();
+
+        // Solde total XCIRCLEX dans SC0
+        let total_balance = self.blockchain().get_sc_balance(
+            &EgldOrEsdtTokenIdentifier::esdt(token_id), 0
+        );
+
+        // Montants comptabilises
+        let rewards_pool = self.rewards_pool().get();
+        let pending_for_lp = self.pending_xcirclex_for_lp().get();
+        let accounted = &rewards_pool + &pending_for_lp;
+
+        // Calculer les orphelins
+        if total_balance > accounted {
+            let orphan_amount = &total_balance - &accounted;
+
+            // Ajouter au pool de recompenses
+            self.rewards_pool().set(&(&rewards_pool + &orphan_amount));
+
+            self.orphan_xcirclex_recovered_event(&orphan_amount);
+        }
+    }
+
     // ═══════════════════════════════════════════════════════════════
     // ADMIN - BURN CONFIGURATION
     // ═══════════════════════════════════════════════════════════════
@@ -2597,6 +2631,19 @@ pub trait CircleOfLifeCenter {
         self.pending_liquidity_egld().get()
     }
 
+    /// Retourne tous les montants en attente pour la liquidite
+    /// (pending_egld, pending_wegld_swap, pending_wegld_lp, pending_xcirclex, pending_lp, processing_in_progress)
+    #[view(getPendingLiquidityInfo)]
+    fn get_pending_liquidity_info(&self) -> MultiValue6<BigUint, BigUint, BigUint, BigUint, BigUint, bool> {
+        let pending_egld = self.pending_liquidity_egld().get();
+        let pending_wegld_swap = self.pending_wegld_for_swap().get();
+        let pending_wegld_lp = self.pending_wegld_for_lp().get();
+        let pending_xcirclex = self.pending_xcirclex_for_lp().get();
+        let pending_lp = self.pending_lp_tokens().get();
+        let in_progress = self.liquidity_processing_in_progress().get();
+        (pending_egld, pending_wegld_swap, pending_wegld_lp, pending_xcirclex, pending_lp, in_progress).into()
+    }
+
     /// Verifie si la distribution est activee
     #[view(isDistributionEnabled)]
     fn is_distribution_enabled(&self) -> bool {
@@ -2877,6 +2924,9 @@ pub trait CircleOfLifeCenter {
 
     #[event("rewards_deposited")]
     fn rewards_deposited_event(&self, amount: &BigUint);
+
+    #[event("orphan_xcirclex_recovered")]
+    fn orphan_xcirclex_recovered_event(&self, #[indexed] amount: &BigUint);
 
     #[event("rewards_claimed")]
     fn rewards_claimed_event(&self, #[indexed] member: &ManagedAddress, amount: &BigUint);

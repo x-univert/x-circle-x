@@ -6,10 +6,10 @@
 
 // Init:                                 1
 // Upgrade:                              1
-// Endpoints:                          124
+// Endpoints:                          126
 // Async Callback (empty):               1
 // Promise callbacks:                    5
-// Total number of exported functions: 132
+// Total number of exported functions: 134
 
 #![no_std]
 
@@ -52,6 +52,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         setRewardPerCycle => set_reward_per_cycle
         depositRewards => deposit_rewards
         withdrawRewards => withdraw_rewards
+        recoverOrphanXcirclex => recover_orphan_xcirclex
         setBurnPerSc => set_burn_per_sc
         setStarterBonusPercentage => set_starter_bonus_percentage
         setNftContract => set_nft_contract
@@ -129,6 +130,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         getTotalDistributedTreasury => get_total_distributed_treasury
         getTotalDistributedDao => get_total_distributed_dao
         getPendingLiquidityEgld => get_pending_liquidity_egld
+        getPendingLiquidityInfo => get_pending_liquidity_info
         isDistributionEnabled => is_distribution_enabled
         getStarterBonusInfo => get_starter_bonus_info
         getStarterBonusPercentage => get_starter_bonus_percentage

@@ -2599,6 +2599,36 @@ export const liquidityStep4_LockLp = async (senderAddress: string) => {
   };
 };
 
+/**
+ * Admin: Recuperer les XCIRCLEX orphelins et les ajouter au pool de recompenses
+ * Ces tokens sont retournes par xExchange lors de l'ajout de liquidite
+ */
+export const recoverOrphanXcirclex = async (senderAddress: string) => {
+  const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
+  const sender = new Address(senderAddress);
+
+  const transaction = await factory.createTransactionForExecute(sender, {
+    contract: contractAddress,
+    function: 'recoverOrphanXcirclex',
+    gasLimit: BigInt(20_000_000),
+    arguments: []
+  });
+
+  const result = await signAndSendTransactionsWithHash({
+    transactions: [transaction],
+    transactionsDisplayInfo: {
+      processingMessage: 'Recuperation des XCIRCLEX orphelins...',
+      errorMessage: 'Erreur lors de la recuperation',
+      successMessage: 'XCIRCLEX orphelins ajoutes au pool de recompenses !'
+    }
+  });
+
+  return {
+    sessionId: result.sessionId,
+    transactionHash: result.transactionHashes[0] || null
+  };
+};
+
 // ==================== ALIASES (pour compatibilite) ====================
 export const resumeProcessingFromWegld = liquidityStep2_Swap;
 export const resumeFromAddLiquidity = liquidityStep3_AddLiquidity;

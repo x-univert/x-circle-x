@@ -149,6 +149,23 @@ export const AdminPanel = ({ onRefresh }: AdminPanelProps) => {
     }
   };
 
+  const handleRecoverOrphanXcirclex = async () => {
+    if (!address) return;
+    setIsLoading(true);
+    try {
+      const result = await circleOfLifeService.recoverOrphanXcirclex(address);
+      if (result?.transactionHash) {
+        toast.success('XCIRCLEX orphelins recuperes !');
+        onRefresh?.();
+      }
+    } catch (error) {
+      console.error('Error recovering orphan XCIRCLEX:', error);
+      toast.error('Erreur lors de la recuperation');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!isOpen) {
     return (
       <button
@@ -252,6 +269,22 @@ export const AdminPanel = ({ onRefresh }: AdminPanelProps) => {
           className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg font-medium transition-all text-sm"
         >
           4. Lock LP (365j)
+        </button>
+
+        {/* Separator - Recovery */}
+        <div className="border-t border-purple-500/30 pt-3 mt-3">
+          <p className="text-xs text-yellow-400 text-center mb-2 font-semibold">
+            Recovery
+          </p>
+        </div>
+
+        {/* Recover Orphan XCIRCLEX */}
+        <button
+          onClick={handleRecoverOrphanXcirclex}
+          disabled={isLoading}
+          className="w-full bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg font-medium transition-all text-sm"
+        >
+          Recuperer XCIRCLEX Orphelins
         </button>
 
         <div className="border-t border-purple-500/30 pt-3 mt-4">
