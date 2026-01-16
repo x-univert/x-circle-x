@@ -274,18 +274,26 @@ pub trait CircleOfLifeCenter {
     // XEXCHANGE LIQUIDITY PROCESSING
     // ═══════════════════════════════════════════════════════════════
 
-    /// Admin: Force le processing de la liquidite en attente vers xExchange
-    /// Flow: EGLD -> wrap WEGLD -> 50% swap XCIRCLEX -> addLiquidity -> lock LP
+    /// Admin: Etape 1 - Wrap EGLD -> WEGLD
+    /// Utilise les EGLD en attente (pending_liquidity_egld)
+    /// Apres succes, appeler liquidityStep2_Swap
+    #[endpoint(liquidityStep1_WrapEgld)]
+    fn liquidity_step1_wrap_egld(&self) {
+        self.require_owner();
+        self.do_process_liquidity();
+    }
+
+    /// DEPRECATED: Utiliser liquidityStep1_WrapEgld a la place
     #[endpoint(processLiquidity)]
     fn process_liquidity(&self) {
         self.require_owner();
         self.do_process_liquidity();
     }
 
-    /// Admin: Reprend le processing depuis l'etape WEGLD (si wrap a reussi mais callback echoue)
-    /// Utilise le WEGLD deja present dans le SC pour continuer le swap
-    #[endpoint(resumeProcessingFromWegld)]
-    fn resume_processing_from_wegld(&self) {
+    /// Admin: Etape 2 - Swap WEGLD -> XCIRCLEX (50%)
+    /// Appeler apres que l'etape 1 (wrap) soit terminee
+    #[endpoint(liquidityStep2_Swap)]
+    fn liquidity_step2_swap(&self) {
         self.require_owner();
 
         // Verifier config
@@ -331,10 +339,10 @@ pub trait CircleOfLifeCenter {
             .register_promise();
     }
 
-    /// Admin: Reprend le processing depuis l'etape addLiquidity (si swap a reussi mais callback echoue)
-    /// Utilise les XCIRCLEX et WEGLD deja presents dans le SC
-    #[endpoint(resumeFromAddLiquidity)]
-    fn resume_from_add_liquidity(&self) {
+    /// Admin: Etape 3 - Add Liquidity (WEGLD + XCIRCLEX)
+    /// Appeler apres que l'etape 2 (swap) soit terminee
+    #[endpoint(liquidityStep3_AddLiquidity)]
+    fn liquidity_step3_add_liquidity(&self) {
         self.require_owner();
 
         // Verifier config
@@ -383,10 +391,10 @@ pub trait CircleOfLifeCenter {
             .register_promise();
     }
 
-    /// Admin: Lock les LP tokens presents dans le SC (appeler apres addLiquidity)
-    /// Note: multi-level async pas permis, donc lock manuel apres addLiquidity
-    #[endpoint(lockPendingLpTokens)]
-    fn lock_pending_lp_tokens(&self) {
+    /// Admin: Etape 4 - Lock LP tokens pour 365 jours
+    /// Appeler apres que l'etape 3 (addLiquidity) soit terminee
+    #[endpoint(liquidityStep4_LockLp)]
+    fn liquidity_step4_lock_lp(&self) {
         self.require_owner();
 
         // Verifier config
@@ -416,6 +424,26 @@ pub trait CircleOfLifeCenter {
             .register_promise();
     }
 
+    // ══════════ ALIASES POUR COMPATIBILITE ══════════
+
+    /// DEPRECATED: Utiliser liquidityStep2_Swap
+    #[endpoint(resumeProcessingFromWegld)]
+    fn resume_processing_from_wegld(&self) {
+        self.liquidity_step2_swap();
+    }
+
+    /// DEPRECATED: Utiliser liquidityStep3_AddLiquidity
+    #[endpoint(resumeFromAddLiquidity)]
+    fn resume_from_add_liquidity(&self) {
+        self.liquidity_step3_add_liquidity();
+    }
+
+    /// DEPRECATED: Utiliser liquidityStep4_LockLp
+    #[endpoint(lockPendingLpTokens)]
+    fn lock_pending_lp_tokens(&self) {
+        self.liquidity_step4_lock_lp();
+    }
+
     /// Fonction interne pour traiter la liquidite
     fn do_process_liquidity(&self) {
         let pending = self.pending_liquidity_egld().get();
@@ -425,6 +453,14 @@ pub trait CircleOfLifeCenter {
         require!(
             !self.liquidity_processing_in_progress().get(),
             "Processing deja en cours"
+        );
+
+        // Verifier que le montant circulant reste disponible apres processing
+        let sc_balance = self.blockchain().get_sc_balance(&EgldOrEsdtTokenIdentifier::egld(), 0);
+        let circulation = self.circulation_amount().get();
+        require!(
+            sc_balance >= &pending + &circulation,
+            "Solde insuffisant: le montant circulant doit rester disponible"
         );
 
         // Verifier config
@@ -2928,37 +2964,28 @@ pub trait CircleOfLifeCenter {
     #[event("liquidity_processing_error")]
     fn liquidity_processing_error_event(&self, #[indexed] step: &ManagedBuffer, error: &ManagedBuffer);
 
+    #[event("liquidity_step_completed")]
+    fn liquidity_step_completed_event(&self, #[indexed] step: &ManagedBuffer);
+
     // ═══════════════════════════════════════════════════════════════
     // CALLBACKS - XEXCHANGE LIQUIDITY PROCESSING (Promises API)
     // ═══════════════════════════════════════════════════════════════
 
     /// Callback apres wrap EGLD -> WEGLD
+    /// NOTE: Ne chaine PAS d'autre appel async - l'utilisateur doit appeler l'etape suivante
     #[promises_callback]
     fn wrap_egld_callback(&self, #[call_result] result: ManagedAsyncCallResult<()>) {
         match result {
             ManagedAsyncCallResult::Ok(()) => {
-                // WEGLD recu avec succes, maintenant swap 50% pour XCIRCLEX
+                // WEGLD recu avec succes
                 let wegld_for_swap = self.pending_wegld_for_swap().get();
-                let wegld_token = self.wegld_token_id().get();
-                let xcirclex_token = self.xcirclex_token_id().get();
-                let pair_address = self.xexchange_pair_address().get();
-
                 let total_wegld = &wegld_for_swap + &self.pending_wegld_for_lp().get();
                 self.wegld_wrapped_event(&total_wegld);
 
-                // Minimum output avec slippage (1 pour eviter 0)
-                let min_out = BigUint::from(1u64);
-
-                // Payment ESDT
-                let payment = EsdtTokenPayment::new(wegld_token, 0, wegld_for_swap);
-
-                self.xexchange_proxy(pair_address)
-                    .swap_tokens_fixed_input(xcirclex_token, min_out)
-                    .with_esdt_transfer(payment)
-                    .with_gas_limit(50_000_000u64)
-                    .with_callback(self.callbacks().swap_xcirclex_callback())
-                    .with_extra_gas_for_callback(150_000_000u64)
-                    .register_promise();
+                // Marquer l'etape comme terminee - PAS de chaining async
+                self.liquidity_processing_in_progress().set(false);
+                self.liquidity_step_completed_event(&ManagedBuffer::from(b"wrap"));
+                // L'utilisateur doit maintenant appeler liquidityStep2_Swap
             },
             ManagedAsyncCallResult::Err(err) => {
                 self.liquidity_processing_error_event(
@@ -2971,6 +2998,7 @@ pub trait CircleOfLifeCenter {
     }
 
     /// Callback apres swap WEGLD -> XCIRCLEX
+    /// NOTE: Ne chaine PAS d'autre appel async - l'utilisateur doit appeler l'etape suivante
     #[promises_callback]
     fn swap_xcirclex_callback(&self, #[call_result] result: ManagedAsyncCallResult<()>) {
         match result {
@@ -2987,23 +3015,10 @@ pub trait CircleOfLifeCenter {
                 // Stocker pour LP
                 self.pending_xcirclex_for_lp().set(&xcirclex_balance);
 
-                // Ajouter liquidite avec XCIRCLEX + WEGLD restant
-                let wegld_for_lp = self.pending_wegld_for_lp().get();
-                let wegld_token = self.wegld_token_id().get();
-                let pair_address = self.xexchange_pair_address().get();
-
-                // Multi-transfer: XCIRCLEX + WEGLD
-                let mut payments = ManagedVec::new();
-                payments.push(EsdtTokenPayment::new(xcirclex_token, 0, xcirclex_balance));
-                payments.push(EsdtTokenPayment::new(wegld_token, 0, wegld_for_lp));
-
-                self.xexchange_proxy(pair_address)
-                    .add_liquidity(BigUint::from(1u64), BigUint::from(1u64))
-                    .with_multi_token_transfer(payments)
-                    .with_gas_limit(50_000_000u64)
-                    .with_callback(self.callbacks().add_liquidity_callback())
-                    .with_extra_gas_for_callback(80_000_000u64)
-                    .register_promise();
+                // Marquer l'etape comme terminee - PAS de chaining async
+                self.liquidity_processing_in_progress().set(false);
+                self.liquidity_step_completed_event(&ManagedBuffer::from(b"swap"));
+                // L'utilisateur doit maintenant appeler liquidityStep3_AddLiquidity
             },
             ManagedAsyncCallResult::Err(err) => {
                 self.liquidity_processing_error_event(

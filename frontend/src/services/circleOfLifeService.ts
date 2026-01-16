@@ -18,17 +18,19 @@ const GAS_LIMITS = {
   setActive: 8_000_000,
   setInactive: 8_000_000,
   leaveCircle: 10_000_000,
-  deposit: 5_000_000,
+  deposit: 30_000_000,          // Augmente pour calculs de distribution EGLD
   preSign: 8_000_000,          // Pre-signature (pas de transfert)
   processNextTransfer: 50_000_000, // Traitement d'un seul transfert en attente
   processAllPendingTransfers: 200_000_000, // Traitement de TOUS les transferts en attente (batch)
   failCycle: 50_000_000,       // Echec du cycle + ban du SC responsable (augmente)
   resetCycle: 10_000_000,      // Admin: Reset du cycle (TEST ONLY)
-  simulateNextDay: 5_000_000,  // Admin: Simuler passage au jour suivant (TEST ONLY)
+  simulateNextDay: 30_000_000,  // Admin: Simuler passage au jour suivant (TEST ONLY)
   claimRewards: 15_000_000,    // Reclamer les recompenses XCIRCLEX
   enableAutoSign: 8_000_000,   // Activer auto-sign permanent
   enableAutoSignForCycles: 8_000_000,  // Activer auto-sign pour N cycles
   disableAutoSign: 5_000_000,  // Desactiver auto-sign
+  processLiquidity: 250_000_000,  // Admin: Process liquidite xExchange (cross-shard async)
+  lockPendingLpTokens: 100_000_000,  // Admin: Lock LP tokens apres addLiquidity
 };
 
 // Types
@@ -2415,6 +2417,191 @@ export const getDistributionStats = async (): Promise<DistributionStats> => {
     };
   }
 };
+
+// ==================== ADMIN: LIQUIDITY PROCESSING (DEPRECATED) ====================
+// NOTE: Utiliser les 4 etapes individuelles ci-dessous pour un meilleur controle
+
+/** @deprecated Utiliser liquidityStep1_WrapEgld */
+export const processLiquidity = async (senderAddress: string) => {
+  // Alias vers l'etape 1 pour compatibilite
+  const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
+  const sender = new Address(senderAddress);
+
+  const transaction = await factory.createTransactionForExecute(sender, {
+    contract: contractAddress,
+    function: 'liquidityStep1_WrapEgld',
+    gasLimit: BigInt(120_000_000),
+    arguments: []
+  });
+
+  const result = await signAndSendTransactionsWithHash({
+    transactions: [transaction],
+    transactionsDisplayInfo: {
+      processingMessage: 'Etape 1: Wrap EGLD -> WEGLD...',
+      errorMessage: 'Erreur lors du wrap',
+      successMessage: 'Wrap reussi ! Utilisez les 4 etapes dans Admin Panel.'
+    }
+  });
+
+  return {
+    sessionId: result.sessionId,
+    transactionHash: result.transactionHashes[0] || null
+  };
+};
+
+/** @deprecated Utiliser liquidityStep4_LockLp */
+export const lockPendingLpTokens = async (senderAddress: string) => {
+  // Alias vers l'etape 4 pour compatibilite
+  const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
+  const sender = new Address(senderAddress);
+
+  const transaction = await factory.createTransactionForExecute(sender, {
+    contract: contractAddress,
+    function: 'liquidityStep4_LockLp',
+    gasLimit: BigInt(80_000_000),
+    arguments: []
+  });
+
+  const result = await signAndSendTransactionsWithHash({
+    transactions: [transaction],
+    transactionsDisplayInfo: {
+      processingMessage: 'Etape 4: Lock LP tokens (365 jours)...',
+      errorMessage: 'Erreur lors du lock',
+      successMessage: 'LP tokens lockes pour 365 jours !'
+    }
+  });
+
+  return {
+    sessionId: result.sessionId,
+    transactionHash: result.transactionHashes[0] || null
+  };
+};
+
+// ==================== LIQUIDITY STEPS (4 etapes independantes) ====================
+
+/**
+ * Etape 1: Wrap EGLD -> WEGLD
+ * Utilise les EGLD en attente (pending_liquidity_egld)
+ */
+export const liquidityStep1_WrapEgld = async (senderAddress: string) => {
+  const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
+  const sender = new Address(senderAddress);
+
+  const transaction = await factory.createTransactionForExecute(sender, {
+    contract: contractAddress,
+    function: 'liquidityStep1_WrapEgld',
+    gasLimit: BigInt(120_000_000), // 120M pour wrap cross-shard + callback
+    arguments: []
+  });
+
+  const result = await signAndSendTransactionsWithHash({
+    transactions: [transaction],
+    transactionsDisplayInfo: {
+      processingMessage: 'Etape 1: Wrap EGLD -> WEGLD...',
+      errorMessage: 'Erreur lors du wrap',
+      successMessage: 'Wrap reussi ! Continuez avec Etape 2.'
+    }
+  });
+
+  return {
+    sessionId: result.sessionId,
+    transactionHash: result.transactionHashes[0] || null
+  };
+};
+
+/**
+ * Etape 2: Swap WEGLD -> XCIRCLEX (50%)
+ * Appeler apres que l'etape 1 soit terminee
+ */
+export const liquidityStep2_Swap = async (senderAddress: string) => {
+  const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
+  const sender = new Address(senderAddress);
+
+  const transaction = await factory.createTransactionForExecute(sender, {
+    contract: contractAddress,
+    function: 'liquidityStep2_Swap',
+    gasLimit: BigInt(100_000_000), // 100M pour swap cross-shard
+    arguments: []
+  });
+
+  const result = await signAndSendTransactionsWithHash({
+    transactions: [transaction],
+    transactionsDisplayInfo: {
+      processingMessage: 'Etape 2: Swap WEGLD -> XCIRCLEX...',
+      errorMessage: 'Erreur lors du swap',
+      successMessage: 'Swap reussi ! Continuez avec Etape 3.'
+    }
+  });
+
+  return {
+    sessionId: result.sessionId,
+    transactionHash: result.transactionHashes[0] || null
+  };
+};
+
+/**
+ * Etape 3: Add Liquidity (WEGLD + XCIRCLEX)
+ * Appeler apres que l'etape 2 soit terminee
+ */
+export const liquidityStep3_AddLiquidity = async (senderAddress: string) => {
+  const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
+  const sender = new Address(senderAddress);
+
+  const transaction = await factory.createTransactionForExecute(sender, {
+    contract: contractAddress,
+    function: 'liquidityStep3_AddLiquidity',
+    gasLimit: BigInt(150_000_000), // 150M pour addLiquidity cross-shard
+    arguments: []
+  });
+
+  const result = await signAndSendTransactionsWithHash({
+    transactions: [transaction],
+    transactionsDisplayInfo: {
+      processingMessage: 'Etape 3: Ajout de liquidite...',
+      errorMessage: 'Erreur lors de l\'ajout de liquidite',
+      successMessage: 'Liquidite ajoutee ! Continuez avec Etape 4.'
+    }
+  });
+
+  return {
+    sessionId: result.sessionId,
+    transactionHash: result.transactionHashes[0] || null
+  };
+};
+
+/**
+ * Etape 4: Lock LP tokens pour 365 jours
+ * Appeler apres que l'etape 3 soit terminee
+ */
+export const liquidityStep4_LockLp = async (senderAddress: string) => {
+  const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
+  const sender = new Address(senderAddress);
+
+  const transaction = await factory.createTransactionForExecute(sender, {
+    contract: contractAddress,
+    function: 'liquidityStep4_LockLp',
+    gasLimit: BigInt(80_000_000), // 80M pour lock
+    arguments: []
+  });
+
+  const result = await signAndSendTransactionsWithHash({
+    transactions: [transaction],
+    transactionsDisplayInfo: {
+      processingMessage: 'Etape 4: Lock LP tokens (365 jours)...',
+      errorMessage: 'Erreur lors du lock',
+      successMessage: 'LP tokens lockes pour 365 jours !'
+    }
+  });
+
+  return {
+    sessionId: result.sessionId,
+    transactionHash: result.transactionHashes[0] || null
+  };
+};
+
+// ==================== ALIASES (pour compatibilite) ====================
+export const resumeProcessingFromWegld = liquidityStep2_Swap;
+export const resumeFromAddLiquidity = liquidityStep3_AddLiquidity;
 
 // ==================== LEGACY ALIASES (pour compatibilite) ====================
 export const createPeripheralContract = joinCircle;

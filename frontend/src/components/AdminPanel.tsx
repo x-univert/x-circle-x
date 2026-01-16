@@ -18,14 +18,8 @@ export const AdminPanel = ({ onRefresh }: AdminPanelProps) => {
   // Verifier si l'utilisateur est admin (owner du contrat)
   const isAdmin = address?.toLowerCase() === OWNER_ADDRESS.toLowerCase();
 
-  // En mode devnet, afficher pour tous les utilisateurs connectes
-  // En production, decommenter la verification admin ci-dessous
-  // if (!isAdmin) {
-  //   return null;
-  // }
-
-  // Ne pas afficher si pas connecte
-  if (!address) {
+  // Ne pas afficher si pas connecte ou pas admin
+  if (!address || !isAdmin) {
     return null;
   }
 
@@ -84,6 +78,75 @@ export const AdminPanel = ({ onRefresh }: AdminPanelProps) => {
     toast.success('Test notification - Succes !');
     toast.error('Test notification - Erreur !');
     toast('Test notification - Info !', { icon: 'i' });
+  };
+
+  // ========== 4 ETAPES LIQUIDITY ==========
+  const handleStep1_WrapEgld = async () => {
+    if (!address) return;
+    setIsLoading(true);
+    try {
+      const result = await circleOfLifeService.liquidityStep1_WrapEgld(address);
+      if (result?.transactionHash) {
+        toast.success('Etape 1 terminee ! Continuez avec Etape 2.');
+        onRefresh?.();
+      }
+    } catch (error) {
+      console.error('Error in step 1:', error);
+      toast.error('Erreur lors du wrap EGLD');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStep2_Swap = async () => {
+    if (!address) return;
+    setIsLoading(true);
+    try {
+      const result = await circleOfLifeService.liquidityStep2_Swap(address);
+      if (result?.transactionHash) {
+        toast.success('Etape 2 terminee ! Continuez avec Etape 3.');
+        onRefresh?.();
+      }
+    } catch (error) {
+      console.error('Error in step 2:', error);
+      toast.error('Erreur lors du swap');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStep3_AddLiquidity = async () => {
+    if (!address) return;
+    setIsLoading(true);
+    try {
+      const result = await circleOfLifeService.liquidityStep3_AddLiquidity(address);
+      if (result?.transactionHash) {
+        toast.success('Etape 3 terminee ! Continuez avec Etape 4.');
+        onRefresh?.();
+      }
+    } catch (error) {
+      console.error('Error in step 3:', error);
+      toast.error('Erreur lors de l\'ajout de liquidite');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStep4_LockLp = async () => {
+    if (!address) return;
+    setIsLoading(true);
+    try {
+      const result = await circleOfLifeService.liquidityStep4_LockLp(address);
+      if (result?.transactionHash) {
+        toast.success('LP tokens lockes pour 365 jours !');
+        onRefresh?.();
+      }
+    } catch (error) {
+      console.error('Error in step 4:', error);
+      toast.error('Erreur lors du lock des LP tokens');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) {
@@ -146,6 +209,49 @@ export const AdminPanel = ({ onRefresh }: AdminPanelProps) => {
           className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg font-medium transition-all text-sm"
         >
           Declarer Cycle Echoue (Ban SC)
+        </button>
+
+        {/* Separator - Liquidite xExchange (4 etapes) */}
+        <div className="border-t border-purple-500/30 pt-3 mt-3">
+          <p className="text-xs text-emerald-400 text-center mb-2 font-semibold">
+            Liquidite xExchange (4 etapes)
+          </p>
+        </div>
+
+        {/* Step 1: Wrap EGLD */}
+        <button
+          onClick={handleStep1_WrapEgld}
+          disabled={isLoading}
+          className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg font-medium transition-all text-sm"
+        >
+          1. Wrap EGLD
+        </button>
+
+        {/* Step 2: Swap */}
+        <button
+          onClick={handleStep2_Swap}
+          disabled={isLoading}
+          className="w-full bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg font-medium transition-all text-sm"
+        >
+          2. Swap WEGLD → XCIRCLEX
+        </button>
+
+        {/* Step 3: Add Liquidity */}
+        <button
+          onClick={handleStep3_AddLiquidity}
+          disabled={isLoading}
+          className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg font-medium transition-all text-sm"
+        >
+          3. Add Liquidity
+        </button>
+
+        {/* Step 4: Lock LP */}
+        <button
+          onClick={handleStep4_LockLp}
+          disabled={isLoading}
+          className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg font-medium transition-all text-sm"
+        >
+          4. Lock LP (365j)
         </button>
 
         <div className="border-t border-purple-500/30 pt-3 mt-4">

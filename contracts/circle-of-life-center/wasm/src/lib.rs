@@ -6,10 +6,10 @@
 
 // Init:                                 1
 // Upgrade:                              1
-// Endpoints:                          120
+// Endpoints:                          124
 // Async Callback (empty):               1
 // Promise callbacks:                    5
-// Total number of exported functions: 128
+// Total number of exported functions: 132
 
 #![no_std]
 
@@ -39,7 +39,11 @@ multiversx_sc_wasm_adapter::endpoints! {
         setXcirclexTokenId => set_xcirclex_token_id
         unlockLpTokens => unlock_lp_tokens
         withdrawPendingLiquidity => withdraw_pending_liquidity
+        liquidityStep1_WrapEgld => liquidity_step1_wrap_egld
         processLiquidity => process_liquidity
+        liquidityStep2_Swap => liquidity_step2_swap
+        liquidityStep3_AddLiquidity => liquidity_step3_add_liquidity
+        liquidityStep4_LockLp => liquidity_step4_lock_lp
         resumeProcessingFromWegld => resume_processing_from_wegld
         resumeFromAddLiquidity => resume_from_add_liquidity
         lockPendingLpTokens => lock_pending_lp_tokens

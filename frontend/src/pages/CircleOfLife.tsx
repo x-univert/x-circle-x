@@ -32,6 +32,7 @@ function CircleOfLife() {
     myContract,
     isMyTurn,
     isActive,
+    isMember,
     activeContracts,
     inactiveContracts,
     contractBalance,
@@ -56,6 +57,7 @@ function CircleOfLife() {
     optionFInfo,
     pioneerInfo,
     depositBonusInfo,
+    distributionStats,
     createPeripheralContract,
     signAndForward,
     startDailyCycle,
@@ -214,6 +216,10 @@ function CircleOfLife() {
   const [tooltipDepositAmount, setTooltipDepositAmount] = useState('0.01')
   const [isDepositing, setIsDepositing] = useState(false)
 
+  // Rewards deposit bonus state
+  const [rewardsDepositAmount, setRewardsDepositAmount] = useState('1')
+  const [isRewardsDepositing, setIsRewardsDepositing] = useState(false)
+
   // Last transaction hashes state
   const [lastTxHashSc0, setLastTxHashSc0] = useState<string | null>(null)
   const [lastTxHashPeripherals, setLastTxHashPeripherals] = useState<Map<string, string>>(new Map())
@@ -317,7 +323,7 @@ function CircleOfLife() {
           sender: senderAddress,
           receiver: recipientAddress,
           value: amountInWei,
-          gasLimit: BigInt(5000000),
+          gasLimit: BigInt(30000000), // Augmente pour calculs de distribution EGLD
           data: new TransactionPayload('deposit'),
           chainID: 'D'
         })
@@ -341,6 +347,29 @@ function CircleOfLife() {
       console.error('Error depositing:', err)
     } finally {
       setIsDepositing(false)
+    }
+  }
+
+  // Handler for deposit bonus (rewards section)
+  const handleRewardsDeposit = async () => {
+    if (!address || isRewardsDepositing) return
+
+    const amount = parseFloat(rewardsDepositAmount)
+    if (isNaN(amount) || amount <= 0) {
+      return
+    }
+
+    setIsRewardsDepositing(true)
+    try {
+      const result = await deposit(rewardsDepositAmount)
+      if (result) {
+        setRewardsDepositAmount('1')
+        await refreshData()
+      }
+    } catch (err) {
+      console.error('Error depositing for bonus:', err)
+    } finally {
+      setIsRewardsDepositing(false)
     }
   }
 
@@ -2288,6 +2317,33 @@ function CircleOfLife() {
                           {depositBonusInfo.bonusPercent}/{depositBonusInfo.maxBonusPercent}%
                         </p>
                       </div>
+
+                      {/* Deposit input */}
+                      {isMember && (
+                        <div className="mt-3 pt-3 border-t border-amber-500/20">
+                          <div className="flex gap-2">
+                            <input
+                              type="number"
+                              min="0.1"
+                              step="0.1"
+                              value={rewardsDepositAmount}
+                              onChange={(e) => setRewardsDepositAmount(e.target.value)}
+                              className="flex-1 bg-gray-800 border border-amber-500/30 rounded-lg px-3 py-2 text-white text-sm focus:border-amber-500 focus:outline-none"
+                              placeholder="1"
+                            />
+                            <button
+                              onClick={handleRewardsDeposit}
+                              disabled={isRewardsDepositing || parseFloat(rewardsDepositAmount) <= 0}
+                              className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 disabled:opacity-50 text-black font-semibold px-4 py-2 rounded-lg transition text-sm"
+                            >
+                              {isRewardsDepositing ? '...' : t('circle.deposit', 'Deposit')}
+                            </button>
+                          </div>
+                          <p className="text-amber-400/50 text-xs mt-1 text-center">
+                            {t('circle.depositNote', 'Deposit EGLD to increase your bonus')}
+                          </p>
+                        </div>
+                      )}
                     </div>
                     <p className="text-amber-400/60 text-xs mt-2 text-center">
                       1 EGLD = +1% (max 360 EGLD = 360%)
@@ -3335,6 +3391,37 @@ function CircleOfLife() {
                     : peripheralBalances.get(tooltipInfo.scAddress) || '0'} EGLD
                 </p>
               </div>
+
+              {/* Distribution Stats - Only for SC0 */}
+              {tooltipInfo.type === 'sc0' && (
+                <div className="mb-4 p-3 bg-gradient-to-r from-teal-500/10 to-blue-500/10 border border-teal-500/30 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-white text-sm font-semibold">{t('scCentral.distributionStats')}</p>
+                    <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                      distributionStats.distributionEnabled
+                        ? 'bg-green-500/20 text-green-400'
+                        : 'bg-red-500/20 text-red-400'
+                    }`}>
+                      {distributionStats.distributionEnabled ? t('scCentral.distributionActive') : t('scCentral.distributionInactive')}
+                    </span>
+                  </div>
+                  <p className="text-gray-400 text-xs mb-3">{t('scCentral.distributionDescription')}</p>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400 text-xs">{t('scCentral.treasurySc0')}</span>
+                      <span className="text-teal-400 font-mono text-sm">{distributionStats.totalDistributedTreasury} EGLD</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400 text-xs">{t('scCentral.daoV2')}</span>
+                      <span className="text-blue-400 font-mono text-sm">{distributionStats.totalDistributedDao} EGLD</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400 text-xs">{t('scCentral.liquidityPending')}</span>
+                      <span className="text-purple-400 font-mono text-sm">{distributionStats.pendingLiquidityEgld} EGLD</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Deposit Panel */}
               <div className="mb-4 p-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-lg">
