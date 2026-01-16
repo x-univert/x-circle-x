@@ -272,6 +272,125 @@ function IDO() {
               </div>
             )}
 
+            {/* Next Steps after Hard Cap */}
+            {hardCapReached && (
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-green-500/50 mb-8">
+                <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                  <span className="text-3xl">&#128203;</span>
+                  {t('ido.nextSteps.title', 'Prochaines Etapes')}
+                </h2>
+
+                <div className="space-y-4">
+                  {/* Step 1 */}
+                  <div className="flex items-start gap-4 bg-white/5 rounded-lg p-4">
+                    <div className="flex-shrink-0 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">
+                      1
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-green-400">
+                        {t('ido.nextSteps.step1Title', 'Finalisation de l\'IDO')}
+                      </h3>
+                      <p className="text-gray-300 text-sm">
+                        {t('ido.nextSteps.step1Desc', 'L\'admin finalise l\'IDO dans les 24-48h. Le contrat passe en statut "Finalized".')}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step 2 */}
+                  <div className="flex items-start gap-4 bg-white/5 rounded-lg p-4">
+                    <div className="flex-shrink-0 w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                      2
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-blue-400">
+                        {t('ido.nextSteps.step2Title', 'Creation de la Liquidite')}
+                      </h3>
+                      <p className="text-gray-300 text-sm">
+                        {t('ido.nextSteps.step2Desc', '80% des EGLD collectes sont utilises pour creer la paire XCIRCLEX/WEGLD sur xExchange. Les LP tokens sont lockes pour 12 mois minimum.')}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step 3 */}
+                  <div className="flex items-start gap-4 bg-white/5 rounded-lg p-4">
+                    <div className="flex-shrink-0 w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                      3
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-purple-400">
+                        {t('ido.nextSteps.step3Title', 'Reclamation des Tokens')}
+                      </h3>
+                      <p className="text-gray-300 text-sm">
+                        {t('ido.nextSteps.step3Desc', 'Une fois finalise, vous pouvez reclamer vos XCIRCLEX! Le bouton "Claim" apparaitra automatiquement.')}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step 4 */}
+                  <div className="flex items-start gap-4 bg-white/5 rounded-lg p-4">
+                    <div className="flex-shrink-0 w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold">
+                      4
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-yellow-400">
+                        {t('ido.nextSteps.step4Title', 'Trading & Staking')}
+                      </h3>
+                      <p className="text-gray-300 text-sm">
+                        {t('ido.nextSteps.step4Desc', 'Apres le claim, vous pouvez trader sur xExchange, staker pour du APY, ou participer au Circle of Life!')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Distribution Summary */}
+                <div className="mt-6 bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded-lg p-4 border border-green-500/30">
+                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                    <span>&#128176;</span>
+                    {t('ido.nextSteps.distributionTitle', 'Repartition des EGLD collectes')}
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="bg-white/10 rounded-lg p-3 text-center">
+                      <div className="text-2xl font-bold text-green-400">80%</div>
+                      <div className="text-xs text-gray-300">{t('ido.nextSteps.liquidity', 'Liquidite xExchange')}</div>
+                    </div>
+                    <div className="bg-white/10 rounded-lg p-3 text-center">
+                      <div className="text-2xl font-bold text-blue-400">10%</div>
+                      <div className="text-xs text-gray-300">{t('ido.nextSteps.development', 'Developpement')}</div>
+                    </div>
+                    <div className="bg-white/10 rounded-lg p-3 text-center">
+                      <div className="text-2xl font-bold text-purple-400">5%</div>
+                      <div className="text-xs text-gray-300">{t('ido.nextSteps.marketing', 'Marketing')}</div>
+                    </div>
+                    <div className="bg-white/10 rounded-lg p-3 text-center">
+                      <div className="text-2xl font-bold text-yellow-400">5%</div>
+                      <div className="text-xs text-gray-300">{t('ido.nextSteps.reserve', 'Reserve')}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Your Allocation */}
+                {userContribution && parseFloat(userContribution.amountEgld) > 0 && (
+                  <div className="mt-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg p-4 border border-purple-500/30">
+                    <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+                      <span>&#127873;</span>
+                      {t('ido.nextSteps.yourAllocation', 'Votre Allocation')}
+                    </h3>
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                      <div>
+                        <span className="text-gray-400">{t('ido.nextSteps.contributed', 'Contribution')}:</span>
+                        <span className="text-white font-bold ml-2">{parseFloat(userContribution.amountEgld).toFixed(4)} EGLD</span>
+                      </div>
+                      <div className="text-2xl">&#10132;</div>
+                      <div>
+                        <span className="text-gray-400">{t('ido.nextSteps.toReceive', 'A recevoir')}:</span>
+                        <span className="text-green-400 font-bold ml-2">{formatNumber(parseFloat(userContribution.tokensToReceive || '0'))} XCIRCLEX</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Countdown Timer */}
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/10 mb-8 text-center">
               <h2 className="text-lg text-gray-300 mb-2">

@@ -840,6 +840,25 @@
       "hardCapReached": "HARD CAP ATTEINT!",
       "thankYou": "Merci a tous les participants!"
     },
+    "nextSteps": {
+      "title": "Prochaines Etapes",
+      "step1Title": "Finalisation de l'IDO",
+      "step1Desc": "L'admin finalise l'IDO dans les 24-48h. Le contrat passe en statut \"Finalized\".",
+      "step2Title": "Creation de la Liquidite",
+      "step2Desc": "80% des EGLD collectes sont utilises pour creer la paire XCIRCLEX/WEGLD sur xExchange. Les LP tokens sont lockes pour 12 mois minimum.",
+      "step3Title": "Reclamation des Tokens",
+      "step3Desc": "Une fois finalise, vous pouvez reclamer vos XCIRCLEX! Le bouton \"Claim\" apparaitra automatiquement.",
+      "step4Title": "Trading & Staking",
+      "step4Desc": "Apres le claim, vous pouvez trader sur xExchange, staker pour du APY, ou participer au Circle of Life!",
+      "distributionTitle": "Repartition des EGLD collectes",
+      "liquidity": "Liquidite xExchange",
+      "development": "Developpement",
+      "marketing": "Marketing",
+      "reserve": "Reserve",
+      "yourAllocation": "Votre Allocation",
+      "contributed": "Contribution",
+      "toReceive": "A recevoir"
+    },
     "info": {
       "title": "Informations IDO",
       "progress": "Progression",
