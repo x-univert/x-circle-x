@@ -170,6 +170,7 @@ function IDO() {
   const softCap = parseFloat(idoInfo?.softCap || String(IDO_CONFIG.softCap))
   const progressPercent = hardCap > 0 ? (totalRaised / hardCap) * 100 : 0
   const softCapReached = totalRaised >= softCap
+  const hardCapReached = progressPercent >= 100
 
   // Get status display
   const getStatusDisplay = (status: IdoStatus) => {
@@ -239,13 +240,55 @@ function IDO() {
           </div>
         ) : (
           <>
+            {/* Hard Cap Reached Celebration */}
+            {hardCapReached && (
+              <div className="mb-8 relative overflow-hidden">
+                <div className="bg-gradient-to-r from-yellow-500 via-green-500 to-yellow-500 rounded-2xl p-8 shadow-2xl border-4 border-yellow-400 animate-pulse">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+                  <div className="relative z-10 text-center">
+                    <div className="text-6xl mb-4 animate-bounce">
+                      &#127881; &#127882; &#127880;
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">
+                      {t('ido.celebration.hardCapReached', 'HARD CAP ATTEINT !')}
+                    </h2>
+                    <p className="text-xl text-white/90 font-semibold">
+                      {t('ido.celebration.thankYou', 'Merci a tous les participants !')}
+                    </p>
+                    <div className="mt-4 text-4xl">
+                      &#128640; &#127775; &#128640;
+                    </div>
+                  </div>
+                </div>
+                <style>{`
+                  @keyframes shimmer {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(100%); }
+                  }
+                  .animate-shimmer {
+                    animation: shimmer 2s infinite;
+                  }
+                `}</style>
+              </div>
+            )}
+
             {/* Countdown Timer */}
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/10 mb-8 text-center">
               <h2 className="text-lg text-gray-300 mb-2">
-                {idoStatus === 'Active' ? t('ido.timer.timeRemaining') : idoStatus === 'NotStarted' ? t('ido.timer.startsIn') : t('ido.timer.ended')}
+                {hardCapReached
+                  ? t('ido.timer.hardCapReached', 'Hard Cap Atteint !')
+                  : idoStatus === 'Active'
+                    ? t('ido.timer.timeRemaining')
+                    : idoStatus === 'NotStarted'
+                      ? t('ido.timer.startsIn')
+                      : t('ido.timer.ended')}
               </h2>
-              <div className="text-4xl md:text-5xl font-bold text-white">
-                {timeRemaining > 0 ? formatTimeRemaining(timeRemaining) : t('ido.timer.finished')}
+              <div className={`text-4xl md:text-5xl font-bold ${hardCapReached ? 'text-green-400' : 'text-white'}`}>
+                {hardCapReached
+                  ? `${hardCap} / ${hardCap} EGLD (100%)`
+                  : timeRemaining > 0
+                    ? formatTimeRemaining(timeRemaining)
+                    : t('ido.timer.finished')}
               </div>
             </div>
 
@@ -259,11 +302,13 @@ function IDO() {
                 <div className="mb-6">
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-gray-400">{t('ido.info.progress')}</span>
-                    <span className="text-white">{totalRaised.toFixed(2)} / {hardCap} EGLD</span>
+                    <span className={hardCapReached ? 'text-green-400 font-bold' : 'text-white'}>
+                      {totalRaised.toFixed(2)} / {hardCap} EGLD {hardCapReached && '(COMPLET !)'}
+                    </span>
                   </div>
-                  <div className="w-full bg-white/10 rounded-full h-4 overflow-hidden">
+                  <div className={`w-full bg-white/10 rounded-full h-4 overflow-hidden ${hardCapReached ? 'ring-2 ring-green-400 ring-offset-2 ring-offset-transparent' : ''}`}>
                     <div
-                      className={`h-full rounded-full transition-all duration-500 ${softCapReached ? 'bg-green-500' : 'bg-blue-500'}`}
+                      className={`h-full rounded-full transition-all duration-500 ${hardCapReached ? 'bg-gradient-to-r from-green-400 via-green-500 to-green-400 animate-pulse' : softCapReached ? 'bg-green-500' : 'bg-blue-500'}`}
                       style={{ width: `${Math.min(progressPercent, 100)}%` }}
                     />
                   </div>
@@ -271,7 +316,9 @@ function IDO() {
                     <span className={softCapReached ? 'text-green-400' : 'text-gray-500'}>
                       {t('ido.info.softCap')}: {softCap} EGLD {softCapReached && `(${t('ido.info.reached')})`}
                     </span>
-                    <span className="text-gray-500">{t('ido.info.hardCap')}: {hardCap} EGLD</span>
+                    <span className={hardCapReached ? 'text-green-400 font-bold' : 'text-gray-500'}>
+                      {t('ido.info.hardCap')}: {hardCap} EGLD {hardCapReached && `(${t('ido.info.reached')})`}
+                    </span>
                   </div>
                 </div>
 

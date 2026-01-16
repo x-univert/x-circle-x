@@ -833,7 +833,12 @@
       "timeRemaining": "Tiempo restante",
       "startsIn": "Comienza en",
       "ended": "IDO Finalizada",
-      "finished": "FINALIZADA"
+      "finished": "FINALIZADA",
+      "hardCapReached": "Hard Cap Alcanzado!"
+    },
+    "celebration": {
+      "hardCapReached": "HARD CAP ALCANZADO!",
+      "thankYou": "Gracias a todos los participantes!"
     },
     "info": {
       "title": "Informacion de la IDO",
