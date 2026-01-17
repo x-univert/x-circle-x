@@ -208,19 +208,42 @@ export const getCollectionStats = async (): Promise<{
       return { totalMinted: 0, holders: 0 };
     }
 
-    const response = await fetch(
-      `https://devnet-api.multiversx.com/collections/${NFT_TOKEN_ID}`
+    // Utiliser l'endpoint /nfts/count pour le nombre de NFTs en circulation
+    const countResponse = await fetch(
+      `https://devnet-api.multiversx.com/collections/${NFT_TOKEN_ID}/nfts/count`
     );
 
-    if (!response.ok) {
-      return { totalMinted: 0, holders: 0 };
+    let nftCount = 0;
+    if (countResponse.ok) {
+      const countText = await countResponse.text();
+      nftCount = parseInt(countText) || 0;
     }
 
-    const collection = await response.json();
+    // Compter les holders uniques via l'endpoint /nfts avec withOwner=true
+    let holdersCount = 0;
+    try {
+      const nftsResponse = await fetch(
+        `https://devnet-api.multiversx.com/nfts?collection=${NFT_TOKEN_ID}&withOwner=true&size=100`
+      );
+      if (nftsResponse.ok) {
+        const nfts = await nftsResponse.json();
+        // Compter les owners uniques
+        const uniqueOwners = new Set(nfts.map((nft: any) => nft.owner).filter(Boolean));
+        holdersCount = uniqueOwners.size;
+      }
+    } catch {
+      // Fallback: chaque NFT = 1 holder (car 1 NFT max par utilisateur)
+      holdersCount = nftCount;
+    }
+
+    // Si toujours 0, utiliser nftCount car chaque membre ne peut avoir qu'un seul NFT
+    if (holdersCount === 0 && nftCount > 0) {
+      holdersCount = nftCount;
+    }
 
     return {
-      totalMinted: parseInt(collection.nfts) || 0,
-      holders: parseInt(collection.holders) || 0
+      totalMinted: nftCount,
+      holders: holdersCount
     };
   } catch (error) {
     console.error('Error getting collection stats:', error);

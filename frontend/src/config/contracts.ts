@@ -34,6 +34,24 @@ export const DAO_V1_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgq35zrtzej655v2czk5plz
 export const NFT_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgqjwd6xwycht2hmm5h76qcgzdqdxnz8g9wflfqt5v6zc';
 export const NFT_TOKEN_ID = 'XCIRCLEX-957f5a';
 
+// NFT IPFS Configuration - GIFs animés sur Pinata
+// CID: QmPjnNcnzdVzmF4NwDgRQPZHBu5ABkwSngvZyGki6zQxTV
+export const NFT_IPFS_CID = 'QmPjnNcnzdVzmF4NwDgRQPZHBu5ABkwSngvZyGki6zQxTV';
+export const NFT_IPFS_GATEWAY = 'https://ipfs.io/ipfs';
+export const NFT_IPFS_BASE_URL = `${NFT_IPFS_GATEWAY}/${NFT_IPFS_CID}/xcirclex`;
+
+// Helper pour obtenir l'URL du GIF NFT par niveau
+// Utilise les fichiers locaux (plus fiable que les gateways IPFS)
+export const getNftGifUrl = (level: number): string => {
+  // Fichiers locaux dans /public/nft-gifs/
+  return `/nft-gifs/${level}.gif`;
+};
+
+// Helper pour obtenir l'URL IPFS du GIF NFT (pour le smart contract)
+export const getNftIpfsUrl = (level: number): string => {
+  return `ipfs://${NFT_IPFS_CID}/xcirclex/${level}.gif`;
+};
+
 // Liquidity Pool Address (xExchange DEX)
 // Paire XCIRCLEX/WEGLD sur xExchange Devnet
 export const LIQUIDITY_POOL_ADDRESS = 'erd1qqqqqqqqqqqqqpgqy4g7upd4dz4mp9qzw3w9x43jqu36qjwc0n4sm37le3';

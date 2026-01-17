@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NftVisual } from '../NftVisual'
+import { NftGifVisual } from '../NftGifVisual'
 import { useCircleOfLife } from '../../hooks/useCircleOfLife'
 import { NFT_CONTRACT_ADDRESS, NFT_TOKEN_ID } from '../../config/contracts'
 import { claimNft, checkUserHasNft, getCollectionStats, burnAndReclaim } from '../../services/nftService'
@@ -56,11 +57,13 @@ export function NftTab() {
   const [showAllLevels, setShowAllLevels] = useState(false)
   const [showGallery, setShowGallery] = useState(false)
   const [enablePreviewMode, setEnablePreviewMode] = useState(false) // Mode demo desactive par defaut
+  const [useGifPreview, setUseGifPreview] = useState(true) // Utiliser les GIFs IPFS par defaut
   const [hasNft, setHasNft] = useState(false)
   const [nftNonce, setNftNonce] = useState(0)
   const [isClaimingNft, setIsClaimingNft] = useState(false)
   const [isUpdatingNft, setIsUpdatingNft] = useState(false)
   const [collectionStats, setCollectionStats] = useState({ totalMinted: 0, holders: 0 })
+  const [nftRefreshKey, setNftRefreshKey] = useState(0) // Cle pour forcer le rechargement des GIFs
 
   // Recuperer les vraies donnees depuis le hook useCircleOfLife
   const { myContract, scStats, isMember, isLoading, address } = useCircleOfLife()
@@ -172,6 +175,8 @@ export function NftTab() {
       setTimeout(() => {
         checkNftOwnership()
         loadCollectionStats()
+        // Forcer le rechargement des GIFs
+        setNftRefreshKey(prev => prev + 1)
       }, 5000)
     } catch (error: any) {
       console.error('Error updating NFT:', error)
@@ -268,16 +273,38 @@ export function NftTab() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Preview Section */}
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
-          <h3 className="text-lg font-bold text-white mb-4">{t('nftTab.nftPreview', 'NFT Preview')}</h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-bold text-white">{t('nftTab.nftPreview', 'NFT Preview')}</h3>
+            {/* Toggle GIF/SVG */}
+            <button
+              onClick={() => setUseGifPreview(!useGifPreview)}
+              className={`text-xs px-3 py-1 rounded-lg transition ${
+                useGifPreview
+                  ? 'bg-green-500/30 text-green-300 hover:bg-green-500/40'
+                  : 'bg-gray-500/30 text-gray-400 hover:bg-gray-500/40'
+              }`}
+              title="Toggle entre GIF IPFS et SVG local"
+            >
+              {useGifPreview ? '🎬 GIF IPFS' : '🎨 SVG Local'}
+            </button>
+          </div>
 
           {/* NFT Visual */}
           <div className="flex justify-center mb-6">
-            <NftVisual
-              level={currentDemo.level}
-              cycles={currentDemo.cycles}
-              size={280}
-              animated={true}
-            />
+            {useGifPreview ? (
+              <NftGifVisual
+                level={currentDemo.level}
+                size={280}
+                refreshKey={nftRefreshKey}
+              />
+            ) : (
+              <NftVisual
+                level={currentDemo.level}
+                cycles={currentDemo.cycles}
+                size={280}
+                animated={true}
+              />
+            )}
           </div>
 
           {/* Level selector */}
@@ -361,7 +388,11 @@ export function NftTab() {
               <div className="mt-6">
                 <p className="text-gray-400 text-sm mb-3">{t('nftTab.previewFutureNft', 'Preview of your future NFT')}:</p>
                 <div className="flex justify-center">
-                  <NftVisual level={userLevel} cycles={userCycles} size={200} animated={true} />
+                  {useGifPreview ? (
+                    <NftGifVisual level={userLevel} size={200} refreshKey={nftRefreshKey} />
+                  ) : (
+                    <NftVisual level={userLevel} cycles={userCycles} size={200} animated={true} />
+                  )}
                 </div>
               </div>
             </div>
@@ -369,7 +400,11 @@ export function NftTab() {
             <div className="text-center">
               {/* User's actual NFT */}
               <div className="flex justify-center mb-4">
-                <NftVisual level={userLevel} cycles={userCycles} size={250} animated={true} />
+                {useGifPreview ? (
+                  <NftGifVisual level={userLevel} size={250} refreshKey={nftRefreshKey} />
+                ) : (
+                  <NftVisual level={userLevel} cycles={userCycles} size={250} animated={true} />
+                )}
               </div>
               <div className="bg-black/20 rounded-lg p-4 mb-4">
                 <div className="grid grid-cols-2 gap-4 text-sm">
@@ -403,7 +438,11 @@ export function NftTab() {
             <div className="text-center py-4">
               {/* Preview du futur NFT */}
               <div className="flex justify-center mb-4">
-                <NftVisual level={userLevel} cycles={userCycles} size={220} animated={true} />
+                {useGifPreview ? (
+                  <NftGifVisual level={userLevel} size={220} refreshKey={nftRefreshKey} />
+                ) : (
+                  <NftVisual level={userLevel} cycles={userCycles} size={220} animated={true} />
+                )}
               </div>
               <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-4 mb-4">
                 <div className="text-blue-300 font-semibold mb-1">{t('nftTab.yourFutureNft', 'Your future NFT')}</div>
@@ -576,13 +615,21 @@ export function NftTab() {
                 onClick={() => setPreviewLevel(levelData.level)}
               >
                 <div className="flex justify-center mb-2">
-                  <NftVisual
-                    level={levelData.level}
-                    cycles={levelData.cycles}
-                    size={140}
-                    animated={false}
-                    seed={levelData.level * 12345}
-                  />
+                  {useGifPreview ? (
+                    <NftGifVisual
+                      level={levelData.level}
+                      size={140}
+                      refreshKey={nftRefreshKey}
+                    />
+                  ) : (
+                    <NftVisual
+                      level={levelData.level}
+                      cycles={levelData.cycles}
+                      size={140}
+                      animated={false}
+                      seed={levelData.level * 12345}
+                    />
+                  )}
                 </div>
                 <div className="text-center">
                   <p className="text-white font-bold text-sm">Niveau {levelData.level}</p>
