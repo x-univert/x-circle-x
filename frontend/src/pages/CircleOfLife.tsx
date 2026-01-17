@@ -68,7 +68,6 @@ function CircleOfLife() {
     failCycle,
     claimRewards,
     enableAutoSign,
-    enableAutoSignForCycles,
     disableAutoSign,
     deposit,
     refreshData,
@@ -428,8 +427,6 @@ function CircleOfLife() {
   const [showAutoSignModal, setShowAutoSignModal] = useState(false)
   const [autoSignModalStep, setAutoSignModalStep] = useState<TransactionStep>('confirm')
   const [autoSignTransactionHash, setAutoSignTransactionHash] = useState('')
-  const [autoSignCycles, setAutoSignCycles] = useState(30)
-  const [autoSignType, setAutoSignType] = useState<'permanent' | 'cycles'>('cycles')
 
   const [showDisableAutoSignModal, setShowDisableAutoSignModal] = useState(false)
   const [disableAutoSignModalStep, setDisableAutoSignModalStep] = useState<TransactionStep>('confirm')
@@ -610,15 +607,8 @@ function CircleOfLife() {
   const handleAutoSignConfirm = async () => {
     setAutoSignModalStep('pending')
     try {
-      let result
-      console.log('Auto-sign type:', autoSignType, 'cycles:', autoSignCycles)
-      if (autoSignType === 'permanent') {
-        console.log('Calling enableAutoSign...')
-        result = await enableAutoSign()
-      } else {
-        console.log('Calling enableAutoSignForCycles with', autoSignCycles, 'cycles...')
-        result = await enableAutoSignForCycles(autoSignCycles)
-      }
+      console.log('Calling enableAutoSign (permanent)...')
+      const result = await enableAutoSign()
       console.log('Auto-sign result:', result)
       if (result && result.transactionHash) {
         setAutoSignTransactionHash(result.transactionHash)
@@ -1596,15 +1586,15 @@ function CircleOfLife() {
                       <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg space-y-3">
                         <div className="flex items-center justify-between">
                           <h4 className="text-purple-300 font-semibold text-sm">{t('circle.autoSign', 'Auto-Signature')}</h4>
-                          {(autoSignStatus.isPermanent || autoSignStatus.remainingCycles > 0) && (
+                          {autoSignStatus.isPermanent && (
                             <span className="px-2 py-1 bg-purple-500/30 text-purple-300 text-xs rounded-full">
-                              {autoSignStatus.isPermanent ? t('circle.permanent', 'Permanent') : `${autoSignStatus.remainingCycles} ${t('circle.cyclesRemaining', 'cycles remaining')}`}
+                              {t('circle.permanent', 'Permanent')}
                             </span>
                           )}
                         </div>
 
                         {/* Status actuel */}
-                        {autoSignStatus.isPermanent && (
+                        {autoSignStatus.isPermanent ? (
                           <div className="p-2 bg-purple-500/20 rounded-lg">
                             <p className="text-purple-300 text-xs text-center">
                               {t('circle.permanentAutoSignActive', 'Permanent auto-sign enabled')}
@@ -1613,20 +1603,7 @@ function CircleOfLife() {
                               {t('circle.cyclesSignedIndefinitely', 'Your cycles will be signed automatically indefinitely')}
                             </p>
                           </div>
-                        )}
-
-                        {!autoSignStatus.isPermanent && autoSignStatus.remainingCycles > 0 && (
-                          <div className="p-2 bg-purple-500/20 rounded-lg">
-                            <p className="text-purple-300 text-xs text-center">
-                              {t('circle.autoSignActiveFor', 'Auto-sign active for')} {autoSignStatus.remainingCycles} {t('circle.cycle', 'cycle')}{autoSignStatus.remainingCycles > 1 ? 's' : ''}
-                            </p>
-                            <p className="text-purple-400/70 text-xs text-center mt-1">
-                              {t('circle.cyclesSignedAuto', 'Your cycles will be signed automatically')}
-                            </p>
-                          </div>
-                        )}
-
-                        {!autoSignStatus.isPermanent && autoSignStatus.remainingCycles === 0 && (
+                        ) : (
                           <p className="text-purple-400/70 text-xs text-center">
                             {t('circle.enableAutoSign', 'Enable auto-sign so you do not have to sign manually every day')}
                           </p>
@@ -1634,7 +1611,7 @@ function CircleOfLife() {
 
                         {/* Boutons */}
                         <div className="flex gap-2">
-                          {!autoSignStatus.isPermanent && autoSignStatus.remainingCycles === 0 && (
+                          {!autoSignStatus.isPermanent && (
                             <button
                               onClick={() => setShowAutoSignModal(true)}
                               disabled={isPaused || isLoading}
@@ -1644,23 +1621,14 @@ function CircleOfLife() {
                             </button>
                           )}
 
-                          {(autoSignStatus.isPermanent || autoSignStatus.remainingCycles > 0) && (
-                            <>
-                              <button
-                                onClick={() => setShowAutoSignModal(true)}
-                                disabled={isPaused || isLoading}
-                                className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 text-white font-semibold py-2 px-3 rounded-lg transition text-sm"
-                              >
-                                Modifier
-                              </button>
-                              <button
-                                onClick={() => setShowDisableAutoSignModal(true)}
-                                disabled={isPaused || isLoading}
-                                className="flex-1 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 disabled:opacity-50 text-white font-semibold py-2 px-3 rounded-lg transition text-sm"
-                              >
-                                {t('circle.disable', 'Disable')}
-                              </button>
-                            </>
+                          {autoSignStatus.isPermanent && (
+                            <button
+                              onClick={() => setShowDisableAutoSignModal(true)}
+                              disabled={isPaused || isLoading}
+                              className="flex-1 bg-gray-600 hover:bg-gray-500 disabled:opacity-50 text-white font-semibold py-2 px-3 rounded-lg transition text-sm"
+                            >
+                              {t('circle.disable', 'Desactiver')}
+                            </button>
                           )}
                         </div>
                       </div>
@@ -3089,89 +3057,30 @@ function CircleOfLife() {
       <TransactionModal
         isOpen={showAutoSignModal}
         step={autoSignModalStep}
-        title="Configurer l'Auto-Signature"
-        confirmTitle="Activer l'Auto-Signature"
-        confirmDescription="Choisissez le type d'auto-signature que vous souhaitez activer."
+        title="Activer l'Auto-Signature"
+        confirmTitle="Activer l'Auto-Signature Permanente"
+        confirmDescription="Activez l'auto-signature pour ne plus avoir a signer manuellement chaque jour."
         confirmDetails={
-          <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 space-y-4">
-            {/* Type Selection */}
-            <div className="space-y-2">
-              <label className="text-gray-300 text-sm font-medium">Type d&apos;auto-signature</label>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setAutoSignType('cycles')}
-                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition ${
-                    autoSignType === 'cycles'
-                      ? 'bg-purple-500 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
-                >
-                  Limite (cycles)
-                </button>
-                <button
-                  onClick={() => setAutoSignType('permanent')}
-                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition ${
-                    autoSignType === 'permanent'
-                      ? 'bg-purple-500 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
-                >
-                  Permanent
-                </button>
+          <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-purple-500/30 flex items-center justify-center">
+                <span className="text-xl">✨</span>
+              </div>
+              <div>
+                <p className="text-white font-semibold">Auto-Signature Permanente</p>
+                <p className="text-purple-300 text-sm">Vos cycles seront signes automatiquement</p>
               </div>
             </div>
-
-            {/* Cycles Input - Only shown for 'cycles' type */}
-            {autoSignType === 'cycles' && (
-              <div className="space-y-2">
-                <label className="text-gray-300 text-sm font-medium">Nombre de cycles (1-365)</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="range"
-                    min="1"
-                    max="365"
-                    value={autoSignCycles}
-                    onChange={(e) => setAutoSignCycles(parseInt(e.target.value))}
-                    className="flex-1 accent-purple-500"
-                  />
-                  <input
-                    type="number"
-                    min="1"
-                    max="365"
-                    value={autoSignCycles}
-                    onChange={(e) => setAutoSignCycles(Math.min(365, Math.max(1, parseInt(e.target.value) || 1)))}
-                    className="w-16 bg-gray-700 text-white text-center rounded-lg py-1 px-2"
-                  />
-                </div>
-                <div className="flex justify-between text-xs text-gray-400">
-                  <span>1 jour</span>
-                  <span>1 mois (30)</span>
-                  <span>1 an (365)</span>
-                </div>
-              </div>
-            )}
-
-            {/* Description based on selection */}
             <div className="border-t border-purple-500/30 pt-3">
-              {autoSignType === 'permanent' ? (
-                <p className="text-purple-300 text-sm">
-                  L&apos;auto-signature permanente signera automatiquement tous vos cycles futurs indefiniment.
-                  Vous pourrez la desactiver a tout moment.
-                </p>
-              ) : (
-                <p className="text-purple-300 text-sm">
-                  L&apos;auto-signature sera active pendant <span className="font-bold text-white">{autoSignCycles}</span> cycle{autoSignCycles > 1 ? 's' : ''}.
-                  Apres cela, vous devrez la renouveler ou signer manuellement.
-                </p>
-              )}
+              <p className="text-purple-300 text-sm">
+                L&apos;auto-signature permanente signera automatiquement tous vos cycles futurs indefiniment.
+                Vous pourrez la desactiver a tout moment.
+              </p>
             </div>
           </div>
         }
         successTitle="Auto-Signature activee !"
-        successMessage={autoSignType === 'permanent'
-          ? "L'auto-signature permanente est maintenant active. Vos cycles seront signes automatiquement."
-          : `L'auto-signature est active pour ${autoSignCycles} cycle${autoSignCycles > 1 ? 's' : ''}.`
-        }
+        successMessage="L'auto-signature permanente est maintenant active. Vos cycles seront signes automatiquement."
         errorMessage="Erreur lors de l'activation de l'auto-signature. Verifiez que vous etes bien membre actif du cercle."
         transactionHash={autoSignTransactionHash}
         onConfirm={handleAutoSignConfirm}
