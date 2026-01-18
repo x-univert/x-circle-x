@@ -1,20 +1,19 @@
 // Configuration des smart contracts - TESTNET
-// A deployer sur Testnet
+// Deployes sur Testnet
 
-// Placeholder addresses - A REMPLACER apres deploiement
 export const CIRCLE_MANAGER_ADDRESS = ''; // TODO: Deploy CircleManager
-export const CIRCLE_OF_LIFE_ADDRESS = ''; // TODO: Deploy Circle of Life Center
+export const CIRCLE_OF_LIFE_ADDRESS = 'erd1qqqqqqqqqqqqqpgqvddnk9lv2x6xvq7dsjkfdsr0f79za3k0flfqp0yey5';
 export const XCIRCLEX_TOKEN_ID = 'XCX-fa8353';
-export const STAKING_CONTRACT_ADDRESS = ''; // TODO: Deploy Staking
-export const VESTING_CONTRACT_ADDRESS = ''; // TODO: Deploy Vesting
-export const DAO_CONTRACT_ADDRESS = ''; // TODO: Deploy DAO v2
+export const STAKING_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgq6dang8kg5487lchamyj47uh4j9pg426uflfqc8pgrw';
+export const VESTING_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgqdtq6gqe7lhzqdaah9ryysnsy704jqmvkflfq5x05rq';
+export const DAO_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgq58jy4tx3k6xerrjn8jxjd6sy6etz9kycflfqyf3rvj';
 export const DAO_V1_CONTRACT_ADDRESS = '';
-export const NFT_CONTRACT_ADDRESS = ''; // TODO: Deploy NFT
-export const NFT_TOKEN_ID = '';
+export const NFT_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgqavw52x72xm33x7cszrz9uankyr9hkmsjflfq7qjnph';
+export const NFT_TOKEN_ID = ''; // TODO: Issue NFT token
 export const LIQUIDITY_POOL_ADDRESS = ''; // TODO: Create LP on xExchange
-export const LP_LOCKER_ADDRESS = ''; // TODO: Deploy LP Locker
-export const TOKEN_PROTECTION_ADDRESS = ''; // TODO: Deploy Token Protection
-export const IDO_CONTRACT_ADDRESS = ''; // TODO: Deploy IDO
+export const LP_LOCKER_ADDRESS = 'erd1qqqqqqqqqqqqqpgqttt9jrazafjckrkdw2mcpk53y8lw95dcflfq04yzsc';
+export const TOKEN_PROTECTION_ADDRESS = 'erd1qqqqqqqqqqqqqpgqp0f7ej3e72cfxj8vj693x4la06hmh2sdflfq5wu26e';
+export const IDO_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgqslvy5cn4u9effv529cv33zdschlvrtzgflfq6zuyey';
 
 export const NETWORK_CONFIG = {
   id: 'testnet',
