@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { XCircleLogo } from './Logo/Logo'
 
-export type TabId = 'circle' | 'sc-central' | 'my-sc' | 'staking' | 'nft' | 'token' | 'dao'
+export type TabId = 'circle' | 'sc-central' | 'my-sc' | 'staking' | 'nft' | 'token' | 'dao' | 'chat'
 
 interface Tab {
   id: TabId
@@ -17,7 +17,8 @@ const tabs: Tab[] = [
   { id: 'staking', labelKey: 'staking.title', icon: '💰' },
   { id: 'nft', labelKey: 'nft.myNft', icon: '🎨' },
   { id: 'token', labelKey: 'circleOfLife.tabs.token', icon: '', isLogoIcon: true },
-  { id: 'dao', labelKey: 'dao.title', icon: '🏛️' }
+  { id: 'dao', labelKey: 'dao.title', icon: '🏛️' },
+  { id: 'chat', labelKey: 'chat.title', icon: '💬' }
 ]
 
 interface CircleNavTabsProps {

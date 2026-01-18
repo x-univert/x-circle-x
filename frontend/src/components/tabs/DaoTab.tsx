@@ -28,6 +28,7 @@ import {
 } from '../../services/daoService';
 import { getTotalStakedByUser } from '../../services/stakingService';
 import { DAO_CONTRACT_ADDRESS } from '../../config/contracts';
+import { ForumSection } from '../forum/ForumSection';
 
 interface ProposalDisplay {
   id: number;
@@ -885,6 +886,11 @@ export function DaoTab() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Forum Section */}
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl">
+        <ForumSection />
       </div>
 
       {/* Contract Info */}

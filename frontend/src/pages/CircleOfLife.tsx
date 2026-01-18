@@ -17,6 +17,7 @@ const TokenTab = lazy(() => import('../components/tabs/TokenTab').then(m => ({ d
 const DaoTab = lazy(() => import('../components/tabs/DaoTab').then(m => ({ default: m.DaoTab })))
 const ScCentralTab = lazy(() => import('../components/tabs/ScCentralTab').then(m => ({ default: m.ScCentralTab })))
 const StakingTab = lazy(() => import('../components/tabs/StakingTab').then(m => ({ default: m.StakingTab })))
+const ChatTab = lazy(() => import('../components/tabs/ChatTab').then(m => ({ default: m.ChatTab })))
 
 function CircleOfLife() {
   const { t } = useTranslation()
@@ -817,6 +818,7 @@ function CircleOfLife() {
           {activeTab === 'nft' && <NftTab />}
           {activeTab === 'token' && <TokenTab />}
           {activeTab === 'dao' && <DaoTab />}
+          {activeTab === 'chat' && <ChatTab />}
         </Suspense>
 
         {/* Circle Tab - Main Grid */}
