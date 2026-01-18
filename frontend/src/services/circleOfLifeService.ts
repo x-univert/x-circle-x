@@ -704,7 +704,8 @@ export const joinCircle = async (senderAddress: string, entryFee: string = '1') 
       processingMessage: 'Adhesion au cercle en cours...',
       errorMessage: 'Erreur lors de l\'adhesion',
       successMessage: 'Bienvenue dans le cercle !'
-    }
+    },
+    senderAddress
   });
 
   return {

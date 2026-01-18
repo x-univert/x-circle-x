@@ -4,6 +4,7 @@ import {
   TransactionManager,
   TransactionsDisplayInfoType
 } from 'lib';
+import { multiversxApiUrl } from 'config';
 
 type SignAndSendTransactionsProps = {
   transactions: Transaction[];
@@ -34,7 +35,7 @@ const getLatestTransactionHash = async (address: string, maxWait = 10000): Promi
   while (Date.now() - startTime < maxWait) {
     try {
       const response = await fetch(
-        `https://devnet-api.multiversx.com/accounts/${address}/transactions?size=1&order=desc&status=pending,success`
+        `${multiversxApiUrl}/accounts/${address}/transactions?size=1&order=desc&status=pending,success`
       );
       if (response.ok) {
         const txs = await response.json();
