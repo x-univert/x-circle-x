@@ -1617,9 +1617,13 @@ function CircleOfLife() {
                             <button
                               onClick={() => setShowAutoSignModal(true)}
                               disabled={isPaused || isLoading}
-                              className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 text-white font-semibold py-2 px-3 rounded-lg transition text-sm"
+                              className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 text-white font-semibold py-2 px-3 rounded-lg transition text-sm animate-pulse shadow-lg shadow-purple-500/50"
                             >
-                              Activer Auto-Sign
+                              <span className="flex items-center justify-center gap-2">
+                                <span className="text-lg">✨</span>
+                                Activer Auto-Sign
+                                <span className="text-lg">✨</span>
+                              </span>
                             </button>
                           )}
 
