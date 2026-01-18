@@ -6,9 +6,11 @@ import {
 import { signAndSendTransactions, signAndSendTransactionsWithHash } from '../helpers/signAndSendTransactions';
 import BigNumber from 'bignumber.js';
 import { CIRCLE_OF_LIFE_ADDRESS } from '../config/contracts';
+import { chainId, multiversxApiUrl } from '../config';
 
-const factoryConfig = new TransactionsFactoryConfig({ chainID: 'D' });
-const factory = new SmartContractTransactionsFactory({ config: factoryConfig });
+// Factory configuration dynamique basee sur le reseau selectionne
+const getFactoryConfig = () => new TransactionsFactoryConfig({ chainID: chainId });
+const getFactory = () => new SmartContractTransactionsFactory({ config: getFactoryConfig() });
 
 // Gas limits pour Circle of Life v3 (avec transferts cross-contract)
 const GAS_LIMITS = {
@@ -90,7 +92,7 @@ const parseBigUint = (hex: string): string => {
 const queryContract = async (funcName: string, args: string[] = []): Promise<any> => {
   try {
     const response = await fetch(
-      'https://devnet-api.multiversx.com/vm-values/query',
+      `${multiversxApiUrl}/vm-values/query`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -690,7 +692,7 @@ export const joinCircle = async (senderAddress: string, entryFee: string = '1') 
   // Convertir en wei
   const feeInWei = new BigNumber(entryFee).multipliedBy('1000000000000000000').toFixed(0);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'joinCircle',
     gasLimit: BigInt(GAS_LIMITS.joinCircle),
@@ -721,7 +723,7 @@ export const signAndForward = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'signAndForward',
     gasLimit: BigInt(GAS_LIMITS.signAndForward),
@@ -751,7 +753,7 @@ export const startDailyCycle = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'startDailyCycle',
     gasLimit: BigInt(GAS_LIMITS.startDailyCycle),
@@ -782,7 +784,7 @@ export const failCycle = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'failCycle',
     gasLimit: BigInt(GAS_LIMITS.failCycle),
@@ -811,7 +813,7 @@ export const setInactive = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'setInactive',
     gasLimit: BigInt(GAS_LIMITS.setInactive),
@@ -840,7 +842,7 @@ export const setActive = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'setActive',
     gasLimit: BigInt(GAS_LIMITS.setActive),
@@ -869,7 +871,7 @@ export const leaveCircle = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'leaveCircle',
     gasLimit: BigInt(GAS_LIMITS.leaveCircle),
@@ -895,7 +897,7 @@ export const deposit = async (amount: string, senderAddress: string) => {
 
   const amountInWei = new BigNumber(amount).multipliedBy('1000000000000000000').toFixed(0);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'deposit',
     gasLimit: BigInt(GAS_LIMITS.deposit),
@@ -928,7 +930,7 @@ export const preSign = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'preSign',
     gasLimit: BigInt(GAS_LIMITS.preSign),
@@ -958,7 +960,7 @@ export const processNextTransfer = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'processNextTransfer',
     gasLimit: BigInt(GAS_LIMITS.processNextTransfer),
@@ -990,7 +992,7 @@ export const processAllPendingTransfers = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'processAllPendingTransfers',
     gasLimit: BigInt(GAS_LIMITS.processAllPendingTransfers),
@@ -1053,7 +1055,7 @@ export const enableAutoSign = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'enableAutoSign',
     gasLimit: BigInt(GAS_LIMITS.enableAutoSign),
@@ -1086,7 +1088,7 @@ export const enableAutoSignForCycles = async (senderAddress: string, numCycles: 
   // Encoder numCycles en hex
   const numCyclesHex = numCycles.toString(16).padStart(2, '0');
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'enableAutoSignForCycles',
     gasLimit: BigInt(GAS_LIMITS.enableAutoSignForCycles),
@@ -1115,7 +1117,7 @@ export const disableAutoSign = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'disableAutoSign',
     gasLimit: BigInt(GAS_LIMITS.disableAutoSign),
@@ -1336,7 +1338,7 @@ export const resetCycle = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'resetCycle',
     gasLimit: BigInt(GAS_LIMITS.resetCycle),
@@ -1366,7 +1368,7 @@ export const simulateNextDay = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'simulateNextDay',
     gasLimit: BigInt(GAS_LIMITS.simulateNextDay),
@@ -1610,7 +1612,7 @@ export const claimRewards = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'claimRewards',
     gasLimit: BigInt(GAS_LIMITS.claimRewards),
@@ -2428,7 +2430,7 @@ export const processLiquidity = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'liquidityStep1_WrapEgld',
     gasLimit: BigInt(120_000_000),
@@ -2456,7 +2458,7 @@ export const lockPendingLpTokens = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'liquidityStep4_LockLp',
     gasLimit: BigInt(80_000_000),
@@ -2488,7 +2490,7 @@ export const liquidityStep1_WrapEgld = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'liquidityStep1_WrapEgld',
     gasLimit: BigInt(120_000_000), // 120M pour wrap cross-shard + callback
@@ -2518,7 +2520,7 @@ export const liquidityStep2_Swap = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'liquidityStep2_Swap',
     gasLimit: BigInt(100_000_000), // 100M pour swap cross-shard
@@ -2548,7 +2550,7 @@ export const liquidityStep3_AddLiquidity = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'liquidityStep3_AddLiquidity',
     gasLimit: BigInt(150_000_000), // 150M pour addLiquidity cross-shard
@@ -2578,7 +2580,7 @@ export const liquidityStep4_LockLp = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'liquidityStep4_LockLp',
     gasLimit: BigInt(80_000_000), // 80M pour lock
@@ -2608,7 +2610,7 @@ export const recoverOrphanXcirclex = async (senderAddress: string) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'recoverOrphanXcirclex',
     gasLimit: BigInt(20_000_000),
