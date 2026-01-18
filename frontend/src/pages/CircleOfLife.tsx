@@ -1713,12 +1713,16 @@ function CircleOfLife() {
                     <button
                       onClick={() => setShowStartCycleModal(true)}
                       disabled={isPaused || isLoading}
-                      className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition"
+                      className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition animate-pulse shadow-lg shadow-orange-500/50"
                     >
-                      {t('circle.startDailyCycle', 'Start Daily Cycle')}
-                      {starterBonusInfo.percentage > 0 && (
-                        <span className="ml-2 text-cyan-200 text-sm">&#x2B50; +{(starterBonusInfo.percentage / 100).toFixed(0)}%</span>
-                      )}
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="text-lg">🚀</span>
+                        {t('circle.startDailyCycle', 'Start Daily Cycle')}
+                        {starterBonusInfo.percentage > 0 && (
+                          <span className="text-cyan-200 text-sm">⭐ +{(starterBonusInfo.percentage / 100).toFixed(0)}%</span>
+                        )}
+                        <span className="text-lg">🚀</span>
+                      </span>
                     </button>
                     {starterBonusInfo.percentage > 0 && (
                       <p className="text-cyan-400 text-xs text-center">
