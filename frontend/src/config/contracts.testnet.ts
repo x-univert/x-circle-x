@@ -14,6 +14,7 @@ export const LIQUIDITY_POOL_ADDRESS = ''; // TODO: Create LP on xExchange
 export const LP_LOCKER_ADDRESS = 'erd1qqqqqqqqqqqqqpgqttt9jrazafjckrkdw2mcpk53y8lw95dcflfq04yzsc';
 export const TOKEN_PROTECTION_ADDRESS = 'erd1qqqqqqqqqqqqqpgqp0f7ej3e72cfxj8vj693x4la06hmh2sdflfq5wu26e';
 export const IDO_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgqpr97f9dy0x5z22r6klfzmtsmr2jc824wflfqhe3lgy';
+export const PERIPHERAL_TEMPLATE_ADDRESS = 'erd1qqqqqqqqqqqqqpgq9dmz03jtxu2v7dzzkx50nwtc2zwvu0r7flfq94jhd3';
 
 export const NETWORK_CONFIG = {
   id: 'testnet',
