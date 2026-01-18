@@ -1703,8 +1703,8 @@ function CircleOfLife() {
                   </>
                 )}
 
-                {/* Start cycle button - seulement si le cycle n'est pas en cours */}
-                {activeContractsCount > 0 && !cycleHolder && !isCycleComplete && (
+                {/* Start cycle button - seulement si membre et le cycle n'est pas en cours */}
+                {isMember && activeContractsCount > 0 && !cycleHolder && !isCycleComplete && (
                   <div className="space-y-2">
                     <button
                       onClick={() => setShowStartCycleModal(true)}
