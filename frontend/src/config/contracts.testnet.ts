@@ -4,7 +4,7 @@
 // Placeholder addresses - A REMPLACER apres deploiement
 export const CIRCLE_MANAGER_ADDRESS = ''; // TODO: Deploy CircleManager
 export const CIRCLE_OF_LIFE_ADDRESS = ''; // TODO: Deploy Circle of Life Center
-export const XCIRCLEX_TOKEN_ID = ''; // TODO: Issue XCIRCLEX token
+export const XCIRCLEX_TOKEN_ID = 'XCX-fa8353';
 export const STAKING_CONTRACT_ADDRESS = ''; // TODO: Deploy Staking
 export const VESTING_CONTRACT_ADDRESS = ''; // TODO: Deploy Vesting
 export const DAO_CONTRACT_ADDRESS = ''; // TODO: Deploy DAO v2
