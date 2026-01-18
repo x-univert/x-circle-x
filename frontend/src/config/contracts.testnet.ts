@@ -1,7 +1,7 @@
 // Configuration des smart contracts - TESTNET
 // Deployes sur Testnet
 
-export const CIRCLE_MANAGER_ADDRESS = ''; // TODO: Deploy CircleManager
+export const CIRCLE_MANAGER_ADDRESS = 'erd1qqqqqqqqqqqqqpgq5t359myktkfeeu4q28w6jghw9xa5fjqyflfqngz3k3';
 export const CIRCLE_OF_LIFE_ADDRESS = 'erd1qqqqqqqqqqqqqpgqvddnk9lv2x6xvq7dsjkfdsr0f79za3k0flfqp0yey5';
 export const XCIRCLEX_TOKEN_ID = 'XCX-fa8353';
 export const STAKING_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgq6dang8kg5487lchamyj47uh4j9pg426uflfqc8pgrw';
