@@ -28,7 +28,7 @@ const GAS_LIMITS = {
   claimRewards: 15_000_000,    // Reclamer les recompenses XCIRCLEX
   enableAutoSign: 8_000_000,   // Activer auto-sign permanent
   enableAutoSignForCycles: 8_000_000,  // Activer auto-sign pour N cycles
-  disableAutoSign: 5_000_000,  // Desactiver auto-sign
+  disableAutoSign: 15_000_000,  // Desactiver auto-sign
   processLiquidity: 250_000_000,  // Admin: Process liquidite xExchange (cross-shard async)
   lockPendingLpTokens: 100_000_000,  // Admin: Lock LP tokens apres addLiquidity
 };
