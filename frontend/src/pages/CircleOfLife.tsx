@@ -1789,9 +1789,13 @@ function CircleOfLife() {
                   <button
                     onClick={() => setShowProcessModal(true)}
                     disabled={isPaused || isLoading}
-                    className="w-full bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition"
+                    className="w-full bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition animate-pulse shadow-lg shadow-cyan-500/50"
                   >
-                    {t('circle.executeTransfers', 'Execute {{count}} transfer(s) in 1 click', { count: pendingAutoTransfers })}
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="text-lg">⚡</span>
+                      {t('circle.executeTransfers', 'Execute {{count}} transfer(s) in 1 click', { count: pendingAutoTransfers })}
+                      <span className="text-lg">⚡</span>
+                    </span>
                   </button>
                 )}
 
