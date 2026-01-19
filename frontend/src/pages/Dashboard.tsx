@@ -1,7 +1,8 @@
 import { useGetIsLoggedIn, useGetAccountInfo } from 'lib'
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { CIRCLE_MANAGER_ADDRESS } from '../config/contracts'
+import { CIRCLE_MANAGER_ADDRESS, CURRENT_NETWORK } from '../config/contracts'
+import { multiversxApiUrl, explorerUrl } from '../config'
 
 interface CircleData {
   id: number
@@ -130,7 +131,7 @@ function Dashboard() {
       try {
         // 1. Get circle count
         const countResponse = await fetch(
-          'https://devnet-api.multiversx.com/vm-values/query',
+          `${multiversxApiUrl}/vm-values/query`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -158,7 +159,7 @@ function Dashboard() {
           const circleIdHex = i.toString(16).padStart(2, '0')
 
           circlePromises.push(
-            fetch('https://devnet-api.multiversx.com/vm-values/query', {
+            fetch(`${multiversxApiUrl}/vm-values/query`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -270,16 +271,22 @@ function Dashboard() {
               <p className="text-white font-bold text-2xl">{formatBalance(account.balance)} <span className="text-blue-400 text-lg">EGLD</span></p>
             </div>
             <div>
-              <p className="text-gray-400 text-sm mb-1">Cercles Totaux (Devnet)</p>
+              <p className="text-gray-400 text-sm mb-1">Cercles Totaux ({CURRENT_NETWORK.charAt(0).toUpperCase() + CURRENT_NETWORK.slice(1)})</p>
               <p className="text-white font-bold text-2xl">
                 {loadingCircles ? '...' : circleCount}
               </p>
             </div>
             <div>
               <p className="text-gray-400 text-sm mb-1">Reseau</p>
-              <span className="inline-flex items-center gap-2 bg-blue-500/20 text-blue-300 text-sm px-3 py-1 rounded-full border border-blue-500/30">
+              <span className={`inline-flex items-center gap-2 text-sm px-3 py-1 rounded-full border ${
+                CURRENT_NETWORK === 'mainnet'
+                  ? 'bg-green-500/20 text-green-300 border-green-500/30'
+                  : CURRENT_NETWORK === 'testnet'
+                    ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
+                    : 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+              }`}>
                 <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                Devnet
+                {CURRENT_NETWORK.charAt(0).toUpperCase() + CURRENT_NETWORK.slice(1)}
               </span>
             </div>
           </div>
@@ -435,7 +442,7 @@ function Dashboard() {
               <p className="text-white font-mono text-xs md:text-sm break-all">{CIRCLE_MANAGER_ADDRESS}</p>
             </div>
             <a
-              href={`https://devnet-explorer.multiversx.com/accounts/${CIRCLE_MANAGER_ADDRESS}`}
+              href={`${explorerUrl}/accounts/${CIRCLE_MANAGER_ADDRESS}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 transition"

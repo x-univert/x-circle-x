@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCircleOfLife } from '../../hooks/useCircleOfLife'
 import { CIRCLE_OF_LIFE_ADDRESS, XCIRCLEX_TOKEN_ID } from '../../config/contracts'
+import { multiversxApiUrl, explorerUrl } from '../../config'
 import { TransactionModal, TransactionStep } from '../TransactionModal'
 
 interface Transaction {
@@ -68,8 +69,8 @@ export function ScCentralTab() {
       try {
         // Utiliser l'API des transferts pour voir tous les mouvements EGLD
         const [transfersRes, txsRes] = await Promise.all([
-          fetch(`https://devnet-api.multiversx.com/accounts/${CIRCLE_OF_LIFE_ADDRESS}/transfers?size=100`),
-          fetch(`https://devnet-api.multiversx.com/accounts/${CIRCLE_OF_LIFE_ADDRESS}/transactions?size=50`)
+          fetch(`${multiversxApiUrl}/accounts/${CIRCLE_OF_LIFE_ADDRESS}/transfers?size=100`),
+          fetch(`${multiversxApiUrl}/accounts/${CIRCLE_OF_LIFE_ADDRESS}/transactions?size=50`)
         ])
 
         const transfers: any[] = transfersRes.ok ? await transfersRes.json() : []
@@ -198,7 +199,7 @@ export function ScCentralTab() {
             <p className="text-gray-400 text-sm mb-2">{t('scCentral.contractAddress', 'SC0 Contract Address')}</p>
             <p className="text-white font-mono text-xs break-all">{CIRCLE_OF_LIFE_ADDRESS}</p>
             <a
-              href={`https://devnet-explorer.multiversx.com/accounts/${CIRCLE_OF_LIFE_ADDRESS}`}
+              href={`${explorerUrl}/accounts/${CIRCLE_OF_LIFE_ADDRESS}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-flex items-center gap-1"
@@ -213,7 +214,7 @@ export function ScCentralTab() {
             <p className="text-white font-mono text-xs break-all">{sc0Owner || t('common.loading', 'Loading...')}</p>
             {sc0Owner && (
               <a
-                href={`https://devnet-explorer.multiversx.com/accounts/${sc0Owner}`}
+                href={`${explorerUrl}/accounts/${sc0Owner}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-flex items-center gap-1"
@@ -418,7 +419,7 @@ export function ScCentralTab() {
                     </div>
                   </div>
                   <a
-                    href={`https://devnet-explorer.multiversx.com/transactions/${tx.txHash}`}
+                    href={`${explorerUrl}/transactions/${tx.txHash}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-400 hover:text-blue-300 text-xs mt-2 inline-block"
@@ -461,7 +462,7 @@ export function ScCentralTab() {
                     </div>
                   </div>
                   <a
-                    href={`https://devnet-explorer.multiversx.com/transactions/${tx.txHash}`}
+                    href={`${explorerUrl}/transactions/${tx.txHash}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-400 hover:text-blue-300 text-xs mt-2 inline-block"

@@ -1,6 +1,6 @@
 # X-CIRCLE-X DAO - Whitepaper
 
-## Version 2.2 - Janvier 2026
+## Version 2.3 - Janvier 2026
 
 ---
 
@@ -101,15 +101,15 @@ La blockchain MultiversX permet de résoudre ces problèmes grâce à :
 
 ### Projets Existants vs X-CIRCLE-X
 
-| Critère | WeTrust (2017) | Aave (Lending) | PoolTogether | **X-CIRCLE-X** |
-|---------|----------------|----------------|--------------|----------------|
-| **Type** | ROSCA on-chain | Prêt P2P | Loterie épargne | ROSCA + Cercle de Vie |
-| **Blockchain** | Ethereum (coûteux) | Multi-chain | Ethereum/Polygon | **MultiversX (rapide, pas cher)** |
-| **Innovation** | Tontine basique | Flash loans | No-loss lottery | **Circulation quotidienne unique** |
-| **NFT Réputation** | ❌ Non | ❌ Non | ❌ Non | **✅ NFT évolutif 12 niveaux** |
-| **Tokenomics** | Basique | Governance | Basique | **π × 10⁸ + Halving 360** |
-| **Statut** | Abandonné | Actif | Actif | **En développement actif** |
-| **Burn mechanism** | ❌ | ❌ | ❌ | **✅ Burn conditionnel** |
+| Critère                  | WeTrust (2017)      | Aave (Lending) | PoolTogether     | **X-CIRCLE-X**                     |
+| ------------------------- | ------------------- | -------------- | ---------------- | ---------------------------------------- |
+| **Type**            | ROSCA on-chain      | Prêt P2P      | Loterie épargne | ROSCA + Cercle de Vie                    |
+| **Blockchain**      | Ethereum (coûteux) | Multi-chain    | Ethereum/Polygon | **MultiversX (rapide, pas cher)**  |
+| **Innovation**      | Tontine basique     | Flash loans    | No-loss lottery  | **Circulation quotidienne unique** |
+| **NFT Réputation** | ❌ Non              | ❌ Non         | ❌ Non           | **✅ NFT évolutif 12 niveaux**    |
+| **Tokenomics**      | Basique             | Governance     | Basique          | **π × 10⁸ + Halving 360**       |
+| **Statut**          | Abandonné          | Actif          | Actif            | **En développement actif**        |
+| **Burn mechanism**  | ❌                  | ❌             | ❌               | **✅ Burn conditionnel**           |
 
 ### Avantages Compétitifs Uniques
 
@@ -238,12 +238,14 @@ Utilisateur
 **Situation** : Marie veut acheter un réfrigérateur pour son commerce (500€) mais n'a pas accès au crédit bancaire.
 
 **Solution traditionnelle (Tontine)** :
+
 - Rejoint une tontine de quartier avec 9 autres femmes
 - Cotise 50€/mois
 - Attend 5 mois en moyenne pour recevoir la cagnotte
 - **Risques** : Membres qui disparaissent, gestionnaire malhonnête
 
 **Solution X-CIRCLE-X** :
+
 ```
 1. Marie crée un SC périphérique (coût: 1 EGLD ≈ 40€)
 2. Participe aux cycles quotidiens depuis son téléphone
@@ -252,6 +254,7 @@ Utilisateur
 5. Elle peut revendre ses XCX ou les staker pour 5-42% APY
 6. Sa réputation on-chain lui ouvre des cercles premium
 ```
+
 **Avantages** : Transparent, automatique, réputation portable, gains passifs
 
 ---
@@ -261,6 +264,7 @@ Utilisateur
 **Situation** : Ahmed gagne en crypto et veut épargner de manière productive.
 
 **Utilisation X-CIRCLE-X** :
+
 ```
 1. Stake 100,000 XCX au niveau 6 (180 jours)
 2. Gagne 22% APY = 22,000 XCX/an
@@ -268,6 +272,7 @@ Utilisateur
 4. Vote dans la DAO avec son pouvoir de vote 1.5x
 5. Son NFT niveau 6 lui donne +15% bonus staking
 ```
+
 **Résultat** : Épargne productive + gouvernance + réputation
 
 ---
@@ -277,6 +282,7 @@ Utilisateur
 **Situation** : 15 amis veulent épargner ensemble pour un voyage annuel.
 
 **Solution X-CIRCLE-X** :
+
 ```
 1. Chacun crée un SC périphérique (1 EGLD)
 2. L'association reçoit des XCX à chaque cycle réussi
@@ -284,6 +290,7 @@ Utilisateur
 4. Les membres gardent leur NFT de réputation
 5. L'année suivante, ils ont accès à des cercles VIP
 ```
+
 **Avantage** : Plus de trésorier humain, tout est on-chain et transparent
 
 ---
@@ -293,6 +300,7 @@ Utilisateur
 **Situation** : Pierre cherche du yield dans un projet innovant.
 
 **Stratégie X-CIRCLE-X** :
+
 ```
 1. Achète 500,000 XCX sur xExchange
 2. Stake au niveau 12 (360 jours) = 42% APY
@@ -300,6 +308,7 @@ Utilisateur
 4. Participe au Cercle de Vie = bonus quotidiens
 5. NFT Cercle Parfait = +50% bonus + 3x vote DAO
 ```
+
 **Yield total estimé** : 50-80% APY combiné
 
 ---
@@ -437,14 +446,14 @@ Le système de ban utilise une **pénalité progressive** qui s'aggrave à chaqu
 └─────────────────────────────────────────────────────────────┘
 ```
 
-| Infraction               | Conséquence              | Durée                            |
-| ------------------------ | ------------------------- | --------------------------------- |
-| Non-signature à minuit (1ère fois) | Ban automatique | 30 jours                         |
-| Non-signature à minuit (2ème fois) | Ban automatique | 60 jours                         |
-| Non-signature à minuit (3ème fois) | Ban automatique | 90 jours                         |
-| Non-signature à minuit (Nème fois) | Ban automatique | N × 30 jours                    |
-| Inactivité prolongée   | Vote d'éjection possible | Permanent                         |
-| Comportement malveillant | Éjection par vote DAO    | Permanent                         |
+| Infraction                           | Conséquence              | Durée        |
+| ------------------------------------ | ------------------------- | ------------- |
+| Non-signature à minuit (1ère fois) | Ban automatique           | 30 jours      |
+| Non-signature à minuit (2ème fois) | Ban automatique           | 60 jours      |
+| Non-signature à minuit (3ème fois) | Ban automatique           | 90 jours      |
+| Non-signature à minuit (Nème fois) | Ban automatique           | N × 30 jours |
+| Inactivité prolongée               | Vote d'éjection possible | Permanent     |
+| Comportement malveillant             | Éjection par vote DAO    | Permanent     |
 
 Pendant la période de ban :
 
@@ -484,6 +493,48 @@ Pendant la période de ban :
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+### 5.7 Système d'Auto-Signature
+
+Pour faciliter la participation aux cycles quotidiens, le système propose une fonctionnalité d'**auto-signature permanente** :
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    AUTO-SIGNATURE PERMANENTE                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  🔄 FONCTIONNEMENT                                          │
+│  ─────────────────────────────────────────                  │
+│  • Une fois activée, l'auto-signature reste PERMANENTE     │
+│  • Le SC signe automatiquement chaque cycle sans action    │
+│  • L'utilisateur n'a plus besoin de signer manuellement    │
+│  • Idéal pour les participants réguliers                   │
+│                                                             │
+│  ✅ ACTIVATION                                               │
+│  ─────────────────────────────────────────                  │
+│  • Transaction unique pour activer                         │
+│  • Coût : frais de gas uniquement                          │
+│  • Effet : immédiat et permanent                           │
+│                                                             │
+│  ❌ DÉSACTIVATION                                            │
+│  ─────────────────────────────────────────                  │
+│  • Transaction pour désactiver                             │
+│  • L'utilisateur doit ensuite signer manuellement          │
+│  • Attention : risque de ban si oubli de signature !       │
+│                                                             │
+│  📌 RECOMMANDATION                                          │
+│  ─────────────────────────────────────────                  │
+│  Activez l'auto-signature pour éviter les oublis et        │
+│  garantir votre participation à chaque cycle.              │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Avantages de l'auto-signature :**
+- ✅ Pas besoin de se connecter chaque jour
+- ✅ Aucun risque d'oubli = aucun risque de ban
+- ✅ Récompenses garanties à chaque cycle réussi
+- ✅ Participation passive au Cercle de Vie
 
 ---
 
@@ -650,7 +701,7 @@ Le token $XCIRCLEXX est basé sur le nombre **π (Pi)**, symbole mathématique u
 | **Staking Rewards (360°)**         | 15%         | ~47M   | Décroissant sur 30 mois    | Rendement staking                         |
 | **Équipe fondatrice**              | 10%         | ~31M   | 24 mois (cliff 6 mois)      | Motivation long-terme                     |
 | **Trésorerie DAO**                 | 10%         | ~31M   | Contrôlé par gouvernance  | Développement, partenariats              |
-| **IDO (Initial DEX Offering)**     | 5%          | ~16M   | Immédiat                   | Vente publique - Objectif 360 EGLD       |
+| **IDO (Initial DEX Offering)**      | 5%          | ~16M   | Immédiat                   | Vente publique - Objectif 360 EGLD        |
 | **Marketing & Growth**              | 5%          | ~16M   | 12 mois                     | Acquisition utilisateurs                  |
 | **Conseillers**                     | 3%          | ~9M    | 12 mois (cliff 3 mois)      | Expertise stratégique                    |
 | **Airdrop initial**                 | 2%          | ~6M    | Immédiat                   | Early adopters                            |
@@ -665,7 +716,8 @@ Le burn est au cœur de la philosophie X-CIRCLE-X : seul l'engagement collectif 
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │  ✅ CYCLE RÉUSSI (100% signatures)                          │
-│     └── BURN de X tokens $XCIRCLEX                           │
+│     └── BURN de 1 XCIRCLEX par SC actif                    │
+│         → Total burn = nombre de SC actifs × 1 XCX         │
 │         → Supply diminue                                    │
 │         → Valeur augmente pour tous                         │
 │                                                             │
@@ -683,12 +735,14 @@ Le burn est au cœur de la philosophie X-CIRCLE-X : seul l'engagement collectif 
 
 #### Calcul du Burn par Cycle
 
-| Nombre de SC actifs | Burn par cycle réussi | Burn mensuel (30 cycles) |
-| ------------------- | ---------------------- | ------------------------ |
-| 10 SC               | 10 XCIRCLE             | 300 XCIRCLE              |
-| 50 SC               | 50 XCIRCLE             | 1,500 XCIRCLE            |
-| 100 SC              | 100 XCIRCLE            | 3,000 XCIRCLE            |
-| 1,000 SC            | 1,000 XCIRCLE          | 30,000 XCIRCLE           |
+**Formule : 1 XCIRCLEX brûlé par SC actif participant au cycle réussi**
+
+| Nombre de SC actifs | Burn par cycle réussi | Burn mensuel (30 cycles) | Burn annuel (365 cycles) |
+| ------------------- | ---------------------- | ------------------------ | ------------------------ |
+| 10 SC               | 10 XCX                 | 300 XCX                  | 3,650 XCX                |
+| 50 SC               | 50 XCX                 | 1,500 XCX                | 18,250 XCX               |
+| 100 SC              | 100 XCX                | 3,000 XCX                | 36,500 XCX               |
+| 1,000 SC            | 1,000 XCX              | 30,000 XCX               | 365,000 XCX              |
 
 ### 7.4 Récompenses du Cercle de Vie - Système π × 360
 
@@ -719,17 +773,17 @@ Le système de récompenses du Cercle de Vie est basé sur une formule unique qu
 
 #### Table des Récompenses par Ère
 
-| Ère | Cycles | Récompense/Cycle | Total sur l'Ère | Durée (~1 cycle/jour) |
-| --- | ------ | ---------------- | --------------- | --------------------- |
-| 0   | 1-360  | 36,000 XCX       | 12,960,000 XCX  | ~1 an                 |
-| 1   | 361-720 | 18,000 XCX      | 6,480,000 XCX   | ~1 an                 |
-| 2   | 721-1080 | 9,000 XCX      | 3,240,000 XCX   | ~1 an                 |
-| 3   | 1081-1440 | 4,500 XCX     | 1,620,000 XCX   | ~1 an                 |
-| 4   | 1441-1800 | 2,250 XCX     | 810,000 XCX     | ~1 an                 |
-| 5   | 1801-2160 | 1,125 XCX     | 405,000 XCX     | ~1 an                 |
-| 6   | 2161-2520 | 562.5 XCX     | 202,500 XCX     | ~1 an                 |
-| 7   | 2521-2880 | 281.25 XCX    | 101,250 XCX     | ~1 an                 |
-| 8+ | 2881+ | ~140 XCX et -    | Décroissant     | Continu               |
+| Ère | Cycles    | Récompense/Cycle | Total sur l'Ère | Durée (~1 cycle/jour) |
+| ---- | --------- | ----------------- | ---------------- | ---------------------- |
+| 0    | 1-360     | 36,000 XCX        | 12,960,000 XCX   | ~1 an                  |
+| 1    | 361-720   | 18,000 XCX        | 6,480,000 XCX    | ~1 an                  |
+| 2    | 721-1080  | 9,000 XCX         | 3,240,000 XCX    | ~1 an                  |
+| 3    | 1081-1440 | 4,500 XCX         | 1,620,000 XCX    | ~1 an                  |
+| 4    | 1441-1800 | 2,250 XCX         | 810,000 XCX      | ~1 an                  |
+| 5    | 1801-2160 | 1,125 XCX         | 405,000 XCX      | ~1 an                  |
+| 6    | 2161-2520 | 562.5 XCX         | 202,500 XCX      | ~1 an                  |
+| 7    | 2521-2880 | 281.25 XCX        | 101,250 XCX      | ~1 an                  |
+| 8+   | 2881+     | ~140 XCX et -     | Décroissant     | Continu                |
 
 **Total distribué sur 8 ères (~8 ans)** : ~25,919,250 XCX
 
@@ -782,14 +836,14 @@ DIMANCHE  → CLAIM DAY ! → Récupération des tokens vers wallet
 
 #### Résumé des Récompenses
 
-| Type de Récompense | Formule | Bénéficiaire |
-| ------------------ | ------- | ------------ |
-| Récompense cycle | 36,000 / 2^era / nb_SC | Chaque SC actif |
-| Bonus Pioneer (3.14%) | (Récompense/nb_SC) × 3.14% | Premiers SC créés |
-| Bonus Dépôt (1%/EGLD) | (Récompense/nb_SC) × bonus% | SC avec dépôt EGLD |
-| Bonus Starter (10%) | (Récompense/nb_SC) × 10% | Celui qui démarre le cycle |
-| Bonus π% (cycle 360) | Récompense × 3.14% | Celui qui complète cycle #360, #720... |
-| Redistribution échec | 100% aux signataires | SC qui ont signé (en cas d'échec) |
+| Type de Récompense     | Formule                       | Bénéficiaire                          |
+| ----------------------- | ----------------------------- | --------------------------------------- |
+| Récompense cycle       | 36,000 / 2^era / nb_SC        | Chaque SC actif                         |
+| Bonus Pioneer (3.14%)   | (Récompense/nb_SC) × 3.14%  | Premiers SC créés                     |
+| Bonus Dépôt (1%/EGLD) | (Récompense/nb_SC) × bonus% | SC avec dépôt EGLD                    |
+| Bonus Starter (10%)     | (Récompense/nb_SC) × 10%    | Celui qui démarre le cycle             |
+| Bonus π% (cycle 360)   | Récompense × 3.14%          | Celui qui complète cycle #360, #720... |
+| Redistribution échec   | 100% aux signataires          | SC qui ont signé (en cas d'échec)     |
 
 ### 7.5 Utilité du Token
 
@@ -886,52 +940,63 @@ Pour ceux qui veulent rester flexibles :
 │              FLUX DES RÉCOMPENSES STAKING                   │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  PHASE 1 : Pool Initiale (15% supply = ~47M XCIRCLE)       │
-│  ────────────────────────────────────────────────────       │
-│  → Récompenses généreuses les premières années             │
+│  PHASE 1 : Pool Initiale (15% supply = ~47M XCIRCLEX)       │
+│  ══════════════════════════════════════════════════════     │
+│  ✅ ACTUELLEMENT IMPLÉMENTÉ                                 │
+│                                                             │
+│  → Pool pré-alimentée lors du déploiement                  │
+│  → Récompenses distribuées selon niveau de lock            │
+│  → APY de 3% (flexible) à 42% (360 jours)                  │
 │  → Durée estimée : 3-5 ans selon participation             │
 │                                                             │
-│  PHASE 2 : Pool Épuisée → Sources Alternatives             │
-│  ────────────────────────────────────────────────────       │
-│  Quand la pool initiale est vide, les récompenses          │
-│  continuent via les revenus du protocole :                 │
-│                                                             │
-│  ┌─────────────────────────────────────────────┐           │
-│  │ Source                      │ % → Stakers  │           │
-│  ├─────────────────────────────────────────────┤           │
-│  │ Frais du Cercle de Vie      │     20%      │           │
-│  │ Pénalités SC bannis         │     50%      │           │
-│  │ Frais trading xExchange     │     30%      │           │
-│  │ Frais création SC (option)  │     10%      │           │
-│  └─────────────────────────────────────────────┘           │
-│                                                             │
-│  RÉSULTAT : APY réduit mais DURABLE                        │
-│  ────────────────────────────────────────────────────       │
-│  → Pas de mint de nouveaux tokens                          │
-│  → Token reste déflationniste                              │
-│  → APY basé sur activité réelle du protocole               │
-│  → Estimation Phase 2 : 5-15% APY selon activité           │
+│  Fonctionnement :                                           │
+│  1. L'admin alimente le contrat de staking avec XCIRCLEX   │
+│  2. Les utilisateurs stake leurs tokens                    │
+│  3. Les récompenses sont calculées automatiquement         │
+│  4. Claim disponible selon les règles de lock              │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 8.5 Calcul des Récompenses en Phase 2
+### 8.5 Vision Future : Phase 2 (Non Implémenté)
 
-Quand la pool initiale est épuisée :
+⚠️ **ATTENTION : Cette section décrit une vision future qui n'est PAS encore implémentée.**
+
+Lorsque la pool initiale sera épuisée, plusieurs options sont envisageables pour maintenir les récompenses de staking :
 
 ```
-APY Phase 2 = (Revenus annuels du protocole × 20%) / Total staké
-
-Exemple avec 1000 SC actifs :
-─────────────────────────────────
-Frais création : 1000 × 1 EGLD × 10% = 100 EGLD/an (en valeur XCIRCLE)
-Frais cycles : ~365 cycles × frais = Variable
-Pénalités : ~5% échecs × redistributions = Variable
-
-Si Total staké = 10M XCIRCLE
-Si Revenus stakers = 500,000 XCIRCLE/an
-→ APY = 500,000 / 10,000,000 = 5%
+┌─────────────────────────────────────────────────────────────┐
+│              OPTIONS POUR LA PHASE 2 (FUTUR)                │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  OPTION A : Réalimentation par la DAO                       │
+│  ─────────────────────────────────────────                  │
+│  → Vote DAO pour allouer des tokens de la trésorerie       │
+│  → Tokens non distribués réinjectés dans le staking        │
+│  → APY ajusté selon allocation votée                       │
+│                                                             │
+│  OPTION B : Revenus du Protocole (à implémenter)           │
+│  ─────────────────────────────────────────                  │
+│  Nécessiterait des développements supplémentaires :        │
+│  • Contrat "Revenue Collector" pour agréger les revenus    │
+│  • Mécanisme de redistribution aux stakers                 │
+│  • Sources potentielles :                                  │
+│    - Portion des LP fees xExchange                         │
+│    - Portion des frais de création SC                      │
+│    - Pénalités des membres bannis                          │
+│                                                             │
+│  OPTION C : Réduction Progressive                           │
+│  ─────────────────────────────────────────                  │
+│  → APY réduit naturellement avec l'épuisement              │
+│  → Focus sur l'utilité du token plutôt que le rendement    │
+│  → Communauté décide via gouvernance DAO                   │
+│                                                             │
+│  📌 La décision sera prise par vote DAO avant épuisement   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+**Note importante :** Le staking Phase 1 est pleinement fonctionnel. La Phase 2 sera définie par la communauté via gouvernance DAO lorsque nécessaire.
 
 ### 8.6 Avantages des Niveaux Élevés
 
@@ -1042,68 +1107,103 @@ Les NFT peuvent être échangés sur le marketplace avec :
 
 ## 10. Pool de Liquidité EGLD/XCIRCLEX
 
-### 10.1 Alimentation de la Pool
+### 10.1 Circulation Quotidienne
 
-La pool de liquidité est alimentée automatiquement par les **frais de création des SC périphériques** :
+Chaque jour, **1 EGLD circule** du SC0 (smart contract central) vers les SC périphériques actifs. Ce mécanisme assure une activité constante dans l'écosystème et récompense les participants actifs.
+
+### 10.2 Alimentation de la Pool - Distribution des EGLD
+
+Lorsqu'un utilisateur crée un SC périphérique en déposant **1 EGLD**, la distribution suivante s'applique :
 
 ```
-X┌─────────────────────────────────────────────────────────────┐
-│           FLUX VERS LA POOL DE LIQUIDITÉ                    │
+┌─────────────────────────────────────────────────────────────┐
+│        DISTRIBUTION DES EGLD (Création SC Périphérique)     │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │  Utilisateur                                                │
 │       │                                                     │
-│       │ Paie 1 EGLD pour créer un SC                       │
+│       │ Dépose 1 EGLD pour créer un SC périphérique        │
 │       ▼                                                     │
 │  ┌─────────┐                                               │
 │  │   SC0   │                                               │
 │  └────┬────┘                                               │
 │       │                                                     │
-│       │ Répartition automatique:                           │
+│       │ ÉTAPE 1 : Prélèvement Trésorerie SC0               │
 │       │                                                     │
-│       ├──────────► 70% → Pool EGLD/XCIRCLEX                 │
-│       │                 (0.7 EGLD)                         │
+│       ├──────────► 3.14% (π%) → Trésorerie SC0             │
+│       │                 (0.0314 EGLD)                       │
 │       │                                                     │
-│       ├──────────► 20% → Trésorerie DAO                    │
-│       │                 (0.2 EGLD)                         │
+│       │ ÉTAPE 2 : Répartition des 96.86% restants          │
+│       │           (0.9686 EGLD)                             │
 │       │                                                     │
-│       └──────────► 10% → Réserve d'urgence                 │
-│                         (0.1 EGLD)                         │
+│       ├──────────► 70% des 96.86% → Liquidité xExchange    │
+│       │                 (≈0.678 EGLD)                       │
+│       │                 ┌─────────────────────────────┐     │
+│       │                 │ 50% → Achat de XCIRCLEX     │     │
+│       │                 │ 50% → Gardé en WEGLD        │     │
+│       │                 │ → Création paire LP         │     │
+│       │                 │   (Manuel par Admin)        │     │
+│       │                 └─────────────────────────────┘     │
+│       │                                                     │
+│       └──────────► 30% des 96.86% → Trésorerie DAO         │
+│                         (≈0.291 EGLD)                       │
+│                         Envoyé directement au SC DAO        │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 10.2 Croissance de la Pool
+### 10.3 Processus de Création de Liquidité
 
-| Nombre de SC créés | EGLD dans la pool | Équivalent USD (si EGLD=$50) |
-| -------------------- | ----------------- | ----------------------------- |
-| 100 SC               | 70 EGLD           | $3,500                        |
-| 500 SC               | 350 EGLD          | $17,500                       |
-| 1,000 SC             | 700 EGLD          | $35,000                       |
-| 5,000 SC             | 3,500 EGLD        | $175,000                      |
-| 10,000 SC            | 7,000 EGLD        | $350,000                      |
+La création de liquidité sur xExchange est effectuée **manuellement par l'admin propriétaire** du contrat SC0 :
 
-### 10.3 Listing xExchange
+```
+┌─────────────────────────────────────────────────────────────┐
+│           PROCESSUS DE CRÉATION DE LIQUIDITÉ                │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1. ACCUMULATION                                            │
+│     └── Les 70% des EGLD s'accumulent dans SC0             │
+│         (pending_liquidity_egld)                            │
+│                                                             │
+│  2. TRAITEMENT (Manuel par Admin)                           │
+│     ├── 50% des EGLD → Wrap en WEGLD → Swap pour XCIRCLEX  │
+│     └── 50% des EGLD → Wrap en WEGLD (conservé)            │
+│                                                             │
+│  3. CRÉATION LP                                             │
+│     └── XCIRCLEX + WEGLD → addLiquidity sur xExchange      │
+│                                                             │
+│  4. LOCK LP TOKENS                                          │
+│     └── LP tokens lockés 365 jours minimum                 │
+│         (LP Locker Contract)                                │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
 
-La pool sera déployée sur **xExchange** (DEX officiel MultiversX) avec :
+**Note importante :** La création de la paire de liquidité et l'ajout aux pools xExchange sont effectués manuellement par l'administrateur du protocole. Cela permet un contrôle sur le timing et les conditions de marché optimales.
 
-- **Paire** : EGLD/XCIRCLE
-- **Frais LP** : 0.3%
-- **Distribution frais** :
-  - 70% → Liquidity Providers
-  - 20% → Stakers $XCIRCLEX
-  - 10% → Trésorerie DAO
+### 10.4 Croissance de la Pool
 
-### 10.4 Incitations LP
+Avec la distribution actuelle (70% de 96.86% ≈ 67.8% par EGLD déposé) :
 
-| Durée LP | APY Bonus | NFT LP        |
-| --------- | --------- | ------------- |
-| 30 jours  | +5%       | Badge Bronze  |
-| 90 jours  | +15%      | Badge Argent  |
-| 180 jours | +30%      | Badge Or      |
-| 365 jours | +50%      | Badge Diamant |
+| Nombre de SC créés | EGLD vers Liquidité | EGLD vers DAO | EGLD vers Treasury SC0 |
+| -------------------- | -------------------- | ------------- | ---------------------- |
+| 100 SC               | ~67.8 EGLD           | ~29.1 EGLD    | ~3.14 EGLD             |
+| 500 SC               | ~339 EGLD            | ~145.5 EGLD   | ~15.7 EGLD             |
+| 1,000 SC             | ~678 EGLD            | ~291 EGLD     | ~31.4 EGLD             |
+| 5,000 SC             | ~3,390 EGLD          | ~1,455 EGLD   | ~157 EGLD              |
+| 10,000 SC            | ~6,780 EGLD          | ~2,910 EGLD   | ~314 EGLD              |
 
-### 10.5 Stratégie IDO et Lancement
+### 10.5 Listing xExchange
+
+La paire de liquidité est déployée sur **xExchange** (DEX officiel MultiversX) :
+
+- **Paire** : XCIRCLEX / WEGLD
+- **Type** : Pool standard xExchange
+- **Frais de swap** : 0.3% (standard xExchange, redistribués aux LP providers)
+
+**Note :** Les frais de swap sont gérés par xExchange selon leurs règles standard. Le protocole X-CIRCLE-X ne prélève pas de frais additionnels sur les trades.
+
+### 10.6 Stratégie IDO et Lancement
 
 #### Phase 1 : Seed Liquidity (Avant IDO)
 
@@ -1169,12 +1269,12 @@ La pool sera déployée sur **xExchange** (DEX officiel MultiversX) avec :
 
 #### Ratio EGLD/XCIRCLEX Recommandé
 
-| Phase        | Ratio                  | Prix XCIRCLEX (si EGLD=$50) | Justification                   |
-| ------------ | ---------------------- | ----------------------------- | -------------------------------- |
-| **Seed**     | 1 EGLD = 50,000 XCX    | $0.001                        | Prix attractif early adopters    |
-| **IDO**      | 1 EGLD = 43,633 XCX    | $0.00115                      | Prix IDO pour lever 360 EGLD     |
-| **Listing**  | 1 EGLD = 40,000 XCX    | $0.00125                      | +8% vs IDO, lancement réel      |
-| **Cible M6** | 1 EGLD = 20,000 XCX    | $0.0025                       | 2x depuis IDO si adoption OK     |
+| Phase              | Ratio               | Prix XCIRCLEX (si EGLD=$50) | Justification                 |
+| ------------------ | ------------------- | --------------------------- | ----------------------------- |
+| **Seed**     | 1 EGLD = 50,000 XCX | $0.001                      | Prix attractif early adopters |
+| **IDO**      | 1 EGLD = 43,633 XCX | $0.00115                    | Prix IDO pour lever 360 EGLD  |
+| **Listing**  | 1 EGLD = 40,000 XCX | $0.00125                    | +8% vs IDO, lancement réel   |
+| **Cible M6** | 1 EGLD = 20,000 XCX | $0.0025                     | 2x depuis IDO si adoption OK  |
 
 #### Calcul de Liquidité Nécessaire
 
@@ -1199,13 +1299,13 @@ OBJECTIF PHASE 2 (6 mois) :
 
 #### Sources de Liquidité
 
-| Source                           | Contribution | Timeline          |
-| -------------------------------- | ------------ | ------------------ |
-| Équipe fondatrice (seed)        | 10-20 EGLD   | Jour 1             |
-| IDO (fonds levés)               | 50-100 EGLD  | Semaine 1          |
-| Frais création SC (70%)         | Progressive  | Continu            |
+| Source                          | Contribution | Timeline           |
+| ------------------------------- | ------------ | ------------------ |
+| Équipe fondatrice (seed)       | 10-20 EGLD   | Jour 1             |
+| IDO (fonds levés)              | 50-360 EGLD  | Semaine 1          |
+| Frais création SC (70%)        | Progressive  | Continu            |
 | Treasury DAO (gouvernance vote) | Variable     | Selon propositions |
-| LP Farming rewards               | Incentive    | Mois 2+            |
+| LP Farming rewards              | Incentive    | Mois 2+            |
 
 #### Règles Anti-Dump
 
@@ -1289,15 +1389,15 @@ PROTECTION CONTRE LA MANIPULATION :
 
 #### Smart Contracts Déployés
 
-| Contrat | Adresse Devnet | Statut |
-|---------|----------------|--------|
-| **Token XCIRCLEX** | `XCIRCLEX-3b9d57` | ✅ Actif |
+| Contrat                        | Adresse Devnet                                                     | Statut   |
+| ------------------------------ | ------------------------------------------------------------------ | -------- |
+| **Token XCIRCLEX**       | `XCIRCLEX-3b9d57`                                                | ✅ Actif |
 | **Circle of Life (SC0)** | `erd1qqqqqqqqqqqqqpgqa6yjeghz6c38cdmk4z0xhsd2jdus0m74flfq0df5xn` | ✅ Actif |
-| **NFT Contract** | `erd1qqqqqqqqqqqqqpgqjwd6xwycht2hmm5h76qcgzdqdxnz8g9wflfqt5v6zc` | ✅ Actif |
-| **Staking 360°** | `erd1qqqqqqqqqqqqqpgqd5r76rsws9kvzcdsxqqgjlrjlw90x44uflfq386xhw` | ✅ Actif |
-| **DAO Governance** | `erd1qqqqqqqqqqqqqpgq35zrtzej655v2czk5plzaa6hp4wluun7flfql80l9d` | ✅ Actif |
-| **Vesting** | `erd1qqqqqqqqqqqqqpgqc00rmsjfsk6prqwpcjggxzmdeus0vwa0flfqhxgel0` | ✅ Actif |
-| **Token Protection** | `erd1qqqqqqqqqqqqqpgqescv0dcpdgu62sa7a89s3w2qdc9njsydflfqwfxdvx` | ✅ Actif |
+| **NFT Contract**         | `erd1qqqqqqqqqqqqqpgqjwd6xwycht2hmm5h76qcgzdqdxnz8g9wflfqt5v6zc` | ✅ Actif |
+| **Staking 360°**        | `erd1qqqqqqqqqqqqqpgqd5r76rsws9kvzcdsxqqgjlrjlw90x44uflfq386xhw` | ✅ Actif |
+| **DAO Governance**       | `erd1qqqqqqqqqqqqqpgq35zrtzej655v2czk5plzaa6hp4wluun7flfql80l9d` | ✅ Actif |
+| **Vesting**              | `erd1qqqqqqqqqqqqqpgqc00rmsjfsk6prqwpcjggxzmdeus0vwa0flfqhxgel0` | ✅ Actif |
+| **Token Protection**     | `erd1qqqqqqqqqqqqqpgqescv0dcpdgu62sa7a89s3w2qdc9njsydflfqwfxdvx` | ✅ Actif |
 
 #### Fonctionnalités Opérationnelles
 
@@ -1312,6 +1412,36 @@ PROTECTION CONTRE LA MANIPULATION :
 #### Explorer Devnet
 
 🔗 **Voir en live** : https://devnet-explorer.multiversx.com/tokens/XCIRCLEX-3b9d57
+
+---
+
+### ✅ Phase 0.5 : Déploiement Testnet (Janvier 2026) - EN COURS
+
+**Statut : Smart contracts déployés et fonctionnels sur Testnet MultiversX**
+
+#### Smart Contracts Déployés (Testnet)
+
+| Contrat                        | Adresse Testnet                                                    | Statut   |
+| ------------------------------ | ------------------------------------------------------------------ | -------- |
+| **Token XCIRCLEX**       | `XCX-fa8353`                                                       | ✅ Actif |
+| **Circle of Life (SC0)** | `erd1qqqqqqqqqqqqqpgqvddnk9lv2x6xvq7dsjkfdsr0f79za3k0flfqp0yey5` | ✅ Actif |
+| **NFT Contract**         | `erd1qqqqqqqqqqqqqpgqavw52x72xm33x7cszrz9uankyr9hkmsjflfq7qjnph` | ✅ Actif |
+| **Staking 360°**        | `erd1qqqqqqqqqqqqqpgqc7al0e4sr8tf4v4lzp3d78waxkgmyyayflfqm9c6ue` | ✅ Actif |
+| **DAO Governance**       | `erd1qqqqqqqqqqqqqpgq58jy4tx3k6xerrjn8jxjd6sy6etz9kycflfqyf3rvj` | ✅ Actif |
+| **Vesting**              | `erd1qqqqqqqqqqqqqpgqdvaqnmk8e6s4xc6a62e87t5s6v9fk8a7flfqcg3g5x` | ✅ Actif |
+
+#### Fonctionnalités Testnet
+
+- ✅ Distribution EGLD activée (3.14% Treasury, 30% DAO, 70% Liquidité)
+- ✅ Burn XCX activé (1 XCX par SC actif par cycle réussi)
+- ✅ Auto-signature permanente
+- ✅ NFT évolutif avec URIs IPFS configurées
+- ✅ Staking multi-niveaux fonctionnel
+- ✅ DAO avec trésorerie EGLD
+
+#### Explorer Testnet
+
+🔗 **Voir en live** : https://testnet-explorer.multiversx.com/tokens/XCX-fa8353
 
 ---
 
@@ -1335,14 +1465,15 @@ PROTECTION CONTRE LA MANIPULATION :
 
 ### 🟢 Phase 2 : Beta (Q2 2026)
 
-**Objectif : Tests utilisateurs sur Testnet**
+**Objectif : Tests utilisateurs et finalisation**
 
-- [ ] NFT de réputation
-- [ ] Système de gouvernance V1
-- [ ] Staking $XCIRCLEX
+- [X] NFT de réputation évolutif
+- [X] Système de gouvernance DAO V1
+- [X] Staking $XCIRCLEX (12 niveaux)
+- [X] Déploiement Testnet complet
 - [ ] Programme ambassadeurs (50 early adopters)
 - [ ] Audit de sécurité interne
-- [ ] Déploiement Testnet
+- [ ] Tests de charge et optimisations
 
 **Deliverables** :
 
@@ -1432,26 +1563,29 @@ X-CIRCLE-X est développé selon le modèle **"Solo Founder + MVP First"**, une 
 
 ### 13.2 Plan de Recrutement Progressif
 
-| Phase | Timing | Recrutement | Financement |
-|-------|--------|-------------|-------------|
-| **MVP** | Q4 2025 ✅ | Solo | Bootstrap |
-| **Communauté** | Q1-Q2 2026 | 2-3 contributeurs bénévoles | Token allocation |
-| **Beta** | Q3 2026 | +1-2 développeurs | IDO / Grants |
-| **Mainnet** | Q4 2026 | Équipe complète (5-8) | Revenus protocole |
+| Phase                 | Timing     | Recrutement                   | Financement       |
+| --------------------- | ---------- | ----------------------------- | ----------------- |
+| **MVP**         | Q4 2025 ✅ | Solo                          | Bootstrap         |
+| **Communauté** | Q1-Q2 2026 | 2-3 contributeurs bénévoles | Token allocation  |
+| **Beta**        | Q3 2026    | +1-2 développeurs            | IDO / Grants      |
+| **Mainnet**     | Q4 2026    | Équipe complète (5-8)       | Revenus protocole |
 
 ### 13.3 Rôles Prioritaires à Recruter
 
 **Court terme (bénévoles/contributeurs)** :
+
 - 📢 **Community Manager** : Discord, Twitter, Telegram
 - 🧪 **Beta Testers** : Early adopters motivés
 - 🌍 **Traducteurs** : Internationalisation
 
 **Moyen terme (rémunérés)** :
+
 - 👨‍💻 **Smart Contract Auditor** : Revue de sécurité
 - 🎨 **UI/UX Designer** : Amélioration interface
 - 📊 **Growth Hacker** : Acquisition utilisateurs
 
 **Long terme (équipe core)** :
+
 - 👩‍💻 **Backend Developer** : Indexation, API
 - 📱 **Mobile Developer** : App iOS/Android
 - 🏛️ **Legal Advisor** : Compliance
@@ -1700,7 +1834,7 @@ Le cercle est la forme parfaite. π en est l'âme mathématique. **X-CIRCLE-X** 
 
 ---
 
-**Document vivant - Dernière mise à jour : Janvier 2026**
+**Document vivant - Dernière mise à jour : 19 Janvier 2026**
 
 *Ce whitepaper est un document évolutif qui sera mis à jour régulièrement par la communauté.*
 

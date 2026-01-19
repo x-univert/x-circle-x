@@ -109,6 +109,29 @@ pub trait XCirclexDaoV2 {
     fn upgrade(&self) {}
 
     // =========================================================================
+    // DEFAULT PAYABLE - Receive EGLD directly
+    // =========================================================================
+
+    /// Default endpoint to receive EGLD (makes contract payable)
+    /// This allows receiving EGLD via direct_egld without calling a specific endpoint
+    #[payable("EGLD")]
+    #[endpoint(receive)]
+    fn receive(&self) {
+        let payment = self.call_value().egld_value().clone_value();
+
+        if payment > 0 {
+            // Update EGLD treasury tracking
+            let current = self.egld_treasury().get();
+            self.egld_treasury().set(&(&current + &payment));
+
+            let total = self.total_egld_received().get();
+            self.total_egld_received().set(&(&total + &payment));
+
+            self.egld_deposited_event(&self.blockchain().get_caller(), &payment);
+        }
+    }
+
+    // =========================================================================
     // TREASURY MANAGEMENT - XCIRCLEX
     // =========================================================================
 
@@ -187,10 +210,12 @@ pub trait XCirclexDaoV2 {
         self.egld_received_from_sc0_event(&payment);
     }
 
-    /// Get EGLD treasury balance
+    /// Get EGLD treasury balance (returns actual SC balance)
     #[view(getEgldTreasuryBalance)]
     fn get_egld_treasury_balance(&self) -> BigUint {
-        self.egld_treasury().get()
+        // Return actual SC EGLD balance instead of tracked storage
+        // This ensures correct display even when EGLD is received via direct_egld
+        self.blockchain().get_sc_balance(&EgldOrEsdtTokenIdentifier::egld(), 0)
     }
 
     // =========================================================================

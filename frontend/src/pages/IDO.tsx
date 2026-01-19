@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { IDO_CONFIG, XCIRCLEX_TOKEN_ID, IDO_CONTRACT_ADDRESS } from '../config/contracts'
+import { explorerUrl } from '../config'
 import * as idoService from '../services/idoService'
 import { Contribution, IdoStatus, IdoInfo } from '../services/idoService'
 
@@ -549,12 +550,16 @@ function IDO() {
                     </div>
 
                     {/* Quick Amount Buttons */}
-                    <div className="flex gap-2 mb-6">
-                      {[0.5, 1, 2, 5, 10].map((amount) => (
+                    <div className="flex flex-wrap gap-2 mb-6">
+                      {[0.5, 1, 2, 5, 10, 20].map((amount) => (
                         <button
                           key={amount}
                           onClick={() => setContributionAmount(amount.toString())}
-                          className="flex-1 bg-white/10 hover:bg-white/20 text-white py-2 rounded-lg transition text-sm"
+                          className={`flex-1 min-w-[60px] py-2 rounded-lg transition text-sm ${
+                            amount === 20
+                              ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold'
+                              : 'bg-white/10 hover:bg-white/20 text-white'
+                          }`}
                         >
                           {amount} EGLD
                         </button>
@@ -698,7 +703,7 @@ function IDO() {
                 </div>
                 <div className="flex gap-4">
                   <a
-                    href={`https://devnet-explorer.multiversx.com/accounts/${IDO_CONTRACT_ADDRESS}`}
+                    href={`${explorerUrl}/accounts/${IDO_CONTRACT_ADDRESS}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 transition"
@@ -706,7 +711,7 @@ function IDO() {
                     {t('ido.contract.contractExplorer')} &#8599;
                   </a>
                   <a
-                    href={`https://devnet-explorer.multiversx.com/tokens/${XCIRCLEX_TOKEN_ID}`}
+                    href={`${explorerUrl}/tokens/${XCIRCLEX_TOKEN_ID}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-green-400 hover:text-green-300 text-sm flex items-center gap-1 transition"

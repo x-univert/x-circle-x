@@ -408,7 +408,8 @@
     "autoSignActiveFor": "Auto-sign active for",
     "cycle": "cycle",
     "cyclesSignedAuto": "Your cycles will be signed automatically",
-    "enableAutoSign": "Enable auto-sign so you don't have to sign manually every day",
+    "enableAutoSign": "Enable Auto-Sign",
+    "enableAutoSignDesc": "Enable auto-sign so you don't have to sign manually every day",
     "disable": "Disable",
     "cycleNotStarted": "The daily cycle has not started yet",
     "waitForStart": "Wait for a member to start the cycle to pre-sign or sign",
@@ -520,7 +521,145 @@
     "preSignaturesDesc": "These members have pre-signed. Their transfer will execute automatically.",
     "others": "others",
     "executeTransfers": "Execute {{count}} transfer(s) in 1 click",
-    "myDashboard": "My Dashboard"
+    "myDashboard": "My Dashboard",
+    "modal": {
+      "common": {
+        "action": "Action",
+        "yourContract": "Your contract"
+      },
+      "join": {
+        "title": "Join the Circle of Life",
+        "confirmTitle": "Create your Smart Contract",
+        "confirmDesc": "You will create a peripheral smart contract and join the Circle of Life.",
+        "successTitle": "Welcome to the Circle!",
+        "successMsg": "Your smart contract has been created. You are now part of the Circle of Life.",
+        "errorMsg": "Error creating the smart contract."
+      },
+      "sign": {
+        "title": "Sign the Transfer",
+        "confirmTitle": "Confirm Signature",
+        "confirmDesc": "You will sign the circular transfer. Funds will be sent to the next SC.",
+        "successTitle": "Transfer signed!",
+        "successMsg": "The transfer has been signed successfully. Funds have been sent to the next SC.",
+        "errorMsg": "Error signing the transfer."
+      },
+      "startCycle": {
+        "title": "Start Daily Cycle",
+        "confirmTitle": "Confirm Cycle Start",
+        "confirmDesc": "You will start the daily cycle. You will receive a bonus for initiating the cycle.",
+        "starterBonus": "Starter bonus",
+        "firstSc": "First SC",
+        "cycleAmount": "Cycle amount",
+        "successTitle": "Cycle started!",
+        "successMsg": "The daily cycle has been started successfully. The first SC can now sign.",
+        "errorMsg": "Error starting the cycle."
+      },
+      "preSign": {
+        "title": "Pre-sign the Transfer",
+        "confirmTitle": "Confirm Pre-signature",
+        "confirmDesc": "You will pre-sign your transfer. It will execute automatically when it's your turn.",
+        "preSignLabel": "Pre-signature",
+        "benefitsTitle": "Benefits of pre-signing:",
+        "benefit1": "No need to be present at your turn",
+        "benefit2": "Transfer executes automatically",
+        "benefit3": "Avoids timeout penalties",
+        "successTitle": "Pre-signature registered!",
+        "successMsg": "Your pre-signature has been registered. The transfer will execute automatically.",
+        "errorMsg": "Error during pre-signature."
+      },
+      "processAll": {
+        "title": "Execute Transfers",
+        "confirmTitle": "Execute all pre-signed transfers",
+        "confirmDesc": "You will execute all pre-signed transfers in a single transaction.",
+        "transfersToProcess": "Transfers to process",
+        "gasCostLabel": "Estimated gas cost",
+        "successTitle": "Transfers executed!",
+        "successMsg": "All pre-signed transfers have been executed successfully.",
+        "errorMsg": "Error executing transfers."
+      },
+      "activate": {
+        "title": "Reactivate my Point",
+        "confirmTitle": "Confirm Reactivation",
+        "confirmDesc": "You will reactivate your point in the circle. You will participate again in daily cycles.",
+        "action": "Reactivation",
+        "benefits": "Benefits of activation:",
+        "benefit1": "Participates in daily cycles",
+        "benefit2": "Receives circular transfers",
+        "benefit3": "Is part of the active circle",
+        "successTitle": "Point reactivated!",
+        "successMsg": "Your point is now active. You participate again in cycles.",
+        "errorMsg": "Error during reactivation."
+      },
+      "deactivate": {
+        "title": "Deactivate my Point",
+        "confirmTitle": "Confirm Deactivation",
+        "confirmDesc": "You will deactivate your point in the circle. You will no longer participate in daily cycles.",
+        "action": "Deactivation",
+        "consequences": "Consequences of deactivation:",
+        "consequence1": "No longer participates in cycles",
+        "consequence2": "No longer receives transfers",
+        "consequence3": "Can be reactivated at any time",
+        "consequence4": "You remain a member of the circle",
+        "successTitle": "Point deactivated!",
+        "successMsg": "Your point is now inactive. You can reactivate it at any time.",
+        "errorMsg": "Error during deactivation."
+      },
+      "failCycle": {
+        "title": "Declare Cycle Failed",
+        "confirmTitle": "Confirm Cycle Failure",
+        "confirmDesc": "You will declare this cycle as failed. The blocking SC will be automatically banned for 7 days.",
+        "action": "Declare Failure",
+        "cycle": "Cycle",
+        "responsibleSc": "Responsible SC",
+        "consequences": "Consequences:",
+        "consequence1": "The responsible SC will be banned for 7 days",
+        "consequence2": "Its failure counter will be incremented",
+        "consequence3": "Funds will be recovered to SC0",
+        "consequence4": "A new cycle can start",
+        "successTitle": "Cycle declared failed!",
+        "successMsg": "The responsible SC has been banned for 7 days. Funds have been recovered to SC0.",
+        "errorMsg": "Error declaring failure. The cycle may not be in timeout yet."
+      },
+      "claimRewards": {
+        "title": "Claim Rewards",
+        "confirmTitle": "Confirm Claim",
+        "confirmDesc": "You will claim your XCIRCLEX rewards accumulated through your participation in cycles.",
+        "amountToClaim": "Amount to claim",
+        "token": "Token",
+        "day": "Day",
+        "claimDay": "claim day",
+        "tokensInfo": "Tokens will be sent directly to your wallet.",
+        "successTitle": "Rewards claimed!",
+        "successMsg": "You received your XCIRCLEX in your wallet.",
+        "errorMsg": "Error during claim. Check that it is Sunday and that you have rewards to claim."
+      },
+      "autoSign": {
+        "title": "Enable Auto-Sign",
+        "confirmTitle": "Enable Permanent Auto-Sign",
+        "confirmDesc": "Enable auto-sign so you no longer have to sign manually every day.",
+        "permanentLabel": "Permanent Auto-Sign",
+        "autoSignInfo": "Your cycles will be signed automatically",
+        "permanentInfo": "Permanent auto-sign will automatically sign all your future cycles indefinitely. You can disable it at any time.",
+        "successTitle": "Auto-Sign enabled!",
+        "successMsg": "Permanent auto-sign is now active. Your cycles will be signed automatically.",
+        "errorMsg": "Error enabling auto-sign. Check that you are an active member of the circle."
+      },
+      "disableAutoSign": {
+        "title": "Disable Auto-Sign",
+        "confirmTitle": "Confirm Deactivation",
+        "confirmDesc": "You will disable auto-sign. You will need to sign manually or pre-sign each cycle.",
+        "currentStatus": "Current status",
+        "permanent": "Permanent",
+        "cyclesRemaining": "cycles remaining",
+        "afterDeactivation": "After deactivation, you will need to:",
+        "option1": "Pre-sign manually each cycle",
+        "option2": "Or sign when it is your turn",
+        "option3": "Or reactivate auto-sign",
+        "successTitle": "Auto-Sign disabled",
+        "successMsg": "Auto-sign has been disabled. You will now need to sign your cycles manually.",
+        "errorMsg": "Error disabling auto-sign."
+      }
+    }
   },
   "scCentral": {
     "title": "Central Smart Contract (SC0)",

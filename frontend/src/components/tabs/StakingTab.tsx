@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useGetAccountInfo } from 'lib'
 import { useStaking } from '../../hooks/useStaking'
 import { STAKING_CONTRACT_ADDRESS, STAKING_LEVELS, NFT_CONTRACT_ADDRESS } from '../../config/contracts'
+import { multiversxApiUrl, explorerUrl } from '../../config'
 import { getPendingRewards, getTimeUntilUnlock, getEmergencyPenalty, getNftBonus, getEffectiveApy } from '../../services/stakingService'
 
 export function StakingTab() {
@@ -94,7 +95,7 @@ export function StakingTab() {
   useEffect(() => {
     const fetchEpoch = async () => {
       try {
-        const response = await fetch('https://devnet-api.multiversx.com/stats')
+        const response = await fetch('${multiversxApiUrl}/stats')
         const data = await response.json()
         if (data.epoch) {
           setCurrentEpoch(data.epoch)
@@ -551,7 +552,7 @@ export function StakingTab() {
             <p className="text-white font-mono text-xs break-all">{STAKING_CONTRACT_ADDRESS}</p>
           </div>
           <a
-            href={`https://devnet-explorer.multiversx.com/accounts/${STAKING_CONTRACT_ADDRESS}`}
+            href={`${explorerUrl}/accounts/${STAKING_CONTRACT_ADDRESS}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 transition"

@@ -28,6 +28,7 @@ import {
 } from '../../services/daoService';
 import { getTotalStakedByUser } from '../../services/stakingService';
 import { DAO_CONTRACT_ADDRESS } from '../../config/contracts';
+import { explorerUrl } from '../../config';
 import { ForumSection } from '../forum/ForumSection';
 
 interface ProposalDisplay {
@@ -901,7 +902,7 @@ export function DaoTab() {
             <p className="text-white font-mono text-xs md:text-sm break-all">{DAO_CONTRACT_ADDRESS}</p>
           </div>
           <a
-            href={`https://devnet-explorer.multiversx.com/accounts/${DAO_CONTRACT_ADDRESS}`}
+            href={`${explorerUrl}/accounts/${DAO_CONTRACT_ADDRESS}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 transition"

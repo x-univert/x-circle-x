@@ -12,9 +12,11 @@ import {
 import { signAndSendTransactions, signAndSendTransactionsWithHash } from '../helpers/signAndSendTransactions';
 import BigNumber from 'bignumber.js';
 import { CIRCLE_MANAGER_ADDRESS, GAS_LIMITS } from '../config/contracts';
+import { chainId, multiversxApiUrl } from '../config';
 
-const factoryConfig = new TransactionsFactoryConfig({ chainID: 'D' });
-const factory = new SmartContractTransactionsFactory({ config: factoryConfig });
+// Dynamic factory based on selected network
+const getFactoryConfig = () => new TransactionsFactoryConfig({ chainID: chainId });
+const getFactory = () => new SmartContractTransactionsFactory({ config: getFactoryConfig() });
 
 /**
  * Cree un nouveau cercle d'epargne
@@ -47,7 +49,7 @@ export const createCircle = async (
 
   try {
     // Utiliser les TypedValues pour les arguments
-    const transaction = await factory.createTransactionForExecute(sender, {
+    const transaction = await getFactory().createTransactionForExecute(sender, {
       contract: contractAddress,
       function: 'createCircle',
       gasLimit: BigInt(GAS_LIMITS.createCircle),
@@ -87,7 +89,7 @@ export const requestMembership = async (circleId: number, senderAddress: string)
   const contractAddress = new Address(CIRCLE_MANAGER_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'requestMembership',
     gasLimit: BigInt(GAS_LIMITS.requestMembership),
@@ -119,7 +121,7 @@ export const voteForMember = async (
   const sender = new Address(senderAddress);
   const candidate = new Address(candidateAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'voteForMember',
     gasLimit: BigInt(GAS_LIMITS.voteForMember),
@@ -153,7 +155,7 @@ export const contribute = async (circleId: number, amount: string, senderAddress
   const contractAddress = new Address(CIRCLE_MANAGER_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'contribute',
     gasLimit: BigInt(GAS_LIMITS.contribute),
@@ -182,7 +184,7 @@ export const contribute = async (circleId: number, amount: string, senderAddress
 export const getCircle = async (circleId: number) => {
   try {
     const response = await fetch(
-      `https://devnet-api.multiversx.com/vm-values/query`,
+      `${multiversxApiUrl}/vm-values/query`,
       {
         method: 'POST',
         headers: {
@@ -215,7 +217,7 @@ export const getCircle = async (circleId: number) => {
 export const getCircleCount = async (): Promise<number> => {
   try {
     const response = await fetch(
-      `https://devnet-api.multiversx.com/vm-values/query`,
+      `${multiversxApiUrl}/vm-values/query`,
       {
         method: 'POST',
         headers: {
@@ -262,7 +264,7 @@ export const getCircleMembers = async (circleId: number): Promise<string[]> => {
     const circleIdHex = circleId.toString(16).padStart(2, '0');
 
     const response = await fetch(
-      'https://devnet-api.multiversx.com/vm-values/query',
+      `${multiversxApiUrl}/vm-values/query`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -314,7 +316,7 @@ export const getPendingRequests = async (circleId: number): Promise<string[]> =>
     const circleIdHex = circleId.toString(16).padStart(2, '0');
 
     const response = await fetch(
-      'https://devnet-api.multiversx.com/vm-values/query',
+      `${multiversxApiUrl}/vm-values/query`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -368,7 +370,7 @@ export const isMember = async (circleId: number, address: string): Promise<boole
     const addressHex = bech32ToHex(address);
 
     const response = await fetch(
-      'https://devnet-api.multiversx.com/vm-values/query',
+      `${multiversxApiUrl}/vm-values/query`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -408,7 +410,7 @@ export const hasVoted = async (circleId: number, candidateAddress: string, voter
     if (!candidateHex || !voterHex) return false;
 
     const response = await fetch(
-      'https://devnet-api.multiversx.com/vm-values/query',
+      `${multiversxApiUrl}/vm-values/query`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -447,7 +449,7 @@ export const hasContributed = async (circleId: number, memberAddress: string): P
     if (!memberHex) return false;
 
     const response = await fetch(
-      'https://devnet-api.multiversx.com/vm-values/query',
+      `${multiversxApiUrl}/vm-values/query`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -483,7 +485,7 @@ export const getCycleContributors = async (circleId: number): Promise<string[]> 
     const circleIdHex = circleId.toString(16).padStart(2, '0');
 
     const response = await fetch(
-      'https://devnet-api.multiversx.com/vm-values/query',
+      `${multiversxApiUrl}/vm-values/query`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -532,7 +534,7 @@ export const getCycleContributorCount = async (circleId: number): Promise<number
     const circleIdHex = circleId.toString(16).padStart(2, '0');
 
     const response = await fetch(
-      'https://devnet-api.multiversx.com/vm-values/query',
+      `${multiversxApiUrl}/vm-values/query`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -568,7 +570,7 @@ export const distributeFunds = async (circleId: number, senderAddress: string) =
   const contractAddress = new Address(CIRCLE_MANAGER_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'distributeFunds',
     gasLimit: BigInt(GAS_LIMITS.contribute), // Meme gas limit que contribute
@@ -598,7 +600,7 @@ export const forceDistribute = async (circleId: number, senderAddress: string) =
   const contractAddress = new Address(CIRCLE_MANAGER_ADDRESS);
   const sender = new Address(senderAddress);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'forceDistribute',
     gasLimit: BigInt(GAS_LIMITS.contribute),

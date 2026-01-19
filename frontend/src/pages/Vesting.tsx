@@ -2,6 +2,7 @@ import { useGetIsLoggedIn, useGetAccountInfo } from 'lib'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { VESTING_CONTRACT_ADDRESS, XCIRCLEX_TOKEN_ID } from '../config/contracts'
+import { explorerUrl } from '../config'
 import { useVesting } from '../hooks/useVesting'
 
 function Vesting() {
@@ -303,7 +304,7 @@ function Vesting() {
               <p className="text-white font-mono text-xs md:text-sm break-all">{VESTING_CONTRACT_ADDRESS}</p>
             </div>
             <a
-              href={`https://devnet-explorer.multiversx.com/accounts/${VESTING_CONTRACT_ADDRESS}`}
+              href={`${explorerUrl}/accounts/${VESTING_CONTRACT_ADDRESS}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 transition"

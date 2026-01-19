@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCircleOfLife } from '../../hooks/useCircleOfLife'
+import { multiversxApiUrl, explorerUrl } from '../../config'
 
 interface CycleHistoryEntry {
   txHash: string
@@ -78,7 +79,7 @@ export function MyPeripheralTab({}: MyPeripheralTabProps) {
 
         // Fetch transfers for the peripheral SC (cycle transfers)
         const scTransfersResponse = await fetch(
-          `https://devnet-api.multiversx.com/accounts/${myContract}/transfers?size=100`
+          `${multiversxApiUrl}/accounts/${myContract}/transfers?size=100`
         )
         const scTransfers: any[] = await scTransfersResponse.json()
 
@@ -86,7 +87,7 @@ export function MyPeripheralTab({}: MyPeripheralTabProps) {
         let userRewardTransfers: any[] = []
         if (userAddress) {
           const userTransfersResponse = await fetch(
-            `https://devnet-api.multiversx.com/accounts/${userAddress}/transfers?size=50&token=XCIRCLEX`
+            `${multiversxApiUrl}/accounts/${userAddress}/transfers?size=50&token=XCIRCLEX`
           )
           const userTransfersData = await userTransfersResponse.json()
           if (Array.isArray(userTransfersData)) {
@@ -256,7 +257,7 @@ export function MyPeripheralTab({}: MyPeripheralTabProps) {
             <p className="text-gray-400 text-sm mb-2">{t('myPeripheral.contractAddress', 'Contract Address')}</p>
             <p className="text-white font-mono text-sm break-all">{myContract}</p>
             <a
-              href={`https://devnet-explorer.multiversx.com/accounts/${myContract}`}
+              href={`${explorerUrl}/accounts/${myContract}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-flex items-center gap-1"
@@ -424,7 +425,7 @@ export function MyPeripheralTab({}: MyPeripheralTabProps) {
                   </div>
                 </div>
                 <a
-                  href={`https://devnet-explorer.multiversx.com/transactions/${entry.txHash}`}
+                  href={`${explorerUrl}/transactions/${entry.txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-400 hover:text-blue-300 text-xs mt-3 inline-flex items-center gap-1"

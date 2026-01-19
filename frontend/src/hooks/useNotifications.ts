@@ -1,5 +1,6 @@
 // Re-export du context pour la compatibilité
 import { useNotificationsContext } from '../contexts/NotificationsContext';
+import { explorerUrl as configExplorerUrl } from '../config';
 
 export enum NotificationType {
   // Transactions
@@ -42,7 +43,7 @@ export const createTransactionNotification = (txHash: string, status: 'success' 
   title: status === 'success' ? 'Transaction reussie' : status === 'pending' ? 'Transaction en cours' : 'Transaction echouee',
   message: message,
   icon: status === 'success' ? '✅' : status === 'pending' ? '⏳' : '❌',
-  link: explorerUrl || `https://devnet-explorer.multiversx.com/transactions/${txHash}`
+  link: explorerUrl || `${configExplorerUrl}/transactions/${txHash}`
 });
 
 // ============= CIRCLES =============

@@ -6,9 +6,9 @@
 
 // Init:                                 1
 // Upgrade:                              1
-// Endpoints:                           39
+// Endpoints:                           40
 // Async Callback (empty):               1
-// Total number of exported functions:  42
+// Total number of exported functions:  43
 
 #![no_std]
 
@@ -20,6 +20,7 @@ multiversx_sc_wasm_adapter::endpoints! {
     (
         init => init
         upgrade => upgrade
+        receive => receive
         depositToTreasury => deposit_to_treasury
         getTreasuryBalance => get_treasury_balance
         depositEgldToTreasury => deposit_egld_to_treasury

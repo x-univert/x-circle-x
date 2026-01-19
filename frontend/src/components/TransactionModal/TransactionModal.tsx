@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useGetNetworkConfig, useGetAccountInfo } from 'lib';
+import { multiversxApiUrl, explorerUrl as configExplorerUrl } from '../../config';
 
 export type TransactionStep = 'confirm' | 'pending' | 'processing' | 'success' | 'error';
 
@@ -45,8 +46,8 @@ export const TransactionModal = ({
   const intervalRef = useRef<number | null>(null);
   const isPollingRef = useRef(false);
 
-  const apiUrl = network.apiAddress || 'https://devnet-api.multiversx.com';
-  const explorerUrl = network.explorerAddress || 'https://devnet-explorer.multiversx.com';
+  const apiUrl = network.apiAddress || multiversxApiUrl;
+  const explorerUrl = network.explorerAddress || configExplorerUrl;
 
   // Sync step prop
   useEffect(() => {

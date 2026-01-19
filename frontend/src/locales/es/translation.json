@@ -408,7 +408,8 @@
     "autoSignActiveFor": "Auto-firma activa para",
     "cycle": "ciclo",
     "cyclesSignedAuto": "Tus ciclos se firmaran automaticamente",
-    "enableAutoSign": "Activa la auto-firma para no tener que firmar manualmente cada dia",
+    "enableAutoSign": "Activar Auto-Sign",
+    "enableAutoSignDesc": "Activa la auto-firma para no tener que firmar manualmente cada dia",
     "disable": "Desactivar",
     "cycleNotStarted": "El ciclo diario aun no ha comenzado",
     "waitForStart": "Espera a que un miembro inicie el ciclo para pre-firmar o firmar",
@@ -520,7 +521,145 @@
     "preSignaturesDesc": "Estos miembros han pre-firmado. Su transferencia se ejecutara automaticamente.",
     "others": "otros",
     "executeTransfers": "Ejecutar {{count}} transferencia(s) en 1 clic",
-    "myDashboard": "Mi Dashboard"
+    "myDashboard": "Mi Dashboard",
+    "modal": {
+      "common": {
+        "action": "Accion",
+        "yourContract": "Tu contrato"
+      },
+      "join": {
+        "title": "Unirse al Circulo de Vida",
+        "confirmTitle": "Crear tu Smart Contract",
+        "confirmDesc": "Vas a crear un smart contract periferico y unirte al Circulo de Vida.",
+        "successTitle": "Bienvenido al Circulo!",
+        "successMsg": "Tu smart contract ha sido creado. Ahora eres parte del Circulo de Vida.",
+        "errorMsg": "Error al crear el smart contract."
+      },
+      "sign": {
+        "title": "Firmar la Transferencia",
+        "confirmTitle": "Confirmar Firma",
+        "confirmDesc": "Vas a firmar la transferencia circular. Los fondos seran enviados al siguiente SC.",
+        "successTitle": "Transferencia firmada!",
+        "successMsg": "La transferencia ha sido firmada con exito. Los fondos han sido enviados al siguiente SC.",
+        "errorMsg": "Error al firmar la transferencia."
+      },
+      "startCycle": {
+        "title": "Iniciar Ciclo Diario",
+        "confirmTitle": "Confirmar Inicio del Ciclo",
+        "confirmDesc": "Vas a iniciar el ciclo diario. Recibiras un bonus por iniciar el ciclo.",
+        "starterBonus": "Bonus de inicio",
+        "firstSc": "Primer SC",
+        "cycleAmount": "Monto del ciclo",
+        "successTitle": "Ciclo iniciado!",
+        "successMsg": "El ciclo diario ha sido iniciado con exito. El primer SC puede firmar ahora.",
+        "errorMsg": "Error al iniciar el ciclo."
+      },
+      "preSign": {
+        "title": "Pre-firmar la Transferencia",
+        "confirmTitle": "Confirmar Pre-firma",
+        "confirmDesc": "Vas a pre-firmar tu transferencia. Se ejecutara automaticamente cuando sea tu turno.",
+        "preSignLabel": "Pre-firma",
+        "benefitsTitle": "Beneficios de la pre-firma:",
+        "benefit1": "No necesitas estar presente en tu turno",
+        "benefit2": "La transferencia se ejecuta automaticamente",
+        "benefit3": "Evita penalizaciones por timeout",
+        "successTitle": "Pre-firma registrada!",
+        "successMsg": "Tu pre-firma ha sido registrada. La transferencia se ejecutara automaticamente.",
+        "errorMsg": "Error durante la pre-firma."
+      },
+      "processAll": {
+        "title": "Ejecutar Transferencias",
+        "confirmTitle": "Ejecutar todas las transferencias pre-firmadas",
+        "confirmDesc": "Vas a ejecutar todas las transferencias pre-firmadas en una sola transaccion.",
+        "transfersToProcess": "Transferencias a procesar",
+        "gasCostLabel": "Costo estimado de gas",
+        "successTitle": "Transferencias ejecutadas!",
+        "successMsg": "Todas las transferencias pre-firmadas han sido ejecutadas con exito.",
+        "errorMsg": "Error al ejecutar las transferencias."
+      },
+      "activate": {
+        "title": "Reactivar mi Punto",
+        "confirmTitle": "Confirmar Reactivacion",
+        "confirmDesc": "Vas a reactivar tu punto en el circulo. Participaras nuevamente en los ciclos diarios.",
+        "action": "Reactivacion",
+        "benefits": "Beneficios de la activacion:",
+        "benefit1": "Participa en los ciclos diarios",
+        "benefit2": "Recibe transferencias circulares",
+        "benefit3": "Es parte del circulo activo",
+        "successTitle": "Punto reactivado!",
+        "successMsg": "Tu punto esta ahora activo. Participas nuevamente en los ciclos.",
+        "errorMsg": "Error durante la reactivacion."
+      },
+      "deactivate": {
+        "title": "Desactivar mi Punto",
+        "confirmTitle": "Confirmar Desactivacion",
+        "confirmDesc": "Vas a desactivar tu punto en el circulo. Ya no participaras en los ciclos diarios.",
+        "action": "Desactivacion",
+        "consequences": "Consecuencias de la desactivacion:",
+        "consequence1": "Ya no participa en los ciclos",
+        "consequence2": "Ya no recibe transferencias",
+        "consequence3": "Puede ser reactivado en cualquier momento",
+        "consequence4": "Sigues siendo miembro del circulo",
+        "successTitle": "Punto desactivado!",
+        "successMsg": "Tu punto esta ahora inactivo. Puedes reactivarlo en cualquier momento.",
+        "errorMsg": "Error durante la desactivacion."
+      },
+      "failCycle": {
+        "title": "Declarar Ciclo Fallido",
+        "confirmTitle": "Confirmar Fallo del Ciclo",
+        "confirmDesc": "Vas a declarar este ciclo como fallido. El SC bloqueante sera automaticamente baneado por 7 dias.",
+        "action": "Declarar Fallo",
+        "cycle": "Ciclo",
+        "responsibleSc": "SC Responsable",
+        "consequences": "Consecuencias:",
+        "consequence1": "El SC responsable sera baneado por 7 dias",
+        "consequence2": "Su contador de fallos sera incrementado",
+        "consequence3": "Los fondos seran recuperados a SC0",
+        "consequence4": "Un nuevo ciclo puede comenzar",
+        "successTitle": "Ciclo declarado fallido!",
+        "successMsg": "El SC responsable ha sido baneado por 7 dias. Los fondos han sido recuperados a SC0.",
+        "errorMsg": "Error al declarar fallo. El ciclo puede no estar aun en timeout."
+      },
+      "claimRewards": {
+        "title": "Reclamar Recompensas",
+        "confirmTitle": "Confirmar Reclamacion",
+        "confirmDesc": "Vas a reclamar tus recompensas XCIRCLEX acumuladas por tu participacion en los ciclos.",
+        "amountToClaim": "Cantidad a reclamar",
+        "token": "Token",
+        "day": "Dia",
+        "claimDay": "dia de reclamacion",
+        "tokensInfo": "Los tokens seran enviados directamente a tu billetera.",
+        "successTitle": "Recompensas reclamadas!",
+        "successMsg": "Has recibido tus XCIRCLEX en tu billetera.",
+        "errorMsg": "Error durante la reclamacion. Verifica que sea domingo y que tengas recompensas para reclamar."
+      },
+      "autoSign": {
+        "title": "Activar Auto-Firma",
+        "confirmTitle": "Activar Auto-Firma Permanente",
+        "confirmDesc": "Activa la auto-firma para no tener que firmar manualmente cada dia.",
+        "permanentLabel": "Auto-Firma Permanente",
+        "autoSignInfo": "Tus ciclos seran firmados automaticamente",
+        "permanentInfo": "La auto-firma permanente firmara automaticamente todos tus ciclos futuros indefinidamente. Puedes desactivarla en cualquier momento.",
+        "successTitle": "Auto-Firma activada!",
+        "successMsg": "La auto-firma permanente esta ahora activa. Tus ciclos seran firmados automaticamente.",
+        "errorMsg": "Error al activar la auto-firma. Verifica que eres un miembro activo del circulo."
+      },
+      "disableAutoSign": {
+        "title": "Desactivar Auto-Firma",
+        "confirmTitle": "Confirmar Desactivacion",
+        "confirmDesc": "Vas a desactivar la auto-firma. Tendras que firmar manualmente o pre-firmar cada ciclo.",
+        "currentStatus": "Estado actual",
+        "permanent": "Permanente",
+        "cyclesRemaining": "ciclos restantes",
+        "afterDeactivation": "Despues de la desactivacion, tendras que:",
+        "option1": "Pre-firmar manualmente cada ciclo",
+        "option2": "O firmar cuando sea tu turno",
+        "option3": "O reactivar la auto-firma",
+        "successTitle": "Auto-Firma desactivada",
+        "successMsg": "La auto-firma ha sido desactivada. Ahora tendras que firmar tus ciclos manualmente.",
+        "errorMsg": "Error al desactivar la auto-firma."
+      }
+    }
   },
   "scCentral": {
     "title": "Smart Contract Central (SC0)",

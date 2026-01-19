@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { Address } from '@multiversx/sdk-core'
 import { CIRCLE_MANAGER_ADDRESS } from '../config/contracts'
+import { multiversxApiUrl, explorerUrl } from '../config'
 import * as circleService from '../services/circleService'
 import { TransactionModal, TransactionStep } from '../components/TransactionModal'
 
@@ -171,7 +172,7 @@ function CircleDetails() {
       const circleIdHex = parseInt(id).toString(16).padStart(2, '0')
 
       // Fetch circle data
-      const response = await fetch('https://devnet-api.multiversx.com/vm-values/query', {
+      const response = await fetch(`${multiversxApiUrl}/vm-values/query`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1145,7 +1146,7 @@ function CircleDetails() {
               <h3 className="text-lg font-bold text-white mb-3">Smart Contract</h3>
               <p className="text-white font-mono text-xs break-all mb-3">{CIRCLE_MANAGER_ADDRESS}</p>
               <a
-                href={`https://devnet-explorer.multiversx.com/accounts/${CIRCLE_MANAGER_ADDRESS}`}
+                href={`${explorerUrl}/accounts/${CIRCLE_MANAGER_ADDRESS}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:text-blue-300 text-sm transition"

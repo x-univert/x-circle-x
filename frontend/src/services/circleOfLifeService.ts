@@ -381,7 +381,7 @@ export const getPeripheralBalances = async (addresses: string[]): Promise<Map<st
       const batch = addresses.slice(i, i + batchSize);
       const promises = batch.map(async (addr) => {
         try {
-          const response = await fetch(`https://devnet-api.multiversx.com/accounts/${addr}`);
+          const response = await fetch(`${multiversxApiUrl}/accounts/${addr}`);
           if (response.ok) {
             const data = await response.json();
             const balanceWei = data.balance || '0';

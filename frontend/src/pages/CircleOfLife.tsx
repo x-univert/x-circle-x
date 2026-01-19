@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { TransactionModal, TransactionStep } from '../components/TransactionModal'
 import { useCircleOfLife } from '../hooks/useCircleOfLife'
 import { CIRCLE_OF_LIFE_ADDRESS } from '../config/contracts'
+import { multiversxApiUrl, explorerUrl } from '../config'
 import { CircleNavTabs, TabId } from '../components/CircleNavTabs'
 import { CircleSkeleton } from '../components/CircleSkeleton'
 import { AdminPanel } from '../components/AdminPanel'
@@ -124,8 +125,8 @@ function CircleOfLife() {
       try {
         // Fetch last transaction/transfer for SC0 (check both transactions and transfers)
         const [sc0TxRes, sc0TransferRes] = await Promise.all([
-          fetch(`https://devnet-api.multiversx.com/accounts/${CIRCLE_OF_LIFE_ADDRESS}/transactions?size=1&order=desc`),
-          fetch(`https://devnet-api.multiversx.com/accounts/${CIRCLE_OF_LIFE_ADDRESS}/transfers?size=1&order=desc`)
+          fetch(`${multiversxApiUrl}/accounts/${CIRCLE_OF_LIFE_ADDRESS}/transactions?size=1&order=desc`),
+          fetch(`${multiversxApiUrl}/accounts/${CIRCLE_OF_LIFE_ADDRESS}/transfers?size=1&order=desc`)
         ])
 
         let latestSc0Tx: string | null = null
@@ -154,8 +155,8 @@ function CircleOfLife() {
           await Promise.all(activeContracts.map(async (contractAddr) => {
             try {
               const [txRes, transferRes] = await Promise.all([
-                fetch(`https://devnet-api.multiversx.com/accounts/${contractAddr}/transactions?size=1&order=desc`),
-                fetch(`https://devnet-api.multiversx.com/accounts/${contractAddr}/transfers?size=1&order=desc`)
+                fetch(`${multiversxApiUrl}/accounts/${contractAddr}/transactions?size=1&order=desc`),
+                fetch(`${multiversxApiUrl}/accounts/${contractAddr}/transfers?size=1&order=desc`)
               ])
 
               let latestHash: string | null = null
@@ -1607,7 +1608,7 @@ function CircleOfLife() {
                           </div>
                         ) : (
                           <p className="text-purple-400/70 text-xs text-center">
-                            {t('circle.enableAutoSign', 'Enable auto-sign so you do not have to sign manually every day')}
+                            {t('circle.enableAutoSignDesc', 'Enable auto-sign so you do not have to sign manually every day')}
                           </p>
                         )}
 
@@ -1621,7 +1622,7 @@ function CircleOfLife() {
                             >
                               <span className="flex items-center justify-center gap-2">
                                 <span className="text-lg">✨</span>
-                                Activer Auto-Sign
+                                {t('circle.enableAutoSign', 'Enable Auto-Sign')}
                                 <span className="text-lg">✨</span>
                               </span>
                             </button>
@@ -1798,13 +1799,6 @@ function CircleOfLife() {
                     </span>
                   </button>
                 )}
-
-                <button
-                  onClick={() => navigate('/dashboard')}
-                  className="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-4 rounded-lg transition"
-                >
-                  {t('circle.myDashboard', 'My Dashboard')}
-                </button>
               </div>
             </div>
 
@@ -2440,7 +2434,7 @@ function CircleOfLife() {
                       </td>
                       <td className="py-3 pr-4">
                         <a
-                          href={`https://devnet-explorer.multiversx.com/accounts/${contractAddr}`}
+                          href={`${explorerUrl}/accounts/${contractAddr}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-gray-300 font-mono text-sm hover:text-blue-400 transition"
@@ -2454,7 +2448,7 @@ function CircleOfLife() {
                       <td className="py-3 pr-4">
                         {ownerAddress ? (
                           <a
-                            href={`https://devnet-explorer.multiversx.com/accounts/${ownerAddress}`}
+                            href={`${explorerUrl}/accounts/${ownerAddress}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className={`font-mono text-sm hover:text-blue-400 transition ${isMyAccount ? 'text-blue-400' : 'text-gray-400'}`}
@@ -2548,7 +2542,7 @@ function CircleOfLife() {
                         </td>
                         <td className="py-3 pr-4">
                           <a
-                            href={`https://devnet-explorer.multiversx.com/accounts/${contractAddr}`}
+                            href={`${explorerUrl}/accounts/${contractAddr}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-gray-400 font-mono text-sm hover:text-blue-400 transition"
@@ -2562,7 +2556,7 @@ function CircleOfLife() {
                         <td className="py-3 pr-4">
                           {ownerAddress ? (
                             <a
-                              href={`https://devnet-explorer.multiversx.com/accounts/${ownerAddress}`}
+                              href={`${explorerUrl}/accounts/${ownerAddress}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className={`font-mono text-sm hover:text-blue-400 transition ${isMyAccount ? 'text-blue-400' : 'text-gray-500'}`}
@@ -2624,7 +2618,7 @@ function CircleOfLife() {
               <p className="text-white font-mono text-xs md:text-sm break-all">{CIRCLE_OF_LIFE_ADDRESS}</p>
             </div>
             <a
-              href={`https://devnet-explorer.multiversx.com/accounts/${CIRCLE_OF_LIFE_ADDRESS}`}
+              href={`${explorerUrl}/accounts/${CIRCLE_OF_LIFE_ADDRESS}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 transition"
@@ -2643,30 +2637,29 @@ function CircleOfLife() {
       <TransactionModal
         isOpen={showJoinModal}
         step={joinModalStep}
-        title="Rejoindre le Cercle de Vie"
-        confirmTitle="Creer votre Smart Contract"
-        confirmDescription="Vous allez creer un smart contract peripherique et rejoindre le Cercle de Vie."
+        title={t('circle.modal.join.title', 'Join the Circle of Life')}
+        confirmTitle={t('circle.modal.join.confirmTitle', 'Create your Smart Contract')}
+        confirmDescription={t('circle.modal.join.confirmDesc', 'You will create a peripheral smart contract and join the Circle of Life.')}
         confirmDetails={
           <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 space-y-3">
             <div className="flex justify-between">
-              <span className="text-gray-400">Frais de creation</span>
+              <span className="text-gray-400">{t('circle.modal.join.creationFee', 'Creation fee')}</span>
               <span className="text-white font-bold">{creationFee} EGLD</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Gas estime</span>
+              <span className="text-gray-400">{t('circle.modal.join.estimatedGas', 'Estimated gas')}</span>
               <span className="text-white">~0.03 EGLD</span>
             </div>
             <div className="border-t border-purple-500/30 pt-3">
               <p className="text-gray-300 text-sm">
-                SC0 deviendra co-proprietaire de votre smart contract.
-                Vous devrez signer les transactions circulaires quotidiennes.
+                {t('circle.modal.join.details', 'SC0 will become co-owner of your smart contract. You will need to sign daily circular transactions.')}
               </p>
             </div>
           </div>
         }
-        successTitle="Bienvenue dans le Cercle !"
-        successMessage="Votre smart contract a ete cree. Vous faites maintenant partie du Cercle de Vie."
-        errorMessage="Erreur lors de la creation du smart contract."
+        successTitle={t('circle.modal.join.successTitle', 'Welcome to the Circle!')}
+        successMessage={t('circle.modal.join.successMsg', 'Your smart contract has been created. You are now part of the Circle of Life.')}
+        errorMessage={t('circle.modal.join.errorMsg', 'Error creating the smart contract.')}
         transactionHash={joinTransactionHash}
         onConfirm={handleJoinConfirm}
         onClose={() => {
@@ -2685,33 +2678,33 @@ function CircleOfLife() {
       <TransactionModal
         isOpen={showSignModal}
         step={signModalStep}
-        title="Signer le Transfert"
-        confirmTitle="Valider le Cycle"
-        confirmDescription="Vous allez signer le transfert des fonds vers le prochain smart contract."
+        title={t('circle.modal.sign.title', 'Sign Transfer')}
+        confirmTitle={t('circle.modal.sign.confirmTitle', 'Validate Cycle')}
+        confirmDescription={t('circle.modal.sign.confirmDesc', 'You will sign the transfer of funds to the next smart contract.')}
         confirmDetails={
           <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 space-y-3">
             <div className="flex justify-between">
-              <span className="text-gray-400">Montant</span>
+              <span className="text-gray-400">{t('circle.modal.amount', 'Amount')}</span>
               <span className="text-white font-bold">{circulationAmount} EGLD</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">De</span>
-              <span className="text-white">Votre SC</span>
+              <span className="text-gray-400">{t('circle.modal.from', 'From')}</span>
+              <span className="text-white">{t('circle.modal.sign.yourSC', 'Your SC')}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Vers</span>
-              <span className="text-white">SC suivant</span>
+              <span className="text-gray-400">{t('circle.modal.to', 'To')}</span>
+              <span className="text-white">{t('circle.modal.sign.nextSC', 'Next SC')}</span>
             </div>
             <div className="border-t border-green-500/30 pt-3">
               <p className="text-orange-300 text-sm">
-                Attention: Si vous ne signez pas avant minuit, les fonds iront directement a SC0.
+                {t('circle.modal.sign.warning', 'Warning: If you do not sign before midnight, funds will go directly to SC0.')}
               </p>
             </div>
           </div>
         }
-        successTitle="Signature validee !"
-        successMessage="Le transfert a ete effectue vers le prochain smart contract."
-        errorMessage="Erreur lors de la signature."
+        successTitle={t('circle.modal.sign.successTitle', 'Signature validated!')}
+        successMessage={t('circle.modal.sign.successMsg', 'The transfer has been made to the next smart contract.')}
+        errorMessage={t('circle.modal.sign.errorMsg', 'Error during signature.')}
         transactionHash={signTransactionHash}
         onConfirm={handleSignConfirm}
         onClose={() => {
@@ -2730,48 +2723,48 @@ function CircleOfLife() {
       <TransactionModal
         isOpen={showStartCycleModal}
         step={startCycleModalStep}
-        title="Demarrer le Cycle"
-        confirmTitle="Lancer le Cycle Quotidien"
-        confirmDescription="Vous allez demarrer le cycle quotidien. SC0 enverra le montant circulant au premier SC actif."
+        title={t('circle.modal.startCycle.title', 'Start Cycle')}
+        confirmTitle={t('circle.modal.startCycle.confirmTitle', 'Launch Daily Cycle')}
+        confirmDescription={t('circle.modal.startCycle.confirmDesc', 'You will start the daily cycle. SC0 will send the circulation amount to the first active SC.')}
         confirmDetails={
           <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4 space-y-3">
             <div className="flex justify-between">
-              <span className="text-gray-400">Montant a envoyer</span>
+              <span className="text-gray-400">{t('circle.modal.startCycle.amountToSend', 'Amount to send')}</span>
               <span className="text-white font-bold">{circulationAmount} EGLD</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">De</span>
-              <span className="text-white">SC0 (Centre)</span>
+              <span className="text-gray-400">{t('circle.modal.from', 'From')}</span>
+              <span className="text-white">SC0 ({t('circle.modal.startCycle.center', 'Center')})</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Vers</span>
-              <span className="text-white">SC1 (Premier actif)</span>
+              <span className="text-gray-400">{t('circle.modal.to', 'To')}</span>
+              <span className="text-white">SC1 ({t('circle.modal.startCycle.firstActive', 'First active')})</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Participants</span>
-              <span className="text-white">{activeContractsCount} SC actifs</span>
+              <span className="text-gray-400">{t('circle.modal.startCycle.participants', 'Participants')}</span>
+              <span className="text-white">{activeContractsCount} {t('circle.modal.startCycle.activeSCs', 'active SCs')}</span>
             </div>
             {starterBonusInfo.percentage > 0 && (
               <div className="flex justify-between items-center bg-cyan-500/20 rounded-lg p-2 -mx-1">
                 <span className="text-cyan-300 font-semibold flex items-center gap-1">
-                  <span>&#x2B50;</span> Bonus Starter
+                  <span>&#x2B50;</span> {t('circle.modal.startCycle.starterBonus', 'Starter Bonus')}
                 </span>
                 <span className="text-cyan-400 font-bold">+{starterBonusInfo.potentialBonus} XCX</span>
               </div>
             )}
             <div className="border-t border-orange-500/30 pt-3">
               <p className="text-gray-300 text-sm">
-                Une fois le cycle demarre, chaque membre devra signer dans l&apos;ordre pour faire circuler les fonds.
+                {t('circle.modal.startCycle.details', 'Once the cycle starts, each member must sign in order to circulate the funds.')}
                 {starterBonusInfo.percentage > 0 && (
-                  <span className="text-cyan-300"> Vous recevrez un bonus de {(starterBonusInfo.percentage / 100).toFixed(1)}% si le cycle se termine avec succes!</span>
+                  <span className="text-cyan-300"> {t('circle.modal.startCycle.bonusInfo', 'You will receive a {{percent}}% bonus if the cycle completes successfully!', { percent: (starterBonusInfo.percentage / 100).toFixed(1) })}</span>
                 )}
               </p>
             </div>
           </div>
         }
-        successTitle="Cycle demarre !"
-        successMessage="Le cycle quotidien a ete lance. Le montant circulant a ete envoye au premier SC."
-        errorMessage="Erreur lors du demarrage du cycle. Verifiez que SC0 a suffisamment de fonds."
+        successTitle={t('circle.modal.startCycle.successTitle', 'Cycle started!')}
+        successMessage={t('circle.modal.startCycle.successMsg', 'The daily cycle has been launched. The circulation amount has been sent to the first SC.')}
+        errorMessage={t('circle.modal.startCycle.errorMsg', 'Error starting the cycle. Check that SC0 has enough funds.')}
         transactionHash={startCycleTransactionHash}
         onConfirm={handleStartCycleConfirm}
         onClose={() => {
@@ -2790,34 +2783,34 @@ function CircleOfLife() {
       <TransactionModal
         isOpen={showPreSignModal}
         step={preSignModalStep}
-        title="Pre-signer a l'avance"
-        confirmTitle="Confirmer la Pre-signature"
-        confirmDescription="Vous allez pre-signer votre participation au cycle. Le transfert s'executera automatiquement quand ce sera votre tour."
+        title={t('circle.modal.preSign.title', 'Pre-sign in Advance')}
+        confirmTitle={t('circle.modal.preSign.confirmTitle', 'Confirm Pre-signature')}
+        confirmDescription={t('circle.modal.preSign.confirmDesc', 'You will pre-sign your participation in the cycle. The transfer will execute automatically when it is your turn.')}
         confirmDetails={
           <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 space-y-3">
             <div className="flex justify-between">
-              <span className="text-gray-400">Action</span>
-              <span className="text-white font-bold">Pre-signature</span>
+              <span className="text-gray-400">{t('circle.modal.action', 'Action')}</span>
+              <span className="text-white font-bold">{t('circle.modal.preSign.preSignature', 'Pre-signature')}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Montant a transferer</span>
+              <span className="text-gray-400">{t('circle.modal.preSign.amountToTransfer', 'Amount to transfer')}</span>
               <span className="text-white">{circulationAmount} EGLD</span>
             </div>
             <div className="border-t border-blue-500/30 pt-3">
               <p className="text-blue-300 text-sm">
-                Avantages de la pre-signature:
+                {t('circle.modal.preSign.advantages', 'Advantages of pre-signing:')}
               </p>
               <ul className="text-gray-300 text-sm mt-2 space-y-1">
-                <li>&#x2713; Pas besoin d&apos;etre present quand c&apos;est votre tour</li>
-                <li>&#x2713; Le transfert s&apos;execute automatiquement</li>
-                <li>&#x2713; Evite de manquer votre tour</li>
+                <li>&#x2713; {t('circle.modal.preSign.adv1', 'No need to be present when it is your turn')}</li>
+                <li>&#x2713; {t('circle.modal.preSign.adv2', 'Transfer executes automatically')}</li>
+                <li>&#x2713; {t('circle.modal.preSign.adv3', 'Avoid missing your turn')}</li>
               </ul>
             </div>
           </div>
         }
-        successTitle="Pre-signature enregistree !"
-        successMessage="Votre pre-signature a ete enregistree. Le transfert s'executera automatiquement quand ce sera votre tour."
-        errorMessage="Erreur lors de la pre-signature."
+        successTitle={t('circle.modal.preSign.successTitle', 'Pre-signature registered!')}
+        successMessage={t('circle.modal.preSign.successMsg', 'Your pre-signature has been registered. The transfer will execute automatically when it is your turn.')}
+        errorMessage={t('circle.modal.preSign.errorMsg', 'Error during pre-signature.')}
         transactionHash={preSignTransactionHash}
         onConfirm={handlePreSignConfirm}
         onClose={() => {
@@ -2836,34 +2829,34 @@ function CircleOfLife() {
       <TransactionModal
         isOpen={showProcessModal}
         step={processModalStep}
-        title="Executer TOUS les Transferts"
-        confirmTitle="Traiter TOUS les Transferts en 1 Transaction"
-        confirmDescription="Vous allez executer TOUS les transferts en attente en une seule transaction. Plus besoin de cliquer plusieurs fois !"
+        title={t('circle.modal.process.title', 'Execute ALL Transfers')}
+        confirmTitle={t('circle.modal.process.confirmTitle', 'Process ALL Transfers in 1 Transaction')}
+        confirmDescription={t('circle.modal.process.confirmDesc', 'You will execute ALL pending transfers in a single transaction. No need to click multiple times!')}
         confirmDetails={
           <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-4 space-y-3">
             <div className="flex justify-between">
-              <span className="text-gray-400">Transferts a executer</span>
+              <span className="text-gray-400">{t('circle.modal.process.transfersToExecute', 'Transfers to execute')}</span>
               <span className="text-white font-bold text-lg">{pendingAutoTransfers}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Montant par transfert</span>
+              <span className="text-gray-400">{t('circle.modal.process.amountPerTransfer', 'Amount per transfer')}</span>
               <span className="text-white">{circulationAmount} EGLD</span>
             </div>
             <div className="bg-green-500/20 border border-green-500/30 rounded p-2 mt-2">
               <p className="text-green-400 text-sm font-semibold text-center">
-                1 signature = {pendingAutoTransfers} transferts executes !
+                {t('circle.modal.process.oneSignature', '1 signature = {{count}} transfers executed!', { count: pendingAutoTransfers })}
               </p>
             </div>
             <div className="border-t border-cyan-500/30 pt-3">
               <p className="text-gray-300 text-sm">
-                Cette action est permissionless - n&apos;importe qui peut declencher les transferts pour les membres qui ont active l&apos;auto-sign.
+                {t('circle.modal.process.permissionless', 'This action is permissionless - anyone can trigger transfers for members who have enabled auto-sign.')}
               </p>
             </div>
           </div>
         }
-        successTitle="Tous les transferts executes !"
-        successMessage={`Les ${pendingAutoTransfers} transferts en attente ont ete traites en une seule transaction !`}
-        errorMessage="Erreur lors du traitement des transferts."
+        successTitle={t('circle.modal.process.successTitle', 'All transfers executed!')}
+        successMessage={t('circle.modal.process.successMsg', 'The {{count}} pending transfers have been processed in a single transaction!', { count: pendingAutoTransfers })}
+        errorMessage={t('circle.modal.process.errorMsg', 'Error processing transfers.')}
         transactionHash={processTransactionHash}
         onConfirm={handleProcessConfirm}
         onClose={() => {
@@ -2882,34 +2875,34 @@ function CircleOfLife() {
       <TransactionModal
         isOpen={showActivateModal}
         step={activateModalStep}
-        title="Reactiver mon Point"
-        confirmTitle="Confirmer la Reactivation"
-        confirmDescription="Vous allez reactiver votre point dans le cercle. Vous participerez a nouveau aux cycles quotidiens."
+        title={t('circle.modal.activate.title', 'Reactivate my Point')}
+        confirmTitle={t('circle.modal.activate.confirmTitle', 'Confirm Reactivation')}
+        confirmDescription={t('circle.modal.activate.confirmDesc', 'You will reactivate your point in the circle. You will participate again in daily cycles.')}
         confirmDetails={
           <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 space-y-3">
             <div className="flex justify-between">
-              <span className="text-gray-400">Action</span>
-              <span className="text-white font-bold">Reactivation</span>
+              <span className="text-gray-400">{t('circle.modal.common.action', 'Action')}</span>
+              <span className="text-white font-bold">{t('circle.modal.activate.action', 'Reactivation')}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Votre contrat</span>
+              <span className="text-gray-400">{t('circle.modal.common.yourContract', 'Your contract')}</span>
               <span className="text-white font-mono text-xs">{myContract ? formatAddress(myContract) : '-'}</span>
             </div>
             <div className="border-t border-green-500/30 pt-3">
               <p className="text-green-300 text-sm">
-                Avantages de l&apos;activation:
+                {t('circle.modal.activate.benefits', 'Benefits of activation:')}
               </p>
               <ul className="text-gray-300 text-sm mt-2 space-y-1">
-                <li>&#x2713; Participe aux cycles quotidiens</li>
-                <li>&#x2713; Recoit les transferts circulaires</li>
-                <li>&#x2713; Fait partie du cercle actif</li>
+                <li>&#x2713; {t('circle.modal.activate.benefit1', 'Participates in daily cycles')}</li>
+                <li>&#x2713; {t('circle.modal.activate.benefit2', 'Receives circular transfers')}</li>
+                <li>&#x2713; {t('circle.modal.activate.benefit3', 'Is part of the active circle')}</li>
               </ul>
             </div>
           </div>
         }
-        successTitle="Point reactive !"
-        successMessage="Votre point est maintenant actif. Vous participez a nouveau aux cycles."
-        errorMessage="Erreur lors de la reactivation."
+        successTitle={t('circle.modal.activate.successTitle', 'Point reactivated!')}
+        successMessage={t('circle.modal.activate.successMsg', 'Your point is now active. You participate again in cycles.')}
+        errorMessage={t('circle.modal.activate.errorMsg', 'Error during reactivation.')}
         transactionHash={activateTransactionHash}
         onConfirm={handleActivateConfirm}
         onClose={() => {
@@ -2928,35 +2921,35 @@ function CircleOfLife() {
       <TransactionModal
         isOpen={showDeactivateModal}
         step={deactivateModalStep}
-        title="Desactiver mon Point"
-        confirmTitle="Confirmer la Desactivation"
-        confirmDescription="Vous allez desactiver votre point dans le cercle. Vous ne participerez plus aux cycles quotidiens."
+        title={t('circle.modal.deactivate.title', 'Deactivate my Point')}
+        confirmTitle={t('circle.modal.deactivate.confirmTitle', 'Confirm Deactivation')}
+        confirmDescription={t('circle.modal.deactivate.confirmDesc', 'You will deactivate your point in the circle. You will no longer participate in daily cycles.')}
         confirmDetails={
           <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4 space-y-3">
             <div className="flex justify-between">
-              <span className="text-gray-400">Action</span>
-              <span className="text-white font-bold">Desactivation</span>
+              <span className="text-gray-400">{t('circle.modal.common.action', 'Action')}</span>
+              <span className="text-white font-bold">{t('circle.modal.deactivate.action', 'Deactivation')}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Votre contrat</span>
+              <span className="text-gray-400">{t('circle.modal.common.yourContract', 'Your contract')}</span>
               <span className="text-white font-mono text-xs">{myContract ? formatAddress(myContract) : '-'}</span>
             </div>
             <div className="border-t border-orange-500/30 pt-3">
               <p className="text-orange-300 text-sm">
-                Consequences de la desactivation:
+                {t('circle.modal.deactivate.consequences', 'Consequences of deactivation:')}
               </p>
               <ul className="text-gray-300 text-sm mt-2 space-y-1">
-                <li>&#x26A0; Ne participe plus aux cycles</li>
-                <li>&#x26A0; Ne recoit plus de transferts</li>
-                <li>&#x2713; Peut etre reactive a tout moment</li>
-                <li>&#x2713; Vous restez membre du cercle</li>
+                <li>&#x26A0; {t('circle.modal.deactivate.consequence1', 'No longer participates in cycles')}</li>
+                <li>&#x26A0; {t('circle.modal.deactivate.consequence2', 'No longer receives transfers')}</li>
+                <li>&#x2713; {t('circle.modal.deactivate.consequence3', 'Can be reactivated at any time')}</li>
+                <li>&#x2713; {t('circle.modal.deactivate.consequence4', 'You remain a member of the circle')}</li>
               </ul>
             </div>
           </div>
         }
-        successTitle="Point desactive !"
-        successMessage="Votre point est maintenant inactif. Vous pouvez le reactiver a tout moment."
-        errorMessage="Erreur lors de la desactivation."
+        successTitle={t('circle.modal.deactivate.successTitle', 'Point deactivated!')}
+        successMessage={t('circle.modal.deactivate.successMsg', 'Your point is now inactive. You can reactivate it at any time.')}
+        errorMessage={t('circle.modal.deactivate.errorMsg', 'Error during deactivation.')}
         transactionHash={deactivateTransactionHash}
         onConfirm={handleDeactivateConfirm}
         onClose={() => {
@@ -2975,39 +2968,39 @@ function CircleOfLife() {
       <TransactionModal
         isOpen={showFailCycleModal}
         step={failCycleModalStep}
-        title="Declarer Cycle Echoue"
-        confirmTitle="Confirmer l'Echec du Cycle"
-        confirmDescription="Vous allez declarer ce cycle comme echoue. Le SC qui bloque sera automatiquement banni pour 7 jours."
+        title={t('circle.modal.failCycle.title', 'Declare Cycle Failed')}
+        confirmTitle={t('circle.modal.failCycle.confirmTitle', 'Confirm Cycle Failure')}
+        confirmDescription={t('circle.modal.failCycle.confirmDesc', 'You will declare this cycle as failed. The blocking SC will be automatically banned for 7 days.')}
         confirmDetails={
           <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 space-y-3">
             <div className="flex justify-between">
-              <span className="text-gray-400">Action</span>
-              <span className="text-white font-bold">Declarer Echec</span>
+              <span className="text-gray-400">{t('circle.modal.common.action', 'Action')}</span>
+              <span className="text-white font-bold">{t('circle.modal.failCycle.action', 'Declare Failure')}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Cycle</span>
+              <span className="text-gray-400">{t('circle.modal.failCycle.cycle', 'Cycle')}</span>
               <span className="text-white">#{cycleDay}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">SC Responsable</span>
+              <span className="text-gray-400">{t('circle.modal.failCycle.responsibleSc', 'Responsible SC')}</span>
               <span className="text-white font-mono text-xs">{cycleHolder ? formatAddress(cycleHolder) : '-'}</span>
             </div>
             <div className="border-t border-red-500/30 pt-3">
               <p className="text-red-300 text-sm font-semibold">
-                Consequences:
+                {t('circle.modal.failCycle.consequences', 'Consequences:')}
               </p>
               <ul className="text-gray-300 text-sm mt-2 space-y-1">
-                <li className="text-red-400">&#x26A0; Le SC responsable sera banni 7 jours</li>
-                <li className="text-red-400">&#x26A0; Son compteur d&apos;echecs sera incremente</li>
-                <li>&#x2713; Les fonds seront recuperes vers SC0</li>
-                <li>&#x2713; Un nouveau cycle pourra demarrer</li>
+                <li className="text-red-400">&#x26A0; {t('circle.modal.failCycle.consequence1', 'The responsible SC will be banned for 7 days')}</li>
+                <li className="text-red-400">&#x26A0; {t('circle.modal.failCycle.consequence2', 'Its failure counter will be incremented')}</li>
+                <li>&#x2713; {t('circle.modal.failCycle.consequence3', 'Funds will be recovered to SC0')}</li>
+                <li>&#x2713; {t('circle.modal.failCycle.consequence4', 'A new cycle can start')}</li>
               </ul>
             </div>
           </div>
         }
-        successTitle="Cycle declare echoue !"
-        successMessage="Le SC responsable a ete banni pour 7 jours. Les fonds ont ete recuperes vers SC0."
-        errorMessage="Erreur lors de la declaration d'echec. Le cycle n'est peut-etre pas encore en timeout."
+        successTitle={t('circle.modal.failCycle.successTitle', 'Cycle declared failed!')}
+        successMessage={t('circle.modal.failCycle.successMsg', 'The responsible SC has been banned for 7 days. Funds have been recovered to SC0.')}
+        errorMessage={t('circle.modal.failCycle.errorMsg', 'Error declaring failure. The cycle may not be in timeout yet.')}
         transactionHash={failCycleTransactionHash}
         onConfirm={handleFailCycleConfirm}
         onClose={() => {
@@ -3026,33 +3019,33 @@ function CircleOfLife() {
       <TransactionModal
         isOpen={showClaimRewardsModal}
         step={claimRewardsModalStep}
-        title="Reclamer les Recompenses"
-        confirmTitle="Confirmer la Reclamation"
-        confirmDescription="Vous allez reclamer vos recompenses XCIRCLEX accumulees grace a votre participation aux cycles."
+        title={t('circle.modal.claimRewards.title', 'Claim Rewards')}
+        confirmTitle={t('circle.modal.claimRewards.confirmTitle', 'Confirm Claim')}
+        confirmDescription={t('circle.modal.claimRewards.confirmDesc', 'You will claim your XCIRCLEX rewards accumulated through your participation in cycles.')}
         confirmDetails={
           <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 space-y-3">
             <div className="flex justify-between">
-              <span className="text-gray-400">Montant a reclamer</span>
+              <span className="text-gray-400">{t('circle.modal.claimRewards.amountToClaim', 'Amount to claim')}</span>
               <span className="text-yellow-400 font-bold">{pendingRewards} XCIRCLEX</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Token</span>
+              <span className="text-gray-400">{t('circle.modal.claimRewards.token', 'Token')}</span>
               <span className="text-white">{rewardsInfo.rewardTokenId || 'XCIRCLEX'}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Jour</span>
-              <span className="text-green-400">{getDayName(dayOfWeek)} (jour de reclamation)</span>
+              <span className="text-gray-400">{t('circle.modal.claimRewards.day', 'Day')}</span>
+              <span className="text-green-400">{getDayName(dayOfWeek)} ({t('circle.modal.claimRewards.claimDay', 'claim day')})</span>
             </div>
             <div className="border-t border-yellow-500/30 pt-3">
               <p className="text-gray-300 text-sm">
-                Les tokens seront envoyes directement dans votre portefeuille.
+                {t('circle.modal.claimRewards.tokensInfo', 'Tokens will be sent directly to your wallet.')}
               </p>
             </div>
           </div>
         }
-        successTitle="Recompenses reclamees !"
-        successMessage={`Vous avez recu ${pendingRewards} XCIRCLEX dans votre portefeuille.`}
-        errorMessage="Erreur lors de la reclamation. Verifiez que c'est bien dimanche et que vous avez des recompenses a reclamer."
+        successTitle={t('circle.modal.claimRewards.successTitle', 'Rewards claimed!')}
+        successMessage={t('circle.modal.claimRewards.successMsg', `You received ${pendingRewards} XCIRCLEX in your wallet.`)}
+        errorMessage={t('circle.modal.claimRewards.errorMsg', 'Error during claim. Check that it is Sunday and that you have rewards to claim.')}
         transactionHash={claimRewardsTransactionHash}
         onConfirm={handleClaimRewardsConfirm}
         onClose={() => {
@@ -3071,9 +3064,9 @@ function CircleOfLife() {
       <TransactionModal
         isOpen={showAutoSignModal}
         step={autoSignModalStep}
-        title="Activer l'Auto-Signature"
-        confirmTitle="Activer l'Auto-Signature Permanente"
-        confirmDescription="Activez l'auto-signature pour ne plus avoir a signer manuellement chaque jour."
+        title={t('circle.modal.autoSign.title', 'Enable Auto-Sign')}
+        confirmTitle={t('circle.modal.autoSign.confirmTitle', 'Enable Permanent Auto-Sign')}
+        confirmDescription={t('circle.modal.autoSign.confirmDesc', 'Enable auto-sign so you no longer have to sign manually every day.')}
         confirmDetails={
           <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 space-y-3">
             <div className="flex items-center gap-3">
@@ -3081,21 +3074,20 @@ function CircleOfLife() {
                 <span className="text-xl">✨</span>
               </div>
               <div>
-                <p className="text-white font-semibold">Auto-Signature Permanente</p>
-                <p className="text-purple-300 text-sm">Vos cycles seront signes automatiquement</p>
+                <p className="text-white font-semibold">{t('circle.modal.autoSign.permanentLabel', 'Permanent Auto-Sign')}</p>
+                <p className="text-purple-300 text-sm">{t('circle.modal.autoSign.autoSignInfo', 'Your cycles will be signed automatically')}</p>
               </div>
             </div>
             <div className="border-t border-purple-500/30 pt-3">
               <p className="text-purple-300 text-sm">
-                L&apos;auto-signature permanente signera automatiquement tous vos cycles futurs indefiniment.
-                Vous pourrez la desactiver a tout moment.
+                {t('circle.modal.autoSign.permanentInfo', 'Permanent auto-sign will automatically sign all your future cycles indefinitely. You can disable it at any time.')}
               </p>
             </div>
           </div>
         }
-        successTitle="Auto-Signature activee !"
-        successMessage="L'auto-signature permanente est maintenant active. Vos cycles seront signes automatiquement."
-        errorMessage="Erreur lors de l'activation de l'auto-signature. Verifiez que vous etes bien membre actif du cercle."
+        successTitle={t('circle.modal.autoSign.successTitle', 'Auto-Sign enabled!')}
+        successMessage={t('circle.modal.autoSign.successMsg', 'Permanent auto-sign is now active. Your cycles will be signed automatically.')}
+        errorMessage={t('circle.modal.autoSign.errorMsg', 'Error enabling auto-sign. Check that you are an active member of the circle.')}
         transactionHash={autoSignTransactionHash}
         onConfirm={handleAutoSignConfirm}
         onClose={() => {
@@ -3114,32 +3106,32 @@ function CircleOfLife() {
       <TransactionModal
         isOpen={showDisableAutoSignModal}
         step={disableAutoSignModalStep}
-        title="Desactiver l'Auto-Signature"
-        confirmTitle="Confirmer la Desactivation"
-        confirmDescription="Vous allez desactiver l'auto-signature. Vous devrez signer manuellement ou pre-signer chaque cycle."
+        title={t('circle.modal.disableAutoSign.title', 'Disable Auto-Sign')}
+        confirmTitle={t('circle.modal.disableAutoSign.confirmTitle', 'Confirm Deactivation')}
+        confirmDescription={t('circle.modal.disableAutoSign.confirmDesc', 'You will disable auto-sign. You will need to sign manually or pre-sign each cycle.')}
         confirmDetails={
           <div className="bg-gray-500/10 border border-gray-500/30 rounded-lg p-4 space-y-3">
             <div className="flex justify-between">
-              <span className="text-gray-400">Status actuel</span>
+              <span className="text-gray-400">{t('circle.modal.disableAutoSign.currentStatus', 'Current status')}</span>
               <span className="text-purple-400 font-bold">
-                {autoSignStatus.isPermanent ? 'Permanent' : `${autoSignStatus.remainingCycles} cycles restants`}
+                {autoSignStatus.isPermanent ? t('circle.modal.disableAutoSign.permanent', 'Permanent') : `${autoSignStatus.remainingCycles} ${t('circle.modal.disableAutoSign.cyclesRemaining', 'cycles remaining')}`}
               </span>
             </div>
             <div className="border-t border-gray-500/30 pt-3">
               <p className="text-gray-300 text-sm">
-                Apres desactivation, vous devrez:
+                {t('circle.modal.disableAutoSign.afterDeactivation', 'After deactivation, you will need to:')}
               </p>
               <ul className="text-gray-400 text-sm mt-2 space-y-1 list-disc list-inside">
-                <li>Pre-signer manuellement chaque cycle</li>
-                <li>Ou signer quand c&apos;est votre tour</li>
-                <li>Ou reactiver l&apos;auto-signature</li>
+                <li>{t('circle.modal.disableAutoSign.option1', 'Pre-sign manually each cycle')}</li>
+                <li>{t('circle.modal.disableAutoSign.option2', 'Or sign when it is your turn')}</li>
+                <li>{t('circle.modal.disableAutoSign.option3', 'Or reactivate auto-sign')}</li>
               </ul>
             </div>
           </div>
         }
-        successTitle="Auto-Signature desactivee"
-        successMessage="L'auto-signature a ete desactivee. Vous devrez maintenant signer manuellement vos cycles."
-        errorMessage="Erreur lors de la desactivation de l'auto-signature."
+        successTitle={t('circle.modal.disableAutoSign.successTitle', 'Auto-Sign disabled')}
+        successMessage={t('circle.modal.disableAutoSign.successMsg', 'Auto-sign has been disabled. You will now need to sign your cycles manually.')}
+        errorMessage={t('circle.modal.disableAutoSign.errorMsg', 'Error disabling auto-sign.')}
         transactionHash={disableAutoSignTransactionHash}
         onConfirm={handleDisableAutoSignConfirm}
         onClose={() => {
@@ -3204,7 +3196,7 @@ function CircleOfLife() {
                 <div className="flex items-center gap-2">
                   <p className="text-white font-mono text-xs break-all">{tooltipInfo.scAddress}</p>
                   <a
-                    href={`https://devnet-explorer.multiversx.com/accounts/${tooltipInfo.scAddress}`}
+                    href={`${explorerUrl}/accounts/${tooltipInfo.scAddress}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-400 hover:text-blue-300 text-sm flex-shrink-0"
@@ -3223,7 +3215,7 @@ function CircleOfLife() {
                   <div className="flex items-center gap-2">
                     <p className="text-white font-mono text-xs break-all">{tooltipInfo.ownerAddress}</p>
                     <a
-                      href={`https://devnet-explorer.multiversx.com/accounts/${tooltipInfo.ownerAddress}`}
+                      href={`${explorerUrl}/accounts/${tooltipInfo.ownerAddress}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-400 hover:text-blue-300 text-sm flex-shrink-0"
@@ -3291,7 +3283,7 @@ function CircleOfLife() {
                           {txHash.slice(0, 12)}...{txHash.slice(-8)}
                         </p>
                         <a
-                          href={`https://devnet-explorer.multiversx.com/transactions/${txHash}`}
+                          href={`${explorerUrl}/transactions/${txHash}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-400 hover:text-blue-300 text-sm flex-shrink-0"

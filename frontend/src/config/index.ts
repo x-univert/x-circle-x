@@ -30,8 +30,9 @@ const networkConfigs = {
     multiversxGatewayUrl: 'https://testnet-gateway.multiversx.com',
     chainId: 'T',
     explorerUrl: 'https://testnet-explorer.multiversx.com',
-    ID_API_URL: 'https://testnet-id-api.multiversx.com',
-    USERS_API_URL: '/users/',
+    // xPortal/Herotag API is global (same as mainnet) - profiles are not network-specific
+    ID_API_URL: 'https://id-api.multiversx.com',
+    USERS_API_URL: '/users/api/v1/users/',
   },
   mainnet: {
     environment: EnvironmentsEnum.mainnet,

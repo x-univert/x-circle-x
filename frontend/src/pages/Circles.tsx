@@ -2,6 +2,7 @@ import { useGetIsLoggedIn } from 'lib'
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { CIRCLE_MANAGER_ADDRESS } from '../config/contracts'
+import { multiversxApiUrl, explorerUrl } from '../config'
 import * as circleService from '../services/circleService'
 
 interface CircleData {
@@ -133,7 +134,7 @@ function Circles() {
       try {
         // 1. Get circle count
         const countResponse = await fetch(
-          'https://devnet-api.multiversx.com/vm-values/query',
+          `${multiversxApiUrl}/vm-values/query`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -160,7 +161,7 @@ function Circles() {
           const circleIdHex = i.toString(16).padStart(2, '0')
 
           circlePromises.push(
-            fetch('https://devnet-api.multiversx.com/vm-values/query', {
+            fetch(`${multiversxApiUrl}/vm-values/query`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -413,7 +414,7 @@ function Circles() {
               <p className="text-white font-mono text-xs md:text-sm break-all">{CIRCLE_MANAGER_ADDRESS}</p>
             </div>
             <a
-              href={`https://devnet-explorer.multiversx.com/accounts/${CIRCLE_MANAGER_ADDRESS}`}
+              href={`${explorerUrl}/accounts/${CIRCLE_MANAGER_ADDRESS}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 transition"

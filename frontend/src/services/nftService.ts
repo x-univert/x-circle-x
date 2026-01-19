@@ -8,9 +8,24 @@ import {
 } from '@multiversx/sdk-core';
 import { signAndSendTransactions } from '../helpers/signAndSendTransactions';
 import { NFT_CONTRACT_ADDRESS, NFT_TOKEN_ID } from '../config/contracts';
+import { multiversxApiUrl } from '../config';
 
-const factoryConfig = new TransactionsFactoryConfig({ chainID: 'D' });
-const factory = new SmartContractTransactionsFactory({ config: factoryConfig });
+// Get chainId dynamically from localStorage to handle network switching
+const getChainId = (): string => {
+  if (typeof window !== 'undefined') {
+    const network = localStorage.getItem('selectedNetwork') || 'devnet';
+    switch (network) {
+      case 'testnet': return 'T';
+      case 'mainnet': return '1';
+      default: return 'D';
+    }
+  }
+  return 'D';
+};
+
+// Dynamic factory based on selected network (reads chainId at call time)
+const getFactoryConfig = () => new TransactionsFactoryConfig({ chainID: getChainId() });
+const getFactory = () => new SmartContractTransactionsFactory({ config: getFactoryConfig() });
 
 // Gas limits pour NFT
 const NFT_GAS_LIMITS = {
@@ -34,7 +49,7 @@ export const checkUserHasNft = async (userAddress: string): Promise<{
 
     // Requeter l'API pour les NFTs de l'utilisateur
     const response = await fetch(
-      `https://devnet-api.multiversx.com/accounts/${userAddress}/nfts?collection=${NFT_TOKEN_ID}`
+      `${multiversxApiUrl}/accounts/${userAddress}/nfts?collection=${NFT_TOKEN_ID}`
     );
 
     if (!response.ok) {
@@ -80,7 +95,7 @@ export const getNftAttributes = async (nonce: number): Promise<{
     const identifier = `${NFT_TOKEN_ID}-${nonceHex}`;
 
     const response = await fetch(
-      `https://devnet-api.multiversx.com/nfts/${identifier}`
+      `${multiversxApiUrl}/nfts/${identifier}`
     );
 
     if (!response.ok) {
@@ -129,7 +144,7 @@ export const claimNft = async (senderAddress: string): Promise<string[]> => {
   const sender = new Address(senderAddress);
   const contract = new Address(NFT_CONTRACT_ADDRESS);
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contract,
     function: 'claimNft',
     gasLimit: BigInt(NFT_GAS_LIMITS.claimNft),
@@ -176,7 +191,7 @@ export const evolveNft = async (
     amount: BigInt(1)
   });
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contract,
     function: 'evolveNft',
     gasLimit: BigInt(NFT_GAS_LIMITS.evolveNft),
@@ -210,7 +225,7 @@ export const getCollectionStats = async (): Promise<{
 
     // Utiliser l'endpoint /nfts/count pour le nombre de NFTs en circulation
     const countResponse = await fetch(
-      `https://devnet-api.multiversx.com/collections/${NFT_TOKEN_ID}/nfts/count`
+      `${multiversxApiUrl}/collections/${NFT_TOKEN_ID}/nfts/count`
     );
 
     let nftCount = 0;
@@ -223,7 +238,7 @@ export const getCollectionStats = async (): Promise<{
     let holdersCount = 0;
     try {
       const nftsResponse = await fetch(
-        `https://devnet-api.multiversx.com/nfts?collection=${NFT_TOKEN_ID}&withOwner=true&size=100`
+        `${multiversxApiUrl}/nfts?collection=${NFT_TOKEN_ID}&withOwner=true&size=100`
       );
       if (nftsResponse.ok) {
         const nfts = await nftsResponse.json();
@@ -279,7 +294,7 @@ export const burnAndReclaim = async (
     amount: BigInt(1)
   });
 
-  const transaction = await factory.createTransactionForExecute(sender, {
+  const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contract,
     function: 'burnAndReclaim',
     gasLimit: BigInt(NFT_GAS_LIMITS.burnAndReclaim),
