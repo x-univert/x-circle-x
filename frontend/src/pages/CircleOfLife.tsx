@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TransactionModal, TransactionStep } from '../components/TransactionModal'
+import { ReferralModal } from '../components/ReferralModal'
 import { useCircleOfLife } from '../hooks/useCircleOfLife'
 import { CIRCLE_OF_LIFE_ADDRESS } from '../config/contracts'
-import { multiversxApiUrl, explorerUrl } from '../config'
+import { multiversxApiUrl, explorerUrl, chainId } from '../config'
 import { CircleNavTabs, TabId } from '../components/CircleNavTabs'
 import { CircleSkeleton } from '../components/CircleSkeleton'
 import { AdminPanel } from '../components/AdminPanel'
@@ -59,6 +60,7 @@ function CircleOfLife() {
     optionFInfo,
     pioneerInfo,
     depositBonusInfo,
+    referralBonusInfo,
     distributionStats,
     createPeripheralContract,
     signAndForward,
@@ -326,7 +328,7 @@ function CircleOfLife() {
           value: amountInWei,
           gasLimit: BigInt(30000000), // Augmente pour calculs de distribution EGLD
           data: new TransactionPayload('deposit'),
-          chainID: 'D'
+          chainID: chainId
         })
 
         const result = await signAndSendTransactionsWithHash({
@@ -389,6 +391,9 @@ function CircleOfLife() {
   }
 
   // Modal states
+  const [showReferralModal, setShowReferralModal] = useState(false)
+  const [referrerAddress, setReferrerAddress] = useState<string | null>(null)
+
   const [showJoinModal, setShowJoinModal] = useState(false)
   const [joinModalStep, setJoinModalStep] = useState<TransactionStep>('confirm')
   const [joinTransactionHash, setJoinTransactionHash] = useState('')
@@ -440,13 +445,23 @@ function CircleOfLife() {
   }, [])
 
   // Handlers
+
+  // Handler when user submits referral code (or skips)
+  const handleReferralSubmit = (referrer: string | null) => {
+    setReferrerAddress(referrer)
+    setShowReferralModal(false)
+    setShowJoinModal(true)
+  }
+
   const handleJoinConfirm = async () => {
     setJoinModalStep('pending')
     try {
-      const result = await createPeripheralContract()
+      const result = await createPeripheralContract(referrerAddress || undefined)
       if (result && result.transactionHash) {
         setJoinTransactionHash(result.transactionHash)
         setJoinModalStep('processing')
+        // Reset referrer after successful join
+        setReferrerAddress(null)
       } else {
         setJoinModalStep('error')
       }
@@ -732,7 +747,7 @@ function CircleOfLife() {
       : 0
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 overflow-x-hidden">
+    <div className="min-h-screen bg-transparent overflow-x-hidden">
       <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 max-w-full overflow-hidden">
 
         {/* Header */}
@@ -1525,7 +1540,7 @@ function CircleOfLife() {
               <div className="space-y-3">
                 {!myContract ? (
                   <button
-                    onClick={() => setShowJoinModal(true)}
+                    onClick={() => setShowReferralModal(true)}
                     disabled={isPaused || isLoading}
                     className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition"
                   >
@@ -1533,6 +1548,22 @@ function CircleOfLife() {
                   </button>
                 ) : (
                   <>
+                    {/* Bouton pour traiter TOUS les transferts en attente en une seule transaction */}
+                    {/* Ne pas afficher si le cycle est en timeout (echec) - il faut d'abord declarer l'echec */}
+                    {pendingAutoTransfers > 0 && !isCycleInTimeout && (
+                      <button
+                        onClick={() => setShowProcessModal(true)}
+                        disabled={isPaused || isLoading}
+                        className="w-full bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition animate-pulse shadow-lg shadow-cyan-500/50"
+                      >
+                        <span className="flex items-center justify-center gap-2">
+                          <span className="text-lg">⚡</span>
+                          {t('circle.executeTransfers', 'Execute {{count}} transfer(s) in 1 click', { count: pendingAutoTransfers })}
+                          <span className="text-lg">⚡</span>
+                        </span>
+                      </button>
+                    )}
+
                     {/* Boutons de signature - seulement si le cycle est demarre (cycleHolder existe) et PAS en timeout */}
                     {cycleHolder && !isCycleInTimeout && (
                       <>
@@ -1782,22 +1813,6 @@ function CircleOfLife() {
                       {t('circle.allMembersSigned', 'All members have signed. Next cycle tomorrow.')}
                     </p>
                   </div>
-                )}
-
-                {/* Bouton pour traiter TOUS les transferts en attente en une seule transaction */}
-                {/* Ne pas afficher si le cycle est en timeout (echec) - il faut d'abord declarer l'echec */}
-                {pendingAutoTransfers > 0 && !isCycleInTimeout && (
-                  <button
-                    onClick={() => setShowProcessModal(true)}
-                    disabled={isPaused || isLoading}
-                    className="w-full bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition animate-pulse shadow-lg shadow-cyan-500/50"
-                  >
-                    <span className="flex items-center justify-center gap-2">
-                      <span className="text-lg">⚡</span>
-                      {t('circle.executeTransfers', 'Execute {{count}} transfer(s) in 1 click', { count: pendingAutoTransfers })}
-                      <span className="text-lg">⚡</span>
-                    </span>
-                  </button>
                 )}
               </div>
             </div>
@@ -2070,7 +2085,13 @@ function CircleOfLife() {
                             <span className="flex-shrink-0">+{(((parseFloat(rewardsInfo.rewardPerCycle) || 0) / (activeContracts.length || 1)) * depositBonusInfo.bonusBps / 10000).toFixed(2)}</span>
                           </div>
                         )}
-                        {!pioneerInfo.isPioneer && depositBonusInfo.bonusPercent === 0 && starterBonusInfo.percentage === 0 && (
+                        {referralBonusInfo.bonusPercent > 0 && (
+                          <div className="flex justify-between items-center text-pink-400 gap-2">
+                            <span className="truncate">+ {t('circle.referral', 'Referral')} (+{referralBonusInfo.bonusPercent}%)</span>
+                            <span className="flex-shrink-0">+{(((parseFloat(rewardsInfo.rewardPerCycle) || 0) / (activeContracts.length || 1)) * referralBonusInfo.bonusBps / 10000).toFixed(2)}</span>
+                          </div>
+                        )}
+                        {!pioneerInfo.isPioneer && depositBonusInfo.bonusPercent === 0 && referralBonusInfo.bonusPercent === 0 && starterBonusInfo.percentage === 0 && (
                           <div className="text-gray-500 text-center text-xs">
                             {t('circle.depositOrPioneer', 'Deposit EGLD or become a pioneer!')}
                           </div>
@@ -2083,7 +2104,8 @@ function CircleOfLife() {
                             const starterPct = isStarterActive ? starterBonusInfo.percentage / 100 : 0;
                             const pioneerPct = pioneerInfo.isPioneer ? pioneerInfo.bonusPercentage / 100 : 0;
                             const depositPct = depositBonusInfo.bonusPercent;
-                            return (starterPct + pioneerPct + depositPct).toFixed(2);
+                            const referralPct = referralBonusInfo.bonusPercent;
+                            return (starterPct + pioneerPct + depositPct + referralPct).toFixed(2);
                           })()}%</span>
                         </div>
                       </div>
@@ -2323,6 +2345,77 @@ function CircleOfLife() {
                     </div>
                     <p className="text-amber-400/60 text-xs mt-2 text-center">
                       1 EGLD = +1% (max 360 EGLD = 360%)
+                    </p>
+                  </div>
+
+                  {/* Referral Bonus Section */}
+                  <div className="bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-xl p-4 border border-pink-500/30">
+                    <h4 className="text-pink-300 font-semibold mb-3 flex items-center gap-2">
+                      <span>&#x1F381;</span> {t('circle.referralBonus', 'Referral Bonus')}
+                    </h4>
+                    <div className="space-y-2">
+                      {/* Referrals count */}
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-gray-400 truncate">{t('circle.referralsCount', 'Referrals')}</span>
+                        <span className={`font-semibold flex-shrink-0 ${referralBonusInfo.count > 0 ? 'text-pink-300' : 'text-gray-500'}`}>
+                          {referralBonusInfo.count}/360
+                        </span>
+                      </div>
+
+                      {/* Current bonus */}
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-gray-400 truncate">{t('circle.currentBonus', 'Current bonus')}</span>
+                        <span className={`font-bold flex-shrink-0 ${referralBonusInfo.bonusPercent > 0 ? 'text-pink-400' : 'text-gray-500'}`}>
+                          +{referralBonusInfo.bonusPercent}%
+                        </span>
+                      </div>
+
+                      {/* Remaining slots */}
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-gray-400 truncate">{t('circle.remainingSlots', 'Remaining slots')}</span>
+                        <span className="text-pink-300/70 flex-shrink-0">{referralBonusInfo.remainingSlots}</span>
+                      </div>
+
+                      {/* Progress bar */}
+                      <div className="mt-2">
+                        <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-pink-500 to-purple-500 transition-all duration-500"
+                            style={{ width: `${(referralBonusInfo.count / 360) * 100}%` }}
+                          />
+                        </div>
+                        <p className="text-pink-400/60 text-xs mt-1 text-center">
+                          {referralBonusInfo.bonusPercent}/360%
+                        </p>
+                      </div>
+
+                      {/* Referral code (user's address) */}
+                      {isMember && address && (
+                        <div className="mt-3 pt-3 border-t border-pink-500/20">
+                          <p className="text-gray-400 text-xs mb-2">{t('circle.yourReferralCode', 'Your referral code')}</p>
+                          <div className="flex gap-2">
+                            <div className="flex-1 bg-gray-800 border border-pink-500/30 rounded-lg px-3 py-2 text-pink-300 text-xs truncate">
+                              {address}
+                            </div>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(address);
+                                // Optional: show toast notification
+                              }}
+                              className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-semibold px-3 py-2 rounded-lg transition text-sm"
+                              title={t('circle.copyReferralCode', 'Copy referral code')}
+                            >
+                              &#x1F4CB;
+                            </button>
+                          </div>
+                          <p className="text-pink-400/50 text-xs mt-2 text-center">
+                            {t('circle.shareReferralNote', 'Share this code to earn +1% per referral!')}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-pink-400/60 text-xs mt-2 text-center">
+                      1 {t('circle.referral', 'referral')} = +1% (max 360 = 360%)
                     </p>
                   </div>
 
@@ -2633,6 +2726,13 @@ function CircleOfLife() {
         )}
       </div>
 
+      {/* Referral Modal - Shown first when joining */}
+      <ReferralModal
+        isOpen={showReferralModal}
+        onClose={() => setShowReferralModal(false)}
+        onSubmit={handleReferralSubmit}
+      />
+
       {/* Join Modal */}
       <TransactionModal
         isOpen={showJoinModal}
@@ -2650,6 +2750,14 @@ function CircleOfLife() {
               <span className="text-gray-400">{t('circle.modal.join.estimatedGas', 'Estimated gas')}</span>
               <span className="text-white">~0.03 EGLD</span>
             </div>
+            {referrerAddress && (
+              <div className="flex justify-between">
+                <span className="text-gray-400">{t('circle.modal.join.referrer', 'Referrer')}</span>
+                <span className="text-green-400 text-xs truncate max-w-[150px]" title={referrerAddress}>
+                  {referrerAddress.substring(0, 10)}...{referrerAddress.substring(referrerAddress.length - 6)}
+                </span>
+              </div>
+            )}
             <div className="border-t border-purple-500/30 pt-3">
               <p className="text-gray-300 text-sm">
                 {t('circle.modal.join.details', 'SC0 will become co-owner of your smart contract. You will need to sign daily circular transactions.')}

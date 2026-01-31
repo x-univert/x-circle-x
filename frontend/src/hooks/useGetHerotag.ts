@@ -2,20 +2,35 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { ID_API_URL, USERS_API_URL } from 'config';
 
-const getUserProfileData = async (address?: string) => {
+/**
+ * Fetch user profile data from xPortal/MultiversX ID API
+ * Can be used outside of React components
+ */
+export const getUserProfileData = async (address?: string) => {
   if (!address) {
-    return;
+    return null;
   }
+
+  // Build the full URL
+  const fullUrl = `${ID_API_URL}${USERS_API_URL}${address}`;
 
   try {
-    const { data } = await axios.get(`${USERS_API_URL}${address}`, {
-      baseURL: ID_API_URL
-    });
-
+    const { data } = await axios.get(fullUrl);
     return data;
-  } catch (err) {
-    console.error('Unable to fetch profile url');
+  } catch (err: any) {
+    // Silently fail - user might not have an xPortal profile
+    return null;
   }
+};
+
+/**
+ * Extract profile picture URL from xPortal API response
+ */
+export const getProfilePictureUrl = (data: any): string | undefined => {
+  if (!data) return undefined;
+  // profile can be { url: "..." } or just a string
+  const profilePic = typeof data?.profile === 'object' ? data?.profile?.url : data?.profile;
+  return profilePic || undefined;
 };
 
 /**
@@ -46,10 +61,17 @@ export const useGetHerotag = (address?: string) => {
     const fetchUserProfileUrl = async () => {
       setLoading(true);
       const data = await getUserProfileData(address);
-      // profile can be { url: "..." } or just a string
-      const profilePic = typeof data?.profile === 'object' ? data?.profile?.url : data?.profile;
+
+      if (!data) {
+        setLoading(false);
+        return;
+      }
+
+      // Use the extracted helper function
+      const profilePic = getProfilePictureUrl(data);
       // cover can be { url: "..." } or just a string
       const coverPic = typeof data?.cover === 'object' ? data?.cover?.url : data?.cover;
+
       setProfileUrl(profilePic || '');
       setCoverUrl(coverPic || '');
       setHerotag(data?.herotag || '');
