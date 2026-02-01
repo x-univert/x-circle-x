@@ -11,17 +11,18 @@
 3. [Problème et opportunité](#3-problème-et-opportunité)
 4. [Solution : X-CIRCLE-X DAO](#4-solution-x-circle-x-dao)
 5. [Le Cercle de Vie](#5-le-cercle-de-vie)
-6. [Architecture technique](#6-architecture-technique)
-7. [Tokenomics $XCIRCLEXX](#7-tokenomics-xcirclex)
-8. [Système de Staking Circulaire (360°)](#8-système-de-staking-circulaire-360)
-9. [NFT Évolutif - Cercle de Réputation](#9-nft-évolutif---cercle-de-réputation)
-10. [Pool de Liquidité EGLD/XCIRCLEX](#10-pool-de-liquidité-egldxcirclex)
-11. [Gouvernance DAO](#11-gouvernance-dao)
-12. [Roadmap](#12-roadmap)
-13. [Équipe et partenaires](#13-équipe-et-partenaires)
-14. [Aspects légaux et compliance](#14-aspects-légaux-et-compliance)
-15. [Risques et mitigation](#15-risques-et-mitigation)
-16. [Idées et Recommandations Futures](#16-idées-et-recommandations-futures)
+6. [Le Cercle d'Investissement](#6-le-cercle-dinvestissement)
+7. [Architecture technique](#7-architecture-technique)
+8. [Tokenomics $XCIRCLEXX](#8-tokenomics-xcirclex)
+9. [Système de Staking Circulaire (360°)](#9-système-de-staking-circulaire-360)
+10. [NFT Évolutif - Cercle de Réputation](#10-nft-évolutif---cercle-de-réputation)
+11. [Pool de Liquidité EGLD/XCIRCLEX](#11-pool-de-liquidité-egldxcirclex)
+12. [Gouvernance DAO](#12-gouvernance-dao)
+13. [Roadmap](#13-roadmap)
+14. [Équipe et partenaires](#14-équipe-et-partenaires)
+15. [Aspects légaux et compliance](#15-aspects-légaux-et-compliance)
+16. [Risques et mitigation](#16-risques-et-mitigation)
+17. [Idées et Recommandations Futures](#17-idées-et-recommandations-futures)
 
 ---
 
@@ -538,9 +539,245 @@ Pour faciliter la participation aux cycles quotidiens, le système propose une f
 
 ---
 
-## 6. Architecture technique
+## 6. Le Cercle d'Investissement
 
-### 6.1 Stack technologique
+### 6.1 Concept et Vision
+
+Le **Cercle d'Investissement** est une évolution moderne des tontines traditionnelles (ROSCA) entièrement gérée par smart contract. Contrairement au Cercle de Vie qui distribue des tokens quotidiennement, le Cercle d'Investissement permet à des groupes de personnes d'épargner ensemble avec des **garanties on-chain** et une **distribution équitable automatisée**.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              CERCLE D'INVESTISSEMENT                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  🎯 PRINCIPE                                                │
+│  ─────────────────────────────────────────                  │
+│  • Groupe de N membres contribuant périodiquement          │
+│  • Chaque période, le pool est distribué à 1 membre        │
+│  • Rotation jusqu'à ce que tous aient reçu                 │
+│  • Caution déposée = garantie anti-défaut                  │
+│                                                             │
+│  💰 EXEMPLE : 4 membres, 100 EGLD/mois, 12 mois            │
+│  ─────────────────────────────────────────                  │
+│  • Total périodes : 12                                      │
+│  • Paiements/membre : 12 ÷ 4 = 3 paiements chacun          │
+│  • Pool mensuel : 4 × 100 = 400 EGLD                       │
+│  • Caution requise : 100 × 12 = 1,200 EGLD                 │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 6.2 Mécanisme de Caution (Collateral)
+
+Le système de caution est la clé qui **élimine le risque de défaut** :
+
+#### 📌 Fonctionnement
+
+1. **Dépôt initial** : Chaque membre dépose une caution = `contribution × nombre_de_périodes`
+2. **Contribution manquée** : La caution est automatiquement utilisée
+3. **Contributions réussies** : La caution se débloque progressivement
+4. **Fin du cercle** : La caution restante est remboursée
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              CYCLE DE VIE DE LA CAUTION                     │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Mois 1: Caution = 1,200 EGLD (100% bloqué)                │
+│          └─► Contribution payée ✅                          │
+│              └─► 100 EGLD débloqué (récupérable)           │
+│                                                             │
+│  Mois 2: Caution utilisable = 1,100 EGLD                   │
+│          └─► Contribution MANQUÉE ❌                        │
+│              └─► 100 EGLD prélevé de la caution            │
+│              └─► Pool toujours complet pour le receveur    │
+│                                                             │
+│  Mois 12: Caution restante remboursée                      │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### ✅ Avantages du système de caution
+
+| Risque Traditionnel | Solution X-CIRCLE-X |
+|---------------------|---------------------|
+| Membre qui disparaît | Caution couvre automatiquement |
+| Retard de paiement | Prélèvement instantané sur caution |
+| Cercle incomplet | Impossible, la caution garantit tout |
+| Perte pour les autres | Aucune, le pool est toujours complet |
+
+### 6.3 Distribution Équitable
+
+Le smart contract impose une **distribution mathématiquement équitable** :
+
+#### 📐 Règle d'or
+
+```
+total_périodes % nombre_membres == 0
+```
+
+Cela garantit que **chaque membre reçoit le même nombre de paiements**.
+
+#### Exemples de configurations valides
+
+| Périodes | Membres | Paiements/membre | Équitable |
+|----------|---------|------------------|-----------|
+| 12 | 3 | 4 | ✅ Oui |
+| 12 | 4 | 3 | ✅ Oui |
+| 12 | 6 | 2 | ✅ Oui |
+| 12 | 12 | 1 | ✅ Oui |
+| 12 | 5 | 2.4 | ❌ Non (refusé par SC) |
+| 10 | 3 | 3.33 | ❌ Non (refusé par SC) |
+
+### 6.4 Cycle de vie d'un Cercle d'Investissement
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│         ÉTATS DU CERCLE D'INVESTISSEMENT                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1️⃣ PENDING (En attente)                                    │
+│     • Cercle créé, en attente de membres                   │
+│     • Membres peuvent rejoindre (avec caution)             │
+│     • Créateur peut annuler (remboursement total)          │
+│     • Membres peuvent quitter (remboursement total)        │
+│                                                             │
+│                    ↓ [Min membres atteint + Distribution OK]│
+│                                                             │
+│  2️⃣ ACTIVE (Actif)                                          │
+│     • Cycle démarre, contributions requises               │
+│     • Deadline par période                                  │
+│     • Distribution automatique au receveur                 │
+│     • Caution utilisée si contribution manquée             │
+│                                                             │
+│                    ↓ [Toutes les périodes terminées]       │
+│                                                             │
+│  3️⃣ COMPLETED (Terminé)                                     │
+│     • Toutes les distributions effectuées                  │
+│     • Cautions restantes remboursées                       │
+│     • Cercle archivé                                        │
+│                                                             │
+│  ❌ CANCELLED (Annulé)                                       │
+│     • Créateur annule avant démarrage                      │
+│     • Toutes les cautions remboursées                      │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 6.5 Smart Contract Investment Circle
+
+#### Endpoints principaux
+
+| Fonction | Description | Qui peut appeler |
+|----------|-------------|------------------|
+| `createCircle` | Crée un nouveau cercle avec caution | Tout le monde |
+| `joinCircle` | Rejoindre avec dépôt de caution | Non-membres |
+| `startCircle` | Démarre le cercle (si conditions OK) | Membres |
+| `contribute` | Payer sa contribution périodique | Membres actifs |
+| `advancePeriod` | Distribuer le pool au receveur | Tout le monde |
+| `claimCollateral` | Récupérer la caution débloquée | Membres |
+| `leaveCircle` | Quitter (avant démarrage) | Membres |
+| `cancelCircle` | Annuler le cercle | Créateur uniquement |
+
+#### Vues (Lecture)
+
+| Fonction | Description |
+|----------|-------------|
+| `getCircleInfo` | Informations complètes du cercle |
+| `getMemberInfo` | Statut d'un membre (caution, contributions) |
+| `canStartCircle` | Vérifie si distribution sera équitable |
+| `getPayoutsPerMember` | Nombre de paiements par membre |
+| `getClaimableCollateral` | Caution récupérable |
+
+### 6.6 Paramètres configurables
+
+Lors de la création d'un cercle, le créateur définit :
+
+| Paramètre | Description | Exemple |
+|-----------|-------------|---------|
+| `name` | Nom du cercle | "Épargne Vacances 2026" |
+| `contribution_amount` | Montant par période | 0.1 EGLD |
+| `frequency` | Fréquence des contributions | Mensuel |
+| `total_contributions` | Nombre total de périodes | 12 |
+| `min_members` | Minimum de membres pour démarrer | 3 |
+| `max_members` | Maximum de membres | 10 |
+
+#### Fréquences disponibles
+
+| Fréquence | Durée période |
+|-----------|---------------|
+| Hebdomadaire | 7 jours |
+| Bi-Hebdomadaire | 14 jours |
+| Mensuel | 30 jours |
+| Trimestriel | 90 jours |
+
+### 6.7 Frais de protocole
+
+Un frais de **3%** est prélevé sur chaque distribution pour :
+
+- 🔧 Maintenance et développement du protocole
+- 🛡️ Réserve de sécurité
+- 📈 Croissance de l'écosystème
+
+### 6.8 Cas d'usage
+
+#### Cas 1 : Groupe d'amis pour un projet commun
+
+```
+Configuration:
+- 6 amis veulent épargner pour un voyage
+- 0.5 EGLD/mois pendant 12 mois
+- Chacun dépose 6 EGLD de caution
+
+Résultat:
+- Pool mensuel : 3 EGLD (6 × 0.5)
+- Chaque membre reçoit 2 fois le pool (12 ÷ 6)
+- Total reçu par membre : 6 EGLD (2 × 3)
+- Aucun risque de défaut grâce à la caution
+```
+
+#### Cas 2 : Association d'entrepreneurs
+
+```
+Configuration:
+- 4 entrepreneurs
+- 5 EGLD/mois pendant 8 mois
+- Caution : 40 EGLD chacun
+
+Résultat:
+- Pool mensuel : 20 EGLD
+- Chaque membre reçoit 2 fois : 40 EGLD total
+- Capital disponible immédiat pour projets
+- Système d'épargne forcée transparent
+```
+
+### 6.9 Avantages vs Tontines Traditionnelles
+
+| Aspect | Tontine Traditionnelle | Cercle d'Investissement |
+|--------|------------------------|-------------------------|
+| **Confiance** | Basée sur réputation locale | Garantie par caution on-chain |
+| **Défaut** | Risque pour tous les membres | Caution couvre automatiquement |
+| **Transparence** | Opaque, gestionnaire humain | 100% on-chain, vérifiable |
+| **Géographie** | Limité à une zone | Global, accessible partout |
+| **Automatisation** | Manuelle | Smart contract automatique |
+| **Équité** | Parfois arbitraire | Mathématiquement prouvée |
+| **Traçabilité** | Aucune | Historique permanent blockchain |
+
+### 6.10 Sécurité et Audits
+
+Le smart contract Investment Circle implémente :
+
+- ✅ **Validation des entrées** : Tous les paramètres sont vérifiés
+- ✅ **Protection contre le reentrancy** : Modèle checks-effects-interactions
+- ✅ **Gestion des erreurs** : Messages d'erreur explicites
+- ✅ **Tests unitaires** : Couverture complète des scénarios
+- ✅ **Audit prévu** : Audit externe avant mainnet
+
+---
+
+## 7. Architecture technique
+
+### 7.1 Stack technologique
 
 #### Smart Contracts (Rust)
 
@@ -579,7 +816,7 @@ pub struct Circle {
 - **Redis** : Cache
 - **MultiversX API** : Indexation blockchain
 
-### 6.2 Smart Contracts détaillés
+### 7.2 Smart Contracts détaillés
 
 #### 📜 1. CircleManager.rs
 
@@ -649,7 +886,7 @@ Gestion de la trésorerie :
 - Réserve d'urgence (20% minimum)
 - Budget marketing (30% max)
 
-### 6.3 Sécurité
+### 7.3 Sécurité
 
 #### Mesures de sécurité :
 
@@ -662,9 +899,9 @@ Gestion de la trésorerie :
 
 ---
 
-## 7. Tokenomics $XCIRCLEXX
+## 8. Tokenomics $XCIRCLEXX
 
-### 7.1 Token $XCIRCLEX - Le Nombre Pi (π)
+### 8.1 Token $XCIRCLEX - Le Nombre Pi (π)
 
 Le token $XCIRCLEXX est basé sur le nombre **π (Pi)**, symbole mathématique universel du cercle. Cette référence n'est pas un hasard : le cercle est au cœur de notre écosystème.
 
@@ -692,7 +929,7 @@ Le token $XCIRCLEXX est basé sur le nombre **π (Pi)**, symbole mathématique u
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 7.2 Distribution Initiale
+### 8.2 Distribution Initiale
 
 | Allocation                                | Pourcentage | Tokens | Vesting                     | Utilisation                               |
 | ----------------------------------------- | ----------- | ------ | --------------------------- | ----------------------------------------- |
@@ -706,7 +943,7 @@ Le token $XCIRCLEXX est basé sur le nombre **π (Pi)**, symbole mathématique u
 | **Conseillers**                     | 3%          | ~9M    | 12 mois (cliff 3 mois)      | Expertise stratégique                    |
 | **Airdrop initial**                 | 2%          | ~6M    | Immédiat                   | Early adopters                            |
 
-### 7.3 Mécanisme de Burn Circulaire 🔥
+### 8.3 Mécanisme de Burn Circulaire 🔥
 
 Le burn est au cœur de la philosophie X-CIRCLE-X : seul l'engagement collectif permet la déflation.
 
@@ -744,7 +981,7 @@ Le burn est au cœur de la philosophie X-CIRCLE-X : seul l'engagement collectif 
 | 100 SC              | 100 XCX                | 3,000 XCX                | 36,500 XCX               |
 | 1,000 SC            | 1,000 XCX              | 30,000 XCX               | 365,000 XCX              |
 
-### 7.4 Récompenses du Cercle de Vie - Système π × 360
+### 8.4 Récompenses du Cercle de Vie - Système π × 360
 
 Le système de récompenses du Cercle de Vie est basé sur une formule unique qui combine la symbolique du cercle (360°) et du nombre π, avec un mécanisme de halving inspiré de Bitcoin.
 
@@ -844,8 +1081,241 @@ DIMANCHE  → CLAIM DAY ! → Récupération des tokens vers wallet
 | Bonus Starter (10%)     | (Récompense/nb_SC) × 10%    | Celui qui démarre le cycle             |
 | Bonus π% (cycle 360)   | Récompense × 3.14%          | Celui qui complète cycle #360, #720... |
 | Redistribution échec   | 100% aux signataires          | SC qui ont signé (en cas d'échec)     |
+| Bonus Parrainage       | 1% par filleul (max 360)      | Parrain avec filleuls actifs          |
 
-### 7.5 Utilité du Token
+---
+
+### 8.5 Système de Bonus Détaillé
+
+Le Cercle de Vie récompense différents types de comportements positifs via un système de bonus cumulables. Chaque bonus encourage une action spécifique qui bénéficie à l'ensemble de l'écosystème.
+
+#### 🚀 Bonus Starter (10%)
+
+Le **Bonus Starter** récompense celui qui initie le cycle quotidien en appelant `startDailyCycle()`.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    BONUS STARTER (10%)                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  🎯 OBJECTIF : Encourager le démarrage rapide des cycles   │
+│                                                             │
+│  📋 CONDITIONS :                                            │
+│  • Être le premier à appeler startDailyCycle()             │
+│  • Le cycle doit être complété avec succès                 │
+│                                                             │
+│  💰 CALCUL :                                                │
+│  Bonus = (Récompense totale / nombre_SC) × 10%             │
+│                                                             │
+│  📊 EXEMPLE avec 21 SC et 36,000 XCX de récompense :       │
+│  • Base par SC = 36,000 / 21 = 1,714.29 XCX               │
+│  • Bonus Starter = 1,714.29 × 10% = 171.43 XCX            │
+│                                                             │
+│  ✅ AVANTAGE : Incite les membres à être actifs tôt        │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### 🏆 Bonus Pioneer (3.14% = π%)
+
+Le **Bonus Pioneer** récompense les premiers membres qui ont créé leur SC périphérique et qui continuent à participer activement.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    BONUS PIONEER (π% = 3.14%)               │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  🎯 OBJECTIF : Récompenser les early adopters              │
+│                                                             │
+│  📋 CONDITIONS :                                            │
+│  • Avoir créé son SC dans les X premiers (configurable)    │
+│  • Être actif dans le cycle en cours                       │
+│  • Le cycle doit être complété avec succès                 │
+│                                                             │
+│  💰 CALCUL :                                                │
+│  Bonus = (Récompense totale / nombre_SC) × 3.14%           │
+│                                                             │
+│  📊 EXEMPLE avec 21 SC et 36,000 XCX de récompense :       │
+│  • Base par SC = 36,000 / 21 = 1,714.29 XCX               │
+│  • Bonus Pioneer = 1,714.29 × 3.14% = 53.83 XCX           │
+│                                                             │
+│  🌟 SYMBOLIQUE : π (3.14...) représente le cercle parfait │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### 💎 Bonus Dépôt (1% par EGLD supplémentaire)
+
+Le **Bonus Dépôt** récompense les membres qui déposent plus que le minimum requis (1 EGLD) lors de la création de leur SC.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 BONUS DÉPÔT (1% par EGLD)                   │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  🎯 OBJECTIF : Encourager les dépôts plus importants       │
+│                                                             │
+│  📋 CONDITIONS :                                            │
+│  • Avoir déposé plus de 1 EGLD à la création du SC        │
+│  • Être actif dans le cycle en cours                       │
+│  • Le cycle doit être complété avec succès                 │
+│                                                             │
+│  💰 CALCUL :                                                │
+│  Bonus = (Récompense/nb_SC) × (EGLD_déposés - 1) × 1%     │
+│                                                             │
+│  📊 EXEMPLES :                                              │
+│  ┌──────────────┬──────────────┬──────────────────────┐    │
+│  │ EGLD Déposé │ Bonus %      │ Bonus XCX (ex: 1714) │    │
+│  ├──────────────┼──────────────┼──────────────────────┤    │
+│  │ 1 EGLD       │ 0%           │ 0 XCX                │    │
+│  │ 2 EGLD       │ 1%           │ 17.14 XCX            │    │
+│  │ 5 EGLD       │ 4%           │ 68.57 XCX            │    │
+│  │ 10 EGLD      │ 9%           │ 154.29 XCX           │    │
+│  │ 20 EGLD      │ 19%          │ 325.71 XCX           │    │
+│  └──────────────┴──────────────┴──────────────────────┘    │
+│                                                             │
+│  💡 Les EGLD supplémentaires alimentent la liquidité       │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### 🔄 Bonus Cercle Complet (π% aux cycles 360, 720, 1080...)
+
+Le **Bonus Cercle Complet** est attribué au membre qui complète un cycle multiple de 360 (un cercle complet de 360°).
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              BONUS CERCLE COMPLET (π% = 3.14%)              │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  🎯 OBJECTIF : Célébrer les cercles parfaits               │
+│                                                             │
+│  📋 CONDITIONS :                                            │
+│  • Être celui qui signe pour compléter le cycle #360,      │
+│    #720, #1080, #1440, etc.                                │
+│  • Le cycle doit être complété avec succès                 │
+│                                                             │
+│  💰 CALCUL :                                                │
+│  Bonus = Récompense_totale_cycle × 3.14%                   │
+│                                                             │
+│  📊 EXEMPLES par ère :                                      │
+│  ┌──────────┬─────────────────┬──────────────────────┐     │
+│  │ Cycle    │ Récompense Base │ Bonus π%             │     │
+│  ├──────────┼─────────────────┼──────────────────────┤     │
+│  │ #360     │ 36,000 XCX      │ +1,130.40 XCX        │     │
+│  │ #720     │ 18,000 XCX      │ +565.20 XCX          │     │
+│  │ #1080    │ 9,000 XCX       │ +282.60 XCX          │     │
+│  │ #1440    │ 4,500 XCX       │ +141.30 XCX          │     │
+│  └──────────┴─────────────────┴──────────────────────┘     │
+│                                                             │
+│  🌟 "Compléter un cercle est récompensé par π"             │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### 👥 Bonus Parrainage (Referral)
+
+Le **Bonus Parrainage** récompense les membres qui invitent de nouveaux utilisateurs à rejoindre le Cercle de Vie. Système simple et puissant basé sur le nombre de filleuls actifs.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    BONUS PARRAINAGE                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  🎯 OBJECTIF : Favoriser la croissance organique           │
+│                                                             │
+│  📋 FORMULE SIMPLE :                                        │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │                                                     │   │
+│  │   Bonus Parrainage = 1% × nombre de filleuls actifs │   │
+│  │                                                     │   │
+│  │   Maximum : 360 filleuls = 360% de bonus           │   │
+│  │                                                     │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+│  📋 FONCTIONNEMENT :                                        │
+│                                                             │
+│  1. GÉNÉRATION DU LIEN                                     │
+│     • Chaque membre actif peut générer un lien de parrain  │
+│     • Lien unique lié à l'adresse du SC du parrain        │
+│                                                             │
+│  2. INSCRIPTION DU FILLEUL                                  │
+│     • Le nouveau membre utilise le lien pour créer son SC  │
+│     • Le lien parrain est enregistré on-chain              │
+│                                                             │
+│  3. CALCUL DU BONUS                                         │
+│     • Chaque filleul ACTIF donne +1% de bonus             │
+│     • Le bonus s'applique sur la récompense de base        │
+│     • Filleul inactif ou banni = ne compte pas             │
+│                                                             │
+│  📊 EXEMPLES :                                              │
+│  ┌───────────────┬────────────┬──────────────────────┐     │
+│  │ Filleuls      │ Bonus      │ Exemple (base 1714)  │     │
+│  ├───────────────┼────────────┼──────────────────────┤     │
+│  │ 1 filleul     │ +1%        │ +17.14 XCX           │     │
+│  │ 10 filleuls   │ +10%       │ +171.4 XCX           │     │
+│  │ 50 filleuls   │ +50%       │ +857 XCX             │     │
+│  │ 100 filleuls  │ +100%      │ +1,714 XCX           │     │
+│  │ 360 filleuls  │ +360% MAX  │ +6,171 XCX           │     │
+│  └───────────────┴────────────┴──────────────────────┘     │
+│                                                             │
+│  ⚡ RÈGLES :                                                │
+│  • Maximum 360 filleuls comptabilisés                      │
+│  • Le parrain doit être actif pour recevoir ses bonus      │
+│  • Seuls les filleuls ACTIFS sont comptés                  │
+│  • Symbolique : 360 filleuls = cercle parfait de parrainage│
+│                                                             │
+│  💡 STRATÉGIE :                                             │
+│  Un parrain avec 100 filleuls actifs double ses récompenses│
+│  à chaque cycle ! (base × 2 = base + 100% bonus)           │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### 📊 Tableau Récapitulatif des Bonus
+
+| Bonus | Pourcentage | Condition | Fréquence | Bénéficiaire |
+|-------|-------------|-----------|-----------|--------------|
+| **Starter** | 10% | Démarrer le cycle | Par cycle | 1 membre |
+| **Pioneer** | 3.14% (π) | Être early adopter | Par cycle | N premiers SC |
+| **Dépôt** | 1% par EGLD | Dépôt > 1 EGLD | Par cycle | Membres avec surplus |
+| **Cercle Complet** | 3.14% (π) | Compléter cycle #360, #720... | Tous les 360 cycles | 1 membre |
+| **Parrainage** | 1% par filleul (max 360%) | Avoir des filleuls actifs | Par cycle | Parrain |
+
+#### 💡 Stratégies pour Maximiser ses Bonus
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              STRATÉGIES DE MAXIMISATION                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  🥇 STRATÉGIE EARLY BIRD                                    │
+│  • Rejoindre tôt pour obtenir le statut Pioneer            │
+│  • Démarrer les cycles rapidement (Bonus Starter)          │
+│  • Viser les cycles #360, #720 (Bonus Cercle Complet)      │
+│                                                             │
+│  💎 STRATÉGIE WHALE                                         │
+│  • Déposer 10+ EGLD pour maximiser le Bonus Dépôt          │
+│  • Bonus Dépôt de 9%+ sur chaque cycle                     │
+│  • ROI plus rapide malgré l'investissement initial         │
+│                                                             │
+│  👥 STRATÉGIE SOCIAL                                        │
+│  • Parrainer un maximum de filleuls (jusqu'à 360)          │
+│  • 100 filleuls actifs = +100% bonus = x2 récompenses      │
+│  • Objectif cercle parfait : 360 filleuls = +360% bonus    │
+│                                                             │
+│  🔄 STRATÉGIE COMBINÉE (Optimale)                           │
+│  • Pioneer + Dépôt 5 EGLD + 50 filleuls actifs             │
+│  • Bonus potentiel : 3.14% + 4% + 50% = +57.14%            │
+│  • Multiplicateur significatif des récompenses             │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 8.6 Utilité du Token
 
 #### 1. Gouvernance DAO 🗳️
 
@@ -873,9 +1343,9 @@ DIMANCHE  → CLAIM DAY ! → Récupération des tokens vers wallet
 
 ---
 
-## 8. Système de Staking Circulaire (360°)
+## 9. Système de Staking Circulaire (360°)
 
-### 8.1 Concept des 360 Degrés
+### 9.1 Concept des 360 Degrés
 
 Le staking X-CIRCLE-X est basé sur la symbolique du cercle parfait : **360 degrés = 12 niveaux de lock × 30 jours**.
 
@@ -908,7 +1378,7 @@ Chaque niveau représente 30 jours supplémentaires de lock, jusqu'à 360 jours 
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 8.2 Les 12 Niveaux de Lock
+### 9.2 Les 12 Niveaux de Lock
 
 | Niveau       | Durée Lock         | Degrés         | APY de Base   | NFT Badge                |
 | ------------ | ------------------- | --------------- | ------------- | ------------------------ |
@@ -925,7 +1395,7 @@ Chaque niveau représente 30 jours supplémentaires de lock, jusqu'à 360 jours 
 | 11           | 330 jours           | 330°           | 38%           | Diamant                  |
 | **12** | **360 jours** | **360°** | **42%** | **Cercle Parfait** |
 
-### 8.3 Flexible Staking (Sans Lock)
+### 9.3 Flexible Staking (Sans Lock)
 
 Pour ceux qui veulent rester flexibles :
 
@@ -933,7 +1403,7 @@ Pour ceux qui veulent rester flexibles :
 | -------- | --- | ---------------------- | ----------------------- |
 | Flexible | 3%  | Retrait à tout moment | APY minimal, pas de NFT |
 
-### 8.4 Source des Récompenses Staking
+### 9.4 Source des Récompenses Staking
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -958,7 +1428,7 @@ Pour ceux qui veulent rester flexibles :
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 8.5 Vision Future : Phase 2 (Non Implémenté)
+### 9.5 Vision Future : Phase 2 (Non Implémenté)
 
 ⚠️ **ATTENTION : Cette section décrit une vision future qui n'est PAS encore implémentée.**
 
@@ -998,7 +1468,7 @@ Lorsque la pool initiale sera épuisée, plusieurs options sont envisageables po
 
 **Note importante :** Le staking Phase 1 est pleinement fonctionnel. La Phase 2 sera définie par la communauté via gouvernance DAO lorsque nécessaire.
 
-### 8.6 Avantages des Niveaux Élevés
+### 9.6 Avantages des Niveaux Élevés
 
 | Niveau       | Bonus Gouvernance | Accès Exclusif               |
 | ------------ | ----------------- | ----------------------------- |
@@ -1010,9 +1480,9 @@ Lorsque la pool initiale sera épuisée, plusieurs options sont envisageables po
 
 ---
 
-## 9. NFT Évolutif - Cercle de Réputation
+## 10. NFT Évolutif - Cercle de Réputation
 
-### 9.1 Concept du NFT Cercle
+### 10.1 Concept du NFT Cercle
 
 Chaque membre du Cercle de Vie possède un **NFT dynamique** qui évolue visuellement en fonction de ses cycles réussis. Le NFT représente un cercle central avec des points périphériques qui apparaissent progressivement.
 
@@ -1056,7 +1526,7 @@ Chaque membre du Cercle de Vie possède un **NFT dynamique** qui évolue visuell
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 9.2 Évolution du NFT
+### 10.2 Évolution du NFT
 
 | Cycles Réussis | Points Périphériques | Écart en Degrés | Rareté                  |
 | --------------- | ---------------------- | ----------------- | ------------------------ |
@@ -1074,7 +1544,7 @@ Chaque membre du Cercle de Vie possède un **NFT dynamique** qui évolue visuell
 | 330+            | 11                     | 32.7°            | Transcendant             |
 | **360+**  | **12**           | **30°**    | **CERCLE PARFAIT** |
 
-### 9.3 Design Visuel
+### 10.3 Design Visuel
 
 Le NFT est un cercle animé avec :
 
@@ -1083,7 +1553,7 @@ Le NFT est un cercle animé avec :
 - **Couleur** : Évolue selon la rareté (Commun=Gris, Rare=Bleu, Épique=Violet, Légendaire=Or, Mythique=Arc-en-ciel)
 - **Animation** : Les points orbitent lentement autour du centre
 
-### 9.4 Bonus NFT
+### 10.4 Bonus NFT
 
 | Niveau NFT               | Bonus Staking  | Bonus Vote DAO | Avantages Spéciaux              |
 | ------------------------ | -------------- | -------------- | -------------------------------- |
@@ -1095,7 +1565,7 @@ Le NFT est un cercle animé avec :
 | Mythique                 | +35%           | 2.5x           | Gouvernance VIP                  |
 | **CERCLE PARFAIT** | **+50%** | **3x**   | **Conseil des Fondateurs** |
 
-### 9.5 Marketplace NFT
+### 10.5 Marketplace NFT
 
 Les NFT peuvent être échangés sur le marketplace avec :
 
@@ -1105,13 +1575,13 @@ Les NFT peuvent être échangés sur le marketplace avec :
 
 ---
 
-## 10. Pool de Liquidité EGLD/XCIRCLEX
+## 11. Pool de Liquidité EGLD/XCIRCLEX
 
-### 10.1 Circulation Quotidienne
+### 11.1 Circulation Quotidienne
 
 Chaque jour, **1 EGLD circule** du SC0 (smart contract central) vers les SC périphériques actifs. Ce mécanisme assure une activité constante dans l'écosystème et récompense les participants actifs.
 
-### 10.2 Alimentation de la Pool - Distribution des EGLD
+### 11.2 Alimentation de la Pool - Distribution des EGLD
 
 Lorsqu'un utilisateur crée un SC périphérique en déposant **1 EGLD**, la distribution suivante s'applique :
 
@@ -1152,7 +1622,7 @@ Lorsqu'un utilisateur crée un SC périphérique en déposant **1 EGLD**, la dis
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 10.3 Processus de Création de Liquidité
+### 11.3 Processus de Création de Liquidité
 
 La création de liquidité sur xExchange est effectuée **manuellement par l'admin propriétaire** du contrat SC0 :
 
@@ -1181,7 +1651,7 @@ La création de liquidité sur xExchange est effectuée **manuellement par l'adm
 
 **Note importante :** La création de la paire de liquidité et l'ajout aux pools xExchange sont effectués manuellement par l'administrateur du protocole. Cela permet un contrôle sur le timing et les conditions de marché optimales.
 
-### 10.4 Croissance de la Pool
+### 11.4 Croissance de la Pool
 
 Avec la distribution actuelle (70% de 96.86% ≈ 67.8% par EGLD déposé) :
 
@@ -1193,7 +1663,7 @@ Avec la distribution actuelle (70% de 96.86% ≈ 67.8% par EGLD déposé) :
 | 5,000 SC             | ~3,390 EGLD          | ~1,455 EGLD   | ~157 EGLD              |
 | 10,000 SC            | ~6,780 EGLD          | ~2,910 EGLD   | ~314 EGLD              |
 
-### 10.5 Listing xExchange
+### 11.5 Listing xExchange
 
 La paire de liquidité est déployée sur **xExchange** (DEX officiel MultiversX) :
 
@@ -1203,7 +1673,7 @@ La paire de liquidité est déployée sur **xExchange** (DEX officiel MultiversX
 
 **Note :** Les frais de swap sont gérés par xExchange selon leurs règles standard. Le protocole X-CIRCLE-X ne prélève pas de frais additionnels sur les trades.
 
-### 10.6 Stratégie IDO et Lancement
+### 11.6 Stratégie IDO et Lancement
 
 #### Phase 1 : Seed Liquidity (Avant IDO)
 
@@ -1329,9 +1799,9 @@ PROTECTION CONTRE LA MANIPULATION :
 
 ---
 
-## 11. Gouvernance DAO
+## 12. Gouvernance DAO
 
-### 11.1 Structure DAO
+### 12.1 Structure DAO
 
 ```
 ┌────────────────────────────────────────────┐
@@ -1363,7 +1833,7 @@ PROTECTION CONTRE LA MANIPULATION :
 └────────────────────────────────────────────┘
 ```
 
-### 11.2 Processus de proposition
+### 12.2 Processus de proposition
 
 1. **Soumission** : Tout holder avec 10,000+ XCIRCLE
 2. **Discussion** : 7 jours sur forum (Discord/Forum dédié)
@@ -1371,7 +1841,7 @@ PROTECTION CONTRE LA MANIPULATION :
 4. **Timelock** : 48h avant exécution
 5. **Exécution** : Automatique par smart contract
 
-### 11.3 Types de propositions
+### 12.3 Types de propositions
 
 - **Paramètres** : Frais, durées, montants minimums
 - **Budget** : Allocation trésorerie
@@ -1381,7 +1851,7 @@ PROTECTION CONTRE LA MANIPULATION :
 
 ---
 
-## 12. Roadmap
+## 13. Roadmap
 
 ### ✅ Phase 0 : MVP Actuel (Décembre 2025) - COMPLÉTÉ
 
@@ -1527,9 +1997,9 @@ PROTECTION CONTRE LA MANIPULATION :
 
 ---
 
-## 13. Équipe et partenaires
+## 14. Équipe et partenaires
 
-### 13.1 Fondateur Solo - Approche Lean Startup
+### 14.1 Fondateur Solo - Approche Lean Startup
 
 X-CIRCLE-X est développé selon le modèle **"Solo Founder + MVP First"**, une approche validée par de nombreux projets Web3 réussis :
 
@@ -1561,7 +2031,7 @@ X-CIRCLE-X est développé selon le modèle **"Solo Founder + MVP First"**, une 
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 13.2 Plan de Recrutement Progressif
+### 14.2 Plan de Recrutement Progressif
 
 | Phase                 | Timing     | Recrutement                   | Financement       |
 | --------------------- | ---------- | ----------------------------- | ----------------- |
@@ -1570,7 +2040,7 @@ X-CIRCLE-X est développé selon le modèle **"Solo Founder + MVP First"**, une 
 | **Beta**        | Q3 2026    | +1-2 développeurs            | IDO / Grants      |
 | **Mainnet**     | Q4 2026    | Équipe complète (5-8)       | Revenus protocole |
 
-### 13.3 Rôles Prioritaires à Recruter
+### 14.3 Rôles Prioritaires à Recruter
 
 **Court terme (bénévoles/contributeurs)** :
 
@@ -1590,7 +2060,7 @@ X-CIRCLE-X est développé selon le modèle **"Solo Founder + MVP First"**, une 
 - 📱 **Mobile Developer** : App iOS/Android
 - 🏛️ **Legal Advisor** : Compliance
 
-### 13.4 Programme Contributeurs
+### 14.4 Programme Contributeurs
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -1611,14 +2081,14 @@ X-CIRCLE-X est développé selon le modèle **"Solo Founder + MVP First"**, une 
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 13.5 Conseillers Recherchés
+### 14.5 Conseillers Recherchés
 
 - Expert MultiversX blockchain
 - Expert DeFi/Tokenomics
 - Expert légal/compliance crypto
 - Expert marketing Web3
 
-### 13.6 Partenariats Stratégiques Ciblés
+### 14.6 Partenariats Stratégiques Ciblés
 
 - **MultiversX** : Support technique, grants
 - **xSafe** : Intégration multi-signature
@@ -1628,9 +2098,9 @@ X-CIRCLE-X est développé selon le modèle **"Solo Founder + MVP First"**, une 
 
 ---
 
-## 14. Aspects légaux et compliance
+## 15. Aspects légaux et compliance
 
-### 14.1 Structure juridique
+### 15.1 Structure juridique
 
 **Option 1 : DAO LLC (Wyoming, USA)**
 
@@ -1644,7 +2114,7 @@ X-CIRCLE-X est développé selon le modèle **"Solo Founder + MVP First"**, une 
 - Stabilité légale
 - Acceptation internationale
 
-### 14.2 Compliance réglementaire
+### 15.2 Compliance réglementaire
 
 #### Token $XCIRCLEX : Security ou Utility ?
 
@@ -1665,7 +2135,7 @@ X-CIRCLE-X est développé selon le modèle **"Solo Founder + MVP First"**, une 
 - **Tier 2** (1000-10,000 EUR) : KYC léger (email, téléphone)
 - **Tier 3** (> 10,000 EUR) : KYC complet via partenaire certifié
 
-### 14.3 Privacy & RGPD
+### 15.3 Privacy & RGPD
 
 **Données collectées (minimum)** :
 
@@ -1681,9 +2151,9 @@ X-CIRCLE-X est développé selon le modèle **"Solo Founder + MVP First"**, une 
 
 ---
 
-## 15. Risques et mitigation
+## 16. Risques et mitigation
 
-### 15.1 Risques techniques
+### 16.1 Risques techniques
 
 | Risque                  | Impact        | Probabilité | Mitigation                                     |
 | ----------------------- | ------------- | ------------ | ---------------------------------------------- |
@@ -1691,7 +2161,7 @@ X-CIRCLE-X est développé selon le modèle **"Solo Founder + MVP First"**, une 
 | Congestion blockchain   | ⚠️ Moyen    | Faible       | MultiversX haute performance                   |
 | Perte de clés privées | ⚠️ Élevé  | Moyen        | Formation utilisateurs, récupération sociale |
 
-### 15.2 Risques économiques
+### 16.2 Risques économiques
 
 | Risque               | Impact        | Probabilité | Mitigation                              |
 | -------------------- | ------------- | ------------ | --------------------------------------- |
@@ -1699,7 +2169,7 @@ X-CIRCLE-X est développé selon le modèle **"Solo Founder + MVP First"**, une 
 | Manque de liquidité | ⚠️ Moyen    | Moyen        | Market making, incitations LP           |
 | Death spiral token   | ⚠️ Critique | Faible       | Tokenomics robuste, utilité réelle    |
 
-### 15.3 Risques sociaux
+### 16.3 Risques sociaux
 
 | Risque                | Impact        | Probabilité | Mitigation                           |
 | --------------------- | ------------- | ------------ | ------------------------------------ |
@@ -1707,7 +2177,7 @@ X-CIRCLE-X est développé selon le modèle **"Solo Founder + MVP First"**, une 
 | Attaques Sybil        | ⚠️ Moyen    | Moyen        | KYC léger, coût d'entrée          |
 | Gouvernance capturée | ⚠️ Critique | Faible       | Distribution large, quadratic voting |
 
-### 15.4 Risques légaux
+### 16.4 Risques légaux
 
 | Risque                  | Impact        | Probabilité | Mitigation                            |
 | ----------------------- | ------------- | ------------ | ------------------------------------- |
@@ -1717,9 +2187,9 @@ X-CIRCLE-X est développé selon le modèle **"Solo Founder + MVP First"**, une 
 
 ---
 
-## 16. Idées et Recommandations Futures
+## 17. Idées et Recommandations Futures
 
-### 16.1 Extensions du Cercle de Vie
+### 17.1 Extensions du Cercle de Vie
 
 #### Cercles Thématiques
 
@@ -1735,7 +2205,7 @@ X-CIRCLE-X est développé selon le modèle **"Solo Founder + MVP First"**, une 
 - **Saisons** : Événements spéciaux avec récompenses bonus
 - **Challenges** : Défis communautaires avec rewards exclusifs
 
-### 16.2 Intégrations Suggérées
+### 17.2 Intégrations Suggérées
 
 #### DeFi Composability
 
@@ -1751,7 +2221,7 @@ X-CIRCLE-X est développé selon le modèle **"Solo Founder + MVP First"**, une 
 - **Referral Program** : Récompenses pour invitations
 - **Guildes** : Regroupements de cercles par intérêt
 
-### 16.3 Évolutions Techniques
+### 17.3 Évolutions Techniques
 
 #### Cross-Chain
 
@@ -1766,7 +2236,7 @@ X-CIRCLE-X est développé selon le modèle **"Solo Founder + MVP First"**, une 
 - **Widget** : Suivi rapide sur écran d'accueil
 - **Biométrie** : Signature par empreinte/Face ID
 
-### 16.4 Économie Circulaire
+### 17.4 Économie Circulaire
 
 #### Partenariats Commerce
 
