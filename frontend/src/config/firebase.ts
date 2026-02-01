@@ -1,6 +1,7 @@
 import { initializeApp, FirebaseApp } from 'firebase/app'
 import { getFirestore, Firestore } from 'firebase/firestore'
 import { getAuth, Auth } from 'firebase/auth'
+import { getStorage, FirebaseStorage } from 'firebase/storage'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -14,6 +15,7 @@ const firebaseConfig = {
 let app: FirebaseApp | null = null
 let db: Firestore | null = null
 let auth: Auth | null = null
+let storage: FirebaseStorage | null = null
 
 // Check if Firebase is configured
 export const isFirebaseConfigured = (): boolean => {
@@ -23,8 +25,18 @@ export const isFirebaseConfigured = (): boolean => {
   )
 }
 
+// Check if Firebase Storage is configured
+export const isStorageConfigured = (): boolean => {
+  const bucket = import.meta.env.VITE_FIREBASE_STORAGE_BUCKET
+  const isConfigured = !!(bucket && bucket.length > 0 && bucket !== 'undefined')
+  if (!isConfigured) {
+    console.warn('Firebase Storage not configured. VITE_FIREBASE_STORAGE_BUCKET is missing or empty.')
+  }
+  return isConfigured
+}
+
 // Initialize Firebase only if configured
-export const initializeFirebase = (): { app: FirebaseApp; db: Firestore; auth: Auth } | null => {
+export const initializeFirebase = (): { app: FirebaseApp; db: Firestore; auth: Auth; storage: FirebaseStorage } | null => {
   if (!isFirebaseConfigured()) {
     console.warn('Firebase is not configured. Chat and Forum features will be disabled.')
     return null
@@ -34,15 +46,17 @@ export const initializeFirebase = (): { app: FirebaseApp; db: Firestore; auth: A
     app = initializeApp(firebaseConfig)
     db = getFirestore(app)
     auth = getAuth(app)
+    storage = getStorage(app)
   }
 
-  return { app, db: db!, auth: auth! }
+  return { app, db: db!, auth: auth!, storage: storage! }
 }
 
 // Get Firebase instances
 export const getFirebaseApp = () => app
 export const getFirebaseDb = () => db
 export const getFirebaseAuth = () => auth
+export const getFirebaseStorage = () => storage
 
 // Export for convenience
-export { app, db, auth }
+export { app, db, auth, storage }

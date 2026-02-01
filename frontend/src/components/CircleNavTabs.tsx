@@ -45,13 +45,14 @@ export function CircleNavTabs({ activeTab, onTabChange }: CircleNavTabsProps) {
               fontWeight: 500,
               fontSize: '14px',
               transition: 'all 0.2s',
-              border: activeTab === tab.id ? 'none' : '1px solid rgba(255,255,255,0.1)',
+              border: activeTab === tab.id ? 'none' : '1px solid rgba(255,255,255,0.3)',
               background: activeTab === tab.id
                 ? 'linear-gradient(to right, #9333ea, #db2777)'
-                : 'rgba(255,255,255,0.05)',
-              color: activeTab === tab.id ? 'white' : '#d1d5db',
+                : 'rgba(45, 31, 78, 0.9)',
+              color: activeTab === tab.id ? 'white' : '#e9d5ff',
               cursor: 'pointer',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              backdropFilter: 'blur(8px)'
             }}
           >
             <span>{tab.isLogoIcon ? <XCircleLogo size={20} animate={activeTab === tab.id} /> : tab.icon}</span>

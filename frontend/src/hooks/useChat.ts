@@ -4,7 +4,10 @@ import {
   ChatChannel,
   OnlineUser,
   PrivateConversation,
+  ReplyTo,
+  MediaAttachment,
   DEFAULT_CHANNELS,
+  AVAILABLE_REACTIONS,
   getChannels,
   sendMessage,
   subscribeToMessages,
@@ -14,9 +17,15 @@ import {
   subscribeToOnlineUsers,
   signInWithMultiversX,
   updateOnlineStatus,
-  formatAddress
+  formatAddress,
+  toggleReaction,
+  uploadMedia,
+  sendMessageWithMedia,
+  uploadVoiceMessage,
+  sendVoiceMessage
 } from '../services/chatService'
 import { isFirebaseConfigured, initializeFirebase } from '../config/firebase'
+import { getLocalProfile } from '../services/profileService'
 
 interface UseChatReturn {
   // State
@@ -30,15 +39,24 @@ interface UseChatReturn {
   onlineUsers: OnlineUser[]
   privateConversations: PrivateConversation[]
   currentPrivateChat: string | null // Address of the person we're chatting with
+  replyingTo: ChatMessage | null
+  isUploading: boolean
+  uploadProgress: number
 
   // Actions
   setCurrentChannel: (channel: ChatChannel) => void
-  sendChannelMessage: (content: string) => Promise<boolean>
+  sendChannelMessage: (content: string, replyTo?: ReplyTo) => Promise<boolean>
   startPrivateChat: (address: string) => void
   sendPrivateChatMessage: (content: string) => Promise<boolean>
   closePrivateChat: () => void
   authenticate: (address: string) => Promise<boolean>
   clearError: () => void
+  // New actions
+  setReplyingTo: (message: ChatMessage | null) => void
+  handleReaction: (messageId: string, emoji: string, currentReactions?: Record<string, string[]>) => Promise<boolean>
+  sendMediaMessage: (file: File, content?: string) => Promise<boolean>
+  sendVoiceMsg: (audioBlob: Blob, duration: number) => Promise<boolean>
+  availableReactions: string[]
 }
 
 export function useChat(userAddress: string | undefined): UseChatReturn {
@@ -52,10 +70,22 @@ export function useChat(userAddress: string | undefined): UseChatReturn {
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([])
   const [privateConversations, setPrivateConversations] = useState<PrivateConversation[]>([])
   const [currentPrivateChat, setCurrentPrivateChat] = useState<string | null>(null)
+  const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
 
   const messagesUnsubscribeRef = useRef<(() => void) | null>(null)
   const onlineUsersUnsubscribeRef = useRef<(() => void) | null>(null)
   const privateChatUnsubscribeRef = useRef<(() => void) | null>(null)
+
+  // Get user display name from profile or fallback to formatted address
+  const getUserDisplayName = useCallback((address: string): string => {
+    const profile = getLocalProfile(address)
+    if (profile?.displayName && profile.displayName.trim()) {
+      return profile.displayName
+    }
+    return formatAddress(address)
+  }, [])
 
   // Initialize Firebase if configured
   useEffect(() => {
@@ -94,7 +124,9 @@ export function useChat(userAddress: string | undefined): UseChatReturn {
   useEffect(() => {
     if (!userAddress || !isAuthenticated) return
 
-    updateOnlineStatus(userAddress, true)
+    // Update online status with user's display name
+    const displayName = getUserDisplayName(userAddress)
+    updateOnlineStatus(userAddress, true, displayName)
 
     // Set offline when leaving
     const handleBeforeUnload = () => {
@@ -106,7 +138,7 @@ export function useChat(userAddress: string | undefined): UseChatReturn {
       window.removeEventListener('beforeunload', handleBeforeUnload)
       updateOnlineStatus(userAddress, false)
     }
-  }, [userAddress, isAuthenticated])
+  }, [userAddress, isAuthenticated, getUserDisplayName])
 
   // Load channels
   useEffect(() => {
@@ -198,7 +230,7 @@ export function useChat(userAddress: string | undefined): UseChatReturn {
   }, [isConfigured, isAuthenticated, userAddress, currentPrivateChat])
 
   // Send message to current channel
-  const sendChannelMessage = useCallback(async (content: string): Promise<boolean> => {
+  const sendChannelMessage = useCallback(async (content: string, replyToData?: ReplyTo): Promise<boolean> => {
     if (!userAddress || !currentChannel || !content.trim()) return false
 
     try {
@@ -206,15 +238,133 @@ export function useChat(userAddress: string | undefined): UseChatReturn {
         currentChannel.id,
         content.trim(),
         userAddress,
-        formatAddress(userAddress)
+        getUserDisplayName(userAddress),
+        replyToData || (replyingTo ? {
+          messageId: replyingTo.id,
+          sender: replyingTo.sender,
+          content: replyingTo.content
+        } : undefined)
       )
+      if (result) {
+        setReplyingTo(null) // Clear reply after sending
+      }
       return !!result
     } catch (err) {
       console.error('Error sending message:', err)
       setError('Failed to send message')
       return false
     }
+  }, [userAddress, currentChannel, replyingTo, getUserDisplayName])
+
+  // Handle reaction toggle
+  const handleReaction = useCallback(async (
+    messageId: string,
+    emoji: string,
+    currentReactions?: Record<string, string[]>
+  ): Promise<boolean> => {
+    if (!userAddress || !currentChannel) return false
+
+    try {
+      return await toggleReaction(
+        currentChannel.id,
+        messageId,
+        emoji,
+        userAddress,
+        currentReactions
+      )
+    } catch (err) {
+      console.error('Error toggling reaction:', err)
+      setError('Failed to react')
+      return false
+    }
   }, [userAddress, currentChannel])
+
+  // Send media message
+  const sendMediaMessage = useCallback(async (file: File, content?: string): Promise<boolean> => {
+    if (!userAddress || !currentChannel) return false
+
+    try {
+      setIsUploading(true)
+      setUploadProgress(0)
+
+      // Upload media
+      setUploadProgress(30)
+      const media = await uploadMedia(currentChannel.id, file, userAddress)
+      setUploadProgress(70)
+
+      // Send message with media
+      const result = await sendMessageWithMedia(
+        currentChannel.id,
+        content || '',
+        userAddress,
+        getUserDisplayName(userAddress),
+        media,
+        replyingTo ? {
+          messageId: replyingTo.id,
+          sender: replyingTo.sender,
+          content: replyingTo.content
+        } : undefined
+      )
+
+      setUploadProgress(100)
+      if (result) {
+        setReplyingTo(null)
+      }
+      return !!result
+    } catch (err) {
+      console.error('Error sending media message:', err)
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('Failed to send media')
+      }
+      return false
+    } finally {
+      setIsUploading(false)
+      setUploadProgress(0)
+    }
+  }, [userAddress, currentChannel, replyingTo, getUserDisplayName])
+
+  // Send voice message
+  const sendVoiceMsg = useCallback(async (audioBlob: Blob, duration: number): Promise<boolean> => {
+    if (!userAddress || !currentChannel) return false
+
+    try {
+      setIsUploading(true)
+      setUploadProgress(30)
+
+      // Upload voice
+      const voiceUrl = await uploadVoiceMessage(currentChannel.id, audioBlob, userAddress)
+      setUploadProgress(70)
+
+      // Send voice message
+      const result = await sendVoiceMessage(
+        currentChannel.id,
+        userAddress,
+        getUserDisplayName(userAddress),
+        voiceUrl,
+        duration,
+        replyingTo ? {
+          messageId: replyingTo.id,
+          sender: replyingTo.sender,
+          content: replyingTo.content
+        } : undefined
+      )
+
+      setUploadProgress(100)
+      if (result) {
+        setReplyingTo(null)
+      }
+      return !!result
+    } catch (err) {
+      console.error('Error sending voice message:', err)
+      setError('Failed to send voice message')
+      return false
+    } finally {
+      setIsUploading(false)
+      setUploadProgress(0)
+    }
+  }, [userAddress, currentChannel, replyingTo, getUserDisplayName])
 
   // Start private chat
   const startPrivateChat = useCallback((address: string) => {
@@ -232,7 +382,7 @@ export function useChat(userAddress: string | undefined): UseChatReturn {
         userAddress,
         currentPrivateChat,
         content.trim(),
-        formatAddress(userAddress)
+        getUserDisplayName(userAddress)
       )
       return !!result
     } catch (err) {
@@ -240,7 +390,7 @@ export function useChat(userAddress: string | undefined): UseChatReturn {
       setError('Failed to send message')
       return false
     }
-  }, [userAddress, currentPrivateChat])
+  }, [userAddress, currentPrivateChat, getUserDisplayName])
 
   // Close private chat
   const closePrivateChat = useCallback(() => {
@@ -264,13 +414,21 @@ export function useChat(userAddress: string | undefined): UseChatReturn {
     onlineUsers,
     privateConversations,
     currentPrivateChat,
+    replyingTo,
+    isUploading,
+    uploadProgress,
     setCurrentChannel,
     sendChannelMessage,
     startPrivateChat,
     sendPrivateChatMessage,
     closePrivateChat,
     authenticate,
-    clearError
+    clearError,
+    setReplyingTo,
+    handleReaction,
+    sendMediaMessage,
+    sendVoiceMsg,
+    availableReactions: AVAILABLE_REACTIONS
   }
 }
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useGetAccountInfo, useGetPendingTransactions } from 'lib';
 import * as circleOfLifeService from '../services/circleOfLifeService';
-import { CircleInfo, CycleStats, ScStats, RewardsInfo, CanClaimResult, BurnStats, AutoSignStatus, StarterBonusInfo, OptionFInfo, PioneerInfo, DepositBonusInfo, DistributionStats } from '../services/circleOfLifeService';
+import { CircleInfo, CycleStats, ScStats, RewardsInfo, CanClaimResult, BurnStats, AutoSignStatus, StarterBonusInfo, OptionFInfo, PioneerInfo, DepositBonusInfo, ReferralBonusInfo, DistributionStats } from '../services/circleOfLifeService';
 
 export interface UseCircleOfLifeReturn {
   // State
@@ -64,11 +64,14 @@ export interface UseCircleOfLifeReturn {
   // Deposit bonus info (1 EGLD = 1%, max 360%)
   depositBonusInfo: DepositBonusInfo;
 
+  // Referral bonus info (1 referral = 1%, max 360%)
+  referralBonusInfo: ReferralBonusInfo;
+
   // Distribution stats (EGLD distribution: 3.14% treasury, 70% liquidity, 30% DAO)
   distributionStats: DistributionStats;
 
   // Actions
-  joinCircle: (entryFee?: string) => Promise<any>;
+  joinCircle: (entryFee?: string, referrerAddress?: string) => Promise<any>;
   signAndForward: () => Promise<any>;
   startDailyCycle: () => Promise<any>;
   setActive: () => Promise<any>;
@@ -99,7 +102,7 @@ export interface UseCircleOfLifeReturn {
   // Legacy aliases
   myContract: string | null;
   activeContracts: string[];
-  createPeripheralContract: () => Promise<any>;
+  createPeripheralContract: (referrerAddress?: string) => Promise<any>;
 }
 
 export const useCircleOfLife = (): UseCircleOfLifeReturn => {
@@ -207,6 +210,14 @@ export const useCircleOfLife = (): UseCircleOfLifeReturn => {
     maxBonusPercent: 360
   });
 
+  // Referral bonus info state (1 referral = 1%, max 360%)
+  const [referralBonusInfo, setReferralBonusInfo] = useState<ReferralBonusInfo>({
+    count: 0,
+    bonusPercent: 0,
+    bonusBps: 0,
+    remainingSlots: 360
+  });
+
   // Distribution stats state (EGLD distribution: 3.14% treasury, 70% liquidity, 30% DAO)
   const [distributionStats, setDistributionStats] = useState<DistributionStats>({
     totalDistributedTreasury: '0',
@@ -233,6 +244,14 @@ export const useCircleOfLife = (): UseCircleOfLifeReturn => {
         circleOfLifeService.isPaused()
       ]);
 
+      console.log('[useCircleOfLife] Essential data loaded:', {
+        circleInfo: infoResult,
+        activeContracts: contractsResult,
+        activeContractsCount: contractsResult?.length || 0,
+        cycleHolder: cycleHolderResult,
+        isPaused: pausedResult
+      });
+
       setCircleInfo(infoResult);
       setActiveContracts(contractsResult);
       setCycleHolder(cycleHolderResult);
@@ -240,7 +259,7 @@ export const useCircleOfLife = (): UseCircleOfLifeReturn => {
 
       return contractsResult;
     } catch (err: any) {
-      console.error('Error loading essential data:', err);
+      console.error('[useCircleOfLife] Error loading essential data:', err);
       throw err;
     }
   }, []);
@@ -315,7 +334,7 @@ export const useCircleOfLife = (): UseCircleOfLifeReturn => {
     if (!address) return;
 
     try {
-      const [isMemberResult, isActiveResult, isMyTurnResult, myContractResult, hasPreSignedResult, hasSignedThisCycleResult, pendingRewardsResult, canClaimResult, autoSignResult, pioneerInfoResult, depositBonusResult] = await Promise.all([
+      const [isMemberResult, isActiveResult, isMyTurnResult, myContractResult, hasPreSignedResult, hasSignedThisCycleResult, pendingRewardsResult, canClaimResult, autoSignResult, pioneerInfoResult, depositBonusResult, referralBonusResult] = await Promise.all([
         circleOfLifeService.isMember(address),
         circleOfLifeService.isActive(address),
         circleOfLifeService.isMyTurn(address),
@@ -326,7 +345,8 @@ export const useCircleOfLife = (): UseCircleOfLifeReturn => {
         circleOfLifeService.canClaimRewards(address),
         circleOfLifeService.getAutoSignStatus(address),
         circleOfLifeService.getPioneerInfo(address),
-        circleOfLifeService.getDepositBonusInfo(address)
+        circleOfLifeService.getDepositBonusInfo(address),
+        circleOfLifeService.getReferralBonusInfo(address)
       ]);
 
       setIsMemberState(isMemberResult);
@@ -340,6 +360,7 @@ export const useCircleOfLife = (): UseCircleOfLifeReturn => {
       setAutoSignStatus(autoSignResult);
       setPioneerInfo(pioneerInfoResult);
       setDepositBonusInfo(depositBonusResult);
+      setReferralBonusInfo(referralBonusResult);
     } catch (err: any) {
       console.error('Error loading user data:', err);
     }
@@ -388,8 +409,10 @@ export const useCircleOfLife = (): UseCircleOfLifeReturn => {
 
   /**
    * Rejoindre le cercle
+   * @param entryFee - Frais d'entree en EGLD (defaut: 1)
+   * @param referrerAddress - Adresse optionnelle du parrain
    */
-  const joinCircle = async (entryFee: string = '1') => {
+  const joinCircle = async (entryFee: string = '1', referrerAddress?: string) => {
     if (!address) {
       setError('Wallet non connecte');
       return null;
@@ -399,7 +422,7 @@ export const useCircleOfLife = (): UseCircleOfLifeReturn => {
     setError(null);
 
     try {
-      const result = await circleOfLifeService.joinCircle(address, entryFee);
+      const result = await circleOfLifeService.joinCircle(address, entryFee, referrerAddress);
       return result;
     } catch (err: any) {
       setError(err.message || 'Erreur lors de l\'adhesion');
@@ -777,6 +800,9 @@ export const useCircleOfLife = (): UseCircleOfLifeReturn => {
     // Deposit bonus info (1 EGLD = 1%, max 360%)
     depositBonusInfo,
 
+    // Referral bonus info (1 referral = 1%, max 360%)
+    referralBonusInfo,
+
     // Distribution stats (EGLD distribution: 3.14% treasury, 70% liquidity, 30% DAO)
     distributionStats,
 
@@ -812,7 +838,7 @@ export const useCircleOfLife = (): UseCircleOfLifeReturn => {
     // Legacy aliases (pour compatibilite avec l'ancien code)
     myContract: myContractAddress, // Adresse du SC peripherique de l'utilisateur
     activeContracts: activeContracts,
-    createPeripheralContract: () => joinCircle('1')
+    createPeripheralContract: (referrerAddress?: string) => joinCircle('1', referrerAddress)
   };
 };
 

@@ -1,6 +1,7 @@
 // Export hooks here
 export * from './useCircle';
 export * from './useCircleOfLife';
+export * from './useInvestmentCircle';
 export * from './useNotifications';
 export * from './useTransactionNotifications';
 export * from './useGetUserHerotag';

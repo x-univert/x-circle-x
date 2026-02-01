@@ -24,6 +24,15 @@ export interface NFT {
   royalties?: number;
 }
 
+export interface PostalAddress {
+  street?: string;
+  city?: string;
+  postalCode?: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
 export interface ExtendedUserProfile {
   displayName: string;
   bio: string;
@@ -31,10 +40,116 @@ export interface ExtendedUserProfile {
   avatarUrl?: string;
   avatarNftId?: string;
   ipfsCid?: string;
+  postalAddress?: PostalAddress;
   updatedAt: number;
 }
 
 const PROFILE_STORAGE_KEY_PREFIX = 'xcirclex_profile_';
+
+// ============================================================================
+// GEOCODING FUNCTIONS
+// ============================================================================
+
+// Cache for geocoded addresses to avoid repeated API calls
+const geocodeCache: Map<string, { lat: number; lng: number }> = new Map();
+
+/**
+ * Geocode a city/country to lat/lng using OpenStreetMap Nominatim (free)
+ */
+export const geocodeAddress = async (city?: string, country?: string): Promise<{ lat: number; lng: number } | null> => {
+  if (!city && !country) return null;
+
+  const cacheKey = `${city || ''}-${country || ''}`.toLowerCase();
+
+  // Check cache first
+  if (geocodeCache.has(cacheKey)) {
+    return geocodeCache.get(cacheKey) || null;
+  }
+
+  try {
+    const query = [city, country].filter(Boolean).join(', ');
+    const encodedQuery = encodeURIComponent(query);
+
+    // Use OpenStreetMap Nominatim (free, no API key required)
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodedQuery}&limit=1`,
+      {
+        headers: {
+          'User-Agent': 'X-CIRCLE-X-App/1.0' // Required by Nominatim
+        }
+      }
+    );
+
+    if (!response.ok) {
+      console.error('Geocoding error:', response.statusText);
+      return null;
+    }
+
+    const results = await response.json();
+
+    if (results && results.length > 0) {
+      const result = {
+        lat: parseFloat(results[0].lat),
+        lng: parseFloat(results[0].lon)
+      };
+      // Cache the result
+      geocodeCache.set(cacheKey, result);
+      return result;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Geocoding error:', error);
+    return null;
+  }
+};
+
+// ============================================================================
+// MAP DATA FUNCTIONS
+// ============================================================================
+
+/**
+ * Get all profiles with postal addresses for the satellite map
+ */
+export const getAllProfilesWithAddresses = (): Array<{
+  address: string;
+  displayName: string;
+  postalAddress: PostalAddress;
+  avatarUrl?: string;
+}> => {
+  const profiles: Array<{
+    address: string;
+    displayName: string;
+    postalAddress: PostalAddress;
+    avatarUrl?: string;
+  }> = [];
+
+  try {
+    // Scan all localStorage keys for profiles
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(PROFILE_STORAGE_KEY_PREFIX)) {
+        const stored = localStorage.getItem(key);
+        if (stored) {
+          const profile = JSON.parse(stored) as ExtendedUserProfile;
+          if (profile.postalAddress?.city) {
+            const walletAddress = key.replace(PROFILE_STORAGE_KEY_PREFIX, '');
+            profiles.push({
+              address: walletAddress,
+              displayName: profile.displayName || 'Anonymous',
+              postalAddress: profile.postalAddress,
+              avatarUrl: profile.avatarUrl
+            });
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error getting profiles with addresses:', error);
+  }
+
+  return profiles;
+};
 
 // ============================================================================
 // NFT FUNCTIONS

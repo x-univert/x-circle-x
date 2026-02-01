@@ -31,6 +31,7 @@ export const LIQUIDITY_POOL_ADDRESS = contracts.LIQUIDITY_POOL_ADDRESS;
 export const LP_LOCKER_ADDRESS = contracts.LP_LOCKER_ADDRESS;
 export const TOKEN_PROTECTION_ADDRESS = contracts.TOKEN_PROTECTION_ADDRESS;
 export const IDO_CONTRACT_ADDRESS = contracts.IDO_CONTRACT_ADDRESS;
+export const INVESTMENT_CIRCLE_ADDRESS = contracts.INVESTMENT_CIRCLE_ADDRESS;
 export const NETWORK_CONFIG = contracts.NETWORK_CONFIG;
 
 // Token constants (same for all networks)
@@ -85,6 +86,27 @@ export const IDO_GAS_LIMITS = {
   claimTokens: 15_000_000,
   refund: 15_000_000,
 };
+
+// Gas limits pour les transactions Investment Circle
+export const INVESTMENT_CIRCLE_GAS_LIMITS = {
+  createCircle: 30_000_000,
+  joinCircle: 20_000_000,
+  startCircle: 15_000_000,
+  contribute: 15_000_000,
+  processMissedContribution: 20_000_000,
+  advancePeriod: 50_000_000,
+  claimCollateral: 15_000_000,
+  leaveCircle: 15_000_000,
+  cancelCircle: 30_000_000,
+};
+
+// Contribution frequencies for Investment Circle
+export const CONTRIBUTION_FREQUENCIES = [
+  { value: 0, label: 'Weekly', days: 7 },
+  { value: 1, label: 'Bi-Weekly', days: 14 },
+  { value: 2, label: 'Monthly', days: 30 },
+  { value: 3, label: 'Quarterly', days: 90 },
+];
 
 // Staking levels configuration
 export const STAKING_LEVELS = [

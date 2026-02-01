@@ -12,8 +12,9 @@ import {
   XCIRCLEX_DECIMALS,
   NETWORK_CONFIG
 } from '../config/contracts';
+import { chainId } from '../config';
 
-const factoryConfig = new TransactionsFactoryConfig({ chainID: 'D' });
+const factoryConfig = new TransactionsFactoryConfig({ chainID: chainId });
 const factory = new SmartContractTransactionsFactory({ config: factoryConfig });
 
 // Gas limits for vesting transactions

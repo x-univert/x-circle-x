@@ -668,8 +668,9 @@ function CircleDetails() {
 
                   {/* Member nodes around the circle */}
                   {members.map((member, index) => {
-                    const totalMembers = members.length || 1
-                    const angle = (2 * Math.PI * index) / totalMembers - Math.PI / 2
+                    // Utiliser maxMembers pour espacer uniformément toutes les positions (72° pour 5 membres)
+                    const totalSlots = circleData.maxMembers || members.length || 1
+                    const angle = (2 * Math.PI * index) / totalSlots - Math.PI / 2
                     const radius = 110
                     const x = Math.cos(angle) * radius
                     const y = Math.sin(angle) * radius

@@ -11,7 +11,8 @@ import {
   uploadAvatarImage,
   getNFTImageUrl,
   ExtendedUserProfile,
-  NFT
+  NFT,
+  PostalAddress
 } from '../services/profileService';
 import { Proposal, ProposalStatus } from '../services/daoService';
 
@@ -33,6 +34,13 @@ function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editForm, setEditForm] = useState({ displayName: '', bio: '' });
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [addressForm, setAddressForm] = useState<PostalAddress>({
+    street: '',
+    city: '',
+    postalCode: '',
+    country: ''
+  });
 
   // NFTs state
   const [nfts, setNfts] = useState<NFT[]>([]);
@@ -60,6 +68,14 @@ function Profile() {
     setEditForm({
       displayName: userProfile.displayName,
       bio: userProfile.bio
+    });
+    setAddressForm({
+      street: userProfile.postalAddress?.street || '',
+      city: userProfile.postalAddress?.city || '',
+      postalCode: userProfile.postalAddress?.postalCode || '',
+      country: userProfile.postalAddress?.country || '',
+      latitude: userProfile.postalAddress?.latitude,
+      longitude: userProfile.postalAddress?.longitude
     });
 
     // Load NFTs
@@ -89,6 +105,30 @@ function Profile() {
     if (result.success) {
       setProfile(updatedProfile);
       setIsEditing(false);
+    }
+    setIsSaving(false);
+  };
+
+  const handleSaveAddress = async () => {
+    if (!address) return;
+
+    setIsSaving(true);
+    const updatedProfile: ExtendedUserProfile = {
+      ...profile,
+      postalAddress: {
+        street: addressForm.street,
+        city: addressForm.city,
+        postalCode: addressForm.postalCode,
+        country: addressForm.country,
+        latitude: addressForm.latitude,
+        longitude: addressForm.longitude
+      }
+    };
+
+    const result = await saveUserProfile(address, updatedProfile);
+    if (result.success) {
+      setProfile(updatedProfile);
+      setIsEditingAddress(false);
     }
     setIsSaving(false);
   };
@@ -432,6 +472,133 @@ function Profile() {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Postal Address Section */}
+        <div className="bg-secondary rounded-2xl p-6 mb-8 border border-secondary">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-primary flex items-center gap-2">
+              <span>&#128205;</span>
+              {t('profile.postalAddress', 'Postal Address')}
+            </h3>
+            {!isEditingAddress && (
+              <button
+                onClick={() => setIsEditingAddress(true)}
+                className="text-sm px-3 py-1 bg-tertiary text-secondary rounded-lg hover:bg-btn-primary hover:text-btn-primary transition"
+              >
+                {profile.postalAddress?.city ? t('profile.edit', 'Edit') : t('profile.add', 'Add')}
+              </button>
+            )}
+          </div>
+
+          {isEditingAddress ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-secondary mb-1">
+                    {t('profile.street', 'Street')}
+                  </label>
+                  <input
+                    type="text"
+                    value={addressForm.street || ''}
+                    onChange={(e) => setAddressForm({ ...addressForm, street: e.target.value })}
+                    className="w-full px-4 py-2 bg-tertiary border border-secondary rounded-lg text-primary focus:outline-none focus:border-accent"
+                    placeholder={t('profile.enterStreet', '123 Main Street')}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-secondary mb-1">
+                    {t('profile.city', 'City')}
+                  </label>
+                  <input
+                    type="text"
+                    value={addressForm.city || ''}
+                    onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
+                    className="w-full px-4 py-2 bg-tertiary border border-secondary rounded-lg text-primary focus:outline-none focus:border-accent"
+                    placeholder={t('profile.enterCity', 'Paris')}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-secondary mb-1">
+                    {t('profile.postalCode', 'Postal Code')}
+                  </label>
+                  <input
+                    type="text"
+                    value={addressForm.postalCode || ''}
+                    onChange={(e) => setAddressForm({ ...addressForm, postalCode: e.target.value })}
+                    className="w-full px-4 py-2 bg-tertiary border border-secondary rounded-lg text-primary focus:outline-none focus:border-accent"
+                    placeholder={t('profile.enterPostalCode', '75001')}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-secondary mb-1">
+                    {t('profile.country', 'Country')}
+                  </label>
+                  <input
+                    type="text"
+                    value={addressForm.country || ''}
+                    onChange={(e) => setAddressForm({ ...addressForm, country: e.target.value })}
+                    className="w-full px-4 py-2 bg-tertiary border border-secondary rounded-lg text-primary focus:outline-none focus:border-accent"
+                    placeholder={t('profile.enterCountry', 'France')}
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-secondary">
+                {t('profile.addressPrivacyNote', 'Your address will be used to display your location on the X-CIRCLE-X satellite map. Only the city/region will be publicly visible.')}
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSaveAddress}
+                  disabled={isSaving}
+                  className="px-4 py-2 bg-btn-primary text-btn-primary rounded-lg hover:opacity-90 transition disabled:opacity-50"
+                >
+                  {isSaving ? t('profile.saving', 'Saving...') : t('profile.save', 'Save')}
+                </button>
+                <button
+                  onClick={() => {
+                    setIsEditingAddress(false);
+                    setAddressForm({
+                      street: profile.postalAddress?.street || '',
+                      city: profile.postalAddress?.city || '',
+                      postalCode: profile.postalAddress?.postalCode || '',
+                      country: profile.postalAddress?.country || ''
+                    });
+                  }}
+                  className="px-4 py-2 bg-tertiary text-secondary rounded-lg hover:bg-btn-secondary transition"
+                >
+                  {t('profile.cancel', 'Cancel')}
+                </button>
+              </div>
+            </div>
+          ) : profile.postalAddress?.city ? (
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center text-2xl">
+                &#127758;
+              </div>
+              <div className="flex-1">
+                {profile.postalAddress.street && (
+                  <p className="text-primary">{profile.postalAddress.street}</p>
+                )}
+                <p className="text-primary">
+                  {profile.postalAddress.postalCode && `${profile.postalAddress.postalCode} `}
+                  {profile.postalAddress.city}
+                </p>
+                {profile.postalAddress.country && (
+                  <p className="text-secondary">{profile.postalAddress.country}</p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <div className="text-4xl mb-2">&#127758;</div>
+              <p className="text-secondary mb-2">
+                {t('profile.noAddress', 'No address added yet')}
+              </p>
+              <p className="text-xs text-secondary">
+                {t('profile.addAddressHint', 'Add your address to appear on the X-CIRCLE-X satellite map')}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* NFTs Section */}

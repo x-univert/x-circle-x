@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { RouteNamesEnum } from 'routes/routes';
+import { RouteNamesEnum } from 'localConstants';
 
 const About = () => {
   const navigate = useNavigate();

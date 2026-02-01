@@ -13,12 +13,37 @@ import {
   updateDoc,
   deleteDoc,
   getDoc,
-  setDoc
+  setDoc,
+  arrayUnion,
+  arrayRemove
 } from 'firebase/firestore'
 import { signInAnonymously, onAuthStateChanged, User } from 'firebase/auth'
-import { getFirebaseDb, getFirebaseAuth, isFirebaseConfigured, initializeFirebase } from '../config/firebase'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { getFirebaseDb, getFirebaseAuth, getFirebaseStorage, isFirebaseConfigured, isStorageConfigured, initializeFirebase } from '../config/firebase'
+import { getLocalProfile } from './profileService'
 
 // Types
+export interface ReplyTo {
+  messageId: string
+  sender: string
+  content: string
+}
+
+export interface MediaAttachment {
+  type: 'image' | 'file' | 'video'
+  url: string
+  filename: string
+  size: number
+  mimeType: string
+  thumbnailUrl?: string
+}
+
+export interface VoiceMessage {
+  url: string
+  duration: number
+  waveform?: number[]
+}
+
 export interface ChatMessage {
   id: string
   sender: string // Display name or address
@@ -26,7 +51,16 @@ export interface ChatMessage {
   content: string
   timestamp: Timestamp | null
   channelId: string
+  replyTo?: ReplyTo
+  reactions?: Record<string, string[]> // emoji -> list of addresses
+  media?: MediaAttachment
+  voice?: VoiceMessage
 }
+
+// Constants
+export const AVAILABLE_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🔥']
+export const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+export const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf', 'video/mp4']
 
 export interface ChatChannel {
   id: string
@@ -77,10 +111,16 @@ export const signInWithMultiversX = async (address: string): Promise<User | null
     // Store the MultiversX address in Firestore user profile
     const db = getFirebaseDb()
     if (db) {
+      // Get display name from local profile if available
+      const localProfile = getLocalProfile(address)
+      const displayName = localProfile?.displayName && localProfile.displayName.trim()
+        ? localProfile.displayName
+        : formatAddress(address)
+
       const userRef = doc(db, 'users', userCredential.user.uid)
       await setDoc(userRef, {
         multiversxAddress: address,
-        displayName: formatAddress(address),
+        displayName,
         lastSeen: serverTimestamp(),
         isOnline: true
       }, { merge: true })
@@ -94,7 +134,7 @@ export const signInWithMultiversX = async (address: string): Promise<User | null
 }
 
 // Update online status
-export const updateOnlineStatus = async (address: string, isOnline: boolean): Promise<void> => {
+export const updateOnlineStatus = async (address: string, isOnline: boolean, displayName?: string): Promise<void> => {
   const db = getFirebaseDb()
   if (!db) return
 
@@ -107,10 +147,15 @@ export const updateOnlineStatus = async (address: string, isOnline: boolean): Pr
 
     if (!snapshot.empty) {
       const userDoc = snapshot.docs[0]
-      await updateDoc(doc(db, 'users', userDoc.id), {
+      const updateData: Record<string, any> = {
         isOnline,
         lastSeen: serverTimestamp()
-      })
+      }
+      // Update displayName if provided and not empty
+      if (displayName && displayName.trim()) {
+        updateData.displayName = displayName
+      }
+      await updateDoc(doc(db, 'users', userDoc.id), updateData)
     }
   } catch (error) {
     console.error('Error updating online status:', error)
@@ -157,25 +202,36 @@ const initializeDefaultChannels = async (): Promise<void> => {
   }
 }
 
-// Send message
+// Send message with optional reply
 export const sendMessage = async (
   channelId: string,
   content: string,
   senderAddress: string,
-  senderName?: string
+  senderName?: string,
+  replyTo?: ReplyTo
 ): Promise<string | null> => {
   const db = getFirebaseDb()
   if (!db) return null
 
   try {
     const messagesRef = collection(db, `circles/${CIRCLE_ID}/messages/${channelId}/messages`)
-    const docRef = await addDoc(messagesRef, {
+    const messageData: Record<string, any> = {
       sender: senderName || formatAddress(senderAddress),
       senderAddress,
       content,
       timestamp: serverTimestamp(),
       channelId
-    })
+    }
+
+    if (replyTo) {
+      messageData.replyTo = {
+        messageId: replyTo.messageId,
+        sender: replyTo.sender,
+        content: replyTo.content.substring(0, 50) + (replyTo.content.length > 50 ? '...' : '')
+      }
+    }
+
+    const docRef = await addDoc(messagesRef, messageData)
     return docRef.id
   } catch (error) {
     console.error('Error sending message:', error)
@@ -347,4 +403,254 @@ export const formatAddress = (address: string): string => {
   if (!address) return 'Unknown'
   if (address.length <= 12) return address
   return `${address.slice(0, 6)}...${address.slice(-4)}`
+}
+
+// ============================================
+// REACTIONS
+// ============================================
+
+// Add reaction to a message
+export const addReaction = async (
+  channelId: string,
+  messageId: string,
+  emoji: string,
+  userAddress: string
+): Promise<boolean> => {
+  const db = getFirebaseDb()
+  if (!db) return false
+
+  try {
+    const messageRef = doc(db, `circles/${CIRCLE_ID}/messages/${channelId}/messages`, messageId)
+    await updateDoc(messageRef, {
+      [`reactions.${emoji}`]: arrayUnion(userAddress)
+    })
+    return true
+  } catch (error) {
+    console.error('Error adding reaction:', error)
+    return false
+  }
+}
+
+// Remove reaction from a message
+export const removeReaction = async (
+  channelId: string,
+  messageId: string,
+  emoji: string,
+  userAddress: string
+): Promise<boolean> => {
+  const db = getFirebaseDb()
+  if (!db) return false
+
+  try {
+    const messageRef = doc(db, `circles/${CIRCLE_ID}/messages/${channelId}/messages`, messageId)
+    await updateDoc(messageRef, {
+      [`reactions.${emoji}`]: arrayRemove(userAddress)
+    })
+    return true
+  } catch (error) {
+    console.error('Error removing reaction:', error)
+    return false
+  }
+}
+
+// Toggle reaction (add if not present, remove if present)
+export const toggleReaction = async (
+  channelId: string,
+  messageId: string,
+  emoji: string,
+  userAddress: string,
+  currentReactions?: Record<string, string[]>
+): Promise<boolean> => {
+  const hasReaction = currentReactions?.[emoji]?.includes(userAddress)
+  if (hasReaction) {
+    return removeReaction(channelId, messageId, emoji, userAddress)
+  }
+  return addReaction(channelId, messageId, emoji, userAddress)
+}
+
+// ============================================
+// MEDIA UPLOAD
+// ============================================
+
+// Upload media file to Firebase Storage
+export const uploadMedia = async (
+  channelId: string,
+  file: File,
+  senderAddress: string
+): Promise<MediaAttachment> => {
+  // Check if storage is configured
+  if (!isStorageConfigured()) {
+    throw new Error('Firebase Storage non configuré. Ajoutez VITE_FIREBASE_STORAGE_BUCKET dans votre fichier .env')
+  }
+
+  const storage = getFirebaseStorage()
+  if (!storage) {
+    throw new Error('Firebase Storage non initialisé. Vérifiez votre configuration Firebase.')
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error('Fichier trop volumineux (max 10MB)')
+  }
+
+  if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+    throw new Error(`Type de fichier non autorisé: ${file.type}. Types acceptés: JPEG, PNG, GIF, WebP, PDF, MP4`)
+  }
+
+  const timestamp = Date.now()
+  const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+  const path = `chat/${channelId}/${senderAddress}/${timestamp}_${safeName}`
+
+  try {
+    console.log('Uploading media to:', path)
+    const storageRef = ref(storage, path)
+    await uploadBytes(storageRef, file)
+    const url = await getDownloadURL(storageRef)
+    console.log('Media uploaded successfully:', url)
+
+    const type: 'image' | 'video' | 'file' = file.type.startsWith('image/')
+      ? 'image'
+      : file.type.startsWith('video/')
+      ? 'video'
+      : 'file'
+
+    return {
+      type,
+      url,
+      filename: file.name,
+      size: file.size,
+      mimeType: file.type
+    }
+  } catch (error: any) {
+    console.error('Error uploading media:', error)
+    if (error.code === 'storage/unauthorized') {
+      throw new Error('Accès refusé. Vérifiez les règles Firebase Storage.')
+    } else if (error.code === 'storage/canceled') {
+      throw new Error('Upload annulé.')
+    } else if (error.code === 'storage/unknown') {
+      throw new Error('Erreur inconnue lors de l\'upload. Vérifiez votre connexion.')
+    }
+    throw new Error(`Erreur upload: ${error.message || 'Erreur inconnue'}`)
+  }
+}
+
+// Send message with media attachment
+export const sendMessageWithMedia = async (
+  channelId: string,
+  content: string,
+  senderAddress: string,
+  senderName: string,
+  media: MediaAttachment,
+  replyTo?: ReplyTo
+): Promise<string | null> => {
+  const db = getFirebaseDb()
+  if (!db) return null
+
+  try {
+    const messagesRef = collection(db, `circles/${CIRCLE_ID}/messages/${channelId}/messages`)
+    const messageData: Record<string, any> = {
+      sender: senderName || formatAddress(senderAddress),
+      senderAddress,
+      content: content || (media.type === 'image' ? '📷 Photo' : media.type === 'video' ? '🎬 Video' : '📎 File'),
+      timestamp: serverTimestamp(),
+      channelId,
+      media
+    }
+
+    if (replyTo) {
+      messageData.replyTo = {
+        messageId: replyTo.messageId,
+        sender: replyTo.sender,
+        content: replyTo.content.substring(0, 50) + (replyTo.content.length > 50 ? '...' : '')
+      }
+    }
+
+    const docRef = await addDoc(messagesRef, messageData)
+    return docRef.id
+  } catch (error) {
+    console.error('Error sending message with media:', error)
+    return null
+  }
+}
+
+// ============================================
+// VOICE MESSAGES
+// ============================================
+
+// Upload voice message to Firebase Storage
+export const uploadVoiceMessage = async (
+  channelId: string,
+  audioBlob: Blob,
+  senderAddress: string
+): Promise<string> => {
+  // Check if storage is configured
+  if (!isStorageConfigured()) {
+    throw new Error('Firebase Storage non configuré. Ajoutez VITE_FIREBASE_STORAGE_BUCKET dans votre fichier .env')
+  }
+
+  const storage = getFirebaseStorage()
+  if (!storage) {
+    throw new Error('Firebase Storage non initialisé. Vérifiez votre configuration Firebase.')
+  }
+
+  const timestamp = Date.now()
+  const path = `chat/${channelId}/${senderAddress}/voice_${timestamp}.webm`
+
+  try {
+    console.log('Uploading voice message to:', path)
+    const storageRef = ref(storage, path)
+    await uploadBytes(storageRef, audioBlob)
+    const url = await getDownloadURL(storageRef)
+    console.log('Voice message uploaded successfully:', url)
+    return url
+  } catch (error: any) {
+    console.error('Error uploading voice message:', error)
+    if (error.code === 'storage/unauthorized') {
+      throw new Error('Accès refusé. Vérifiez les règles Firebase Storage.')
+    } else if (error.code === 'storage/canceled') {
+      throw new Error('Upload annulé.')
+    }
+    throw new Error(`Erreur upload audio: ${error.message || 'Erreur inconnue'}`)
+  }
+}
+
+// Send voice message
+export const sendVoiceMessage = async (
+  channelId: string,
+  senderAddress: string,
+  senderName: string,
+  voiceUrl: string,
+  duration: number,
+  replyTo?: ReplyTo
+): Promise<string | null> => {
+  const db = getFirebaseDb()
+  if (!db) return null
+
+  try {
+    const messagesRef = collection(db, `circles/${CIRCLE_ID}/messages/${channelId}/messages`)
+    const messageData: Record<string, any> = {
+      sender: senderName || formatAddress(senderAddress),
+      senderAddress,
+      content: '🎤 Voice message',
+      timestamp: serverTimestamp(),
+      channelId,
+      voice: {
+        url: voiceUrl,
+        duration
+      }
+    }
+
+    if (replyTo) {
+      messageData.replyTo = {
+        messageId: replyTo.messageId,
+        sender: replyTo.sender,
+        content: replyTo.content.substring(0, 50) + (replyTo.content.length > 50 ? '...' : '')
+      }
+    }
+
+    const docRef = await addDoc(messagesRef, messageData)
+    return docRef.id
+  } catch (error) {
+    console.error('Error sending voice message:', error)
+    return null
+  }
 }
