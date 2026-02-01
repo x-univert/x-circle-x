@@ -12,10 +12,13 @@
     "retry": "Reintentar",
     "goBack": "Volver",
     "transaction": "Transaccion",
-    "pleaseWait": "Por favor espere..."
+    "pleaseWait": "Por favor espere...",
+    "optional": "opcional",
+    "you": "Tu"
   },
   "header": {
     "circleOfLife": "Circulo de Vida",
+    "investmentCircle": "Circulo de Inversion",
     "staking": "Staking",
     "dao": "DAO",
     "vesting": "Vesting",
@@ -24,7 +27,8 @@
     "settings": "Configuracion",
     "about": "Acerca de",
     "whitepaper": "Whitepaper",
-    "ido": "IDO"
+    "ido": "IDO",
+    "satelliteMap": "Mapa Satelital"
   },
   "settings": {
     "title": "Configuracion",
@@ -1181,5 +1185,95 @@
     "minutesAgo": "hace {{count}}min",
     "hoursAgo": "hace {{count}}h",
     "daysAgo": "hace {{count}}d"
+  },
+  "investmentCircle": {
+    "title": "Circulos de Inversion",
+    "subtitle": "Unete a circulos de ahorro con garantia. Deposita tu garantia, realiza contribuciones regulares y recibe los fondos acumulados por turnos.",
+    "totalCircles": "Total de Circulos",
+    "yourCircles": "Tus Circulos",
+    "yourBalance": "Tu Saldo",
+    "protocolFee": "Tarifa del Protocolo",
+    "allCircles": "Todos los Circulos",
+    "myCircles": "Mis Circulos",
+    "createCircle": "Crear Circulo",
+    "noCircles": "Sin Circulos",
+    "noCirclesDesc": "Se el primero en crear un circulo de inversion!",
+    "noUserCircles": "No te has unido a ningun circulo",
+    "noUserCirclesDesc": "Unete a un circulo existente o crea el tuyo.",
+    "createFirst": "Crear el Primer Circulo",
+    "youAreMember": "Eres miembro",
+    "circleId": "ID del Circulo",
+    "contribution": "Contribucion",
+    "frequency": "Frecuencia",
+    "members": "Miembros",
+    "period": "Periodo",
+    "currentPool": "Pool Actual",
+    "nextDeadline": "Proxima Fecha Limite",
+    "remaining": "restante",
+    "connectWallet": "Conecta tu wallet para crear o unirte a circulos",
+    "create": {
+      "title": "Crear Circulo de Inversion",
+      "name": "Nombre del Circulo",
+      "namePlaceholder": "Mi Circulo de Inversion",
+      "description": "Descripcion",
+      "descriptionPlaceholder": "Describe el proposito de tu circulo...",
+      "contributionAmount": "Contribucion (EGLD)",
+      "frequency": "Frecuencia",
+      "totalPeriods": "Total de Periodos",
+      "minMembers": "Miembros Minimos",
+      "maxMembers": "Miembros Maximos",
+      "requiredCollateral": "Garantia Requerida",
+      "creating": "Creando...",
+      "submit": "Crear Circulo"
+    },
+    "details": {
+      "back": "Volver",
+      "creator": "Creador",
+      "membership": "Tu Membresia",
+      "collateralDeposited": "Garantia Depositada",
+      "collateralUsed": "Garantia Utilizada",
+      "claimable": "Reclamable",
+      "contributionsPaid": "Contribuciones Pagadas",
+      "membersList": "Miembros"
+    },
+    "actions": {
+      "join": "Unirse",
+      "joining": "Uniendose...",
+      "start": "Iniciar Circulo",
+      "starting": "Iniciando...",
+      "contribute": "Contribuir",
+      "contributing": "Contribuyendo...",
+      "advancePeriod": "Avanzar Periodo y Distribuir",
+      "advancing": "Procesando...",
+      "claim": "Reclamar",
+      "claiming": "Reclamando...",
+      "leave": "Abandonar Circulo",
+      "leaving": "Abandonando...",
+      "cancel": "Cancelar Circulo",
+      "cancelling": "Cancelando..."
+    },
+    "status": {
+      "pending": "Pendiente",
+      "active": "Activo",
+      "completed": "Completado",
+      "cancelled": "Cancelado"
+    },
+    "frequencies": {
+      "weekly": "Semanal",
+      "biweekly": "Quincenal",
+      "monthly": "Mensual",
+      "quarterly": "Trimestral"
+    },
+    "distribution": {
+      "title": "Distribucion",
+      "fair": "Cada miembro recibe {{count}} pago(s)",
+      "unfair": "El numero actual de miembros no permite una distribucion equitativa",
+      "unfairCreate": "Los periodos deben ser divisibles por el numero minimo de miembros",
+      "waitMore": "Espera mas miembros o ajusta el circulo. Numeros validos: {{counts}}",
+      "payouts": "pagos/miembro",
+      "validCounts": "Numeros de miembros validos",
+      "suggestion": "Prueba {{periods}} periodos para {{members}} miembros",
+      "target": "Con {{min}} miembros: {{count}} pago(s) cada uno"
+    }
   }
 }

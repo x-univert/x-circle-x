@@ -6,28 +6,15 @@ import Dashboard from 'pages/Dashboard';
 import CircleDetails from 'pages/CircleDetails';
 import CircleOfLife from 'pages/CircleOfLife';
 import Staking from 'pages/Staking';
+import InvestmentCircle from 'pages/InvestmentCircle';
 import IDO from 'pages/IDO';
 import Vesting from 'pages/Vesting';
 import About from 'pages/About';
 import Whitepaper from 'pages/Whitepaper';
 import Profile from 'pages/Profile';
+import SatelliteMap from 'pages/SatelliteMap';
 import { Unlock } from 'pages/Unlock';
-
-export enum RouteNamesEnum {
-  home = '/',
-  circles = '/circles',
-  createCircle = '/create-circle',
-  dashboard = '/dashboard',
-  circleDetails = '/circle/:id',
-  circleOfLife = '/circle-of-life',
-  staking = '/staking',
-  ido = '/ido',
-  vesting = '/vesting',
-  unlock = '/unlock',
-  about = '/about',
-  whitepaper = '/whitepaper',
-  profile = '/profile'
-}
+import { RouteNamesEnum } from 'localConstants';
 
 interface RouteWithTitleType extends RouteType {
   title: string;
@@ -75,6 +62,11 @@ export const routes: RouteWithTitleType[] = [
     component: Staking
   },
   {
+    path: RouteNamesEnum.investmentCircle,
+    title: 'Investment Circle',
+    component: InvestmentCircle
+  },
+  {
     path: RouteNamesEnum.ido,
     title: 'IDO',
     component: IDO
@@ -98,5 +90,10 @@ export const routes: RouteWithTitleType[] = [
     path: RouteNamesEnum.profile,
     title: 'Profile',
     component: Profile
+  },
+  {
+    path: RouteNamesEnum.satelliteMap,
+    title: 'Satellite Map',
+    component: SatelliteMap
   }
 ];

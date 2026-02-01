@@ -12,10 +12,13 @@
     "retry": "Retry",
     "goBack": "Go Back",
     "transaction": "Transaction",
-    "pleaseWait": "Please wait..."
+    "pleaseWait": "Please wait...",
+    "optional": "optional",
+    "you": "You"
   },
   "header": {
     "circleOfLife": "Circle of Life",
+    "investmentCircle": "Investment Circle",
     "staking": "Staking",
     "dao": "DAO",
     "vesting": "Vesting",
@@ -24,7 +27,8 @@
     "settings": "Settings",
     "about": "About",
     "whitepaper": "Whitepaper",
-    "ido": "IDO"
+    "ido": "IDO",
+    "satelliteMap": "Satellite Map"
   },
   "settings": {
     "title": "Settings",
@@ -380,6 +384,14 @@
     "deposit": "Deposit",
     "depositNote": "Deposit EGLD to increase your bonus",
     "depositOrPioneer": "Deposit EGLD or become a pioneer!",
+    "referral": "Referral",
+    "referralBonus": "Referral Bonus",
+    "referralsCount": "Referrals",
+    "currentBonus": "Current bonus",
+    "remainingSlots": "Remaining slots",
+    "yourReferralCode": "Your referral code",
+    "copyReferralCode": "Copy referral code",
+    "shareReferralNote": "Share this code to earn +1% per referral!",
     "totalDistributed": "Total distributed",
     "legend": {
       "active": "Active",
@@ -531,6 +543,9 @@
         "title": "Join the Circle of Life",
         "confirmTitle": "Create your Smart Contract",
         "confirmDesc": "You will create a peripheral smart contract and join the Circle of Life.",
+        "creationFee": "Creation fee",
+        "estimatedGas": "Estimated gas",
+        "referrer": "Referrer",
         "successTitle": "Welcome to the Circle!",
         "successMsg": "Your smart contract has been created. You are now part of the Circle of Life.",
         "errorMsg": "Error creating the smart contract."
@@ -1137,6 +1152,18 @@
     "votesAgainst": "Against",
     "created": "Created"
   },
+  "satelliteMap": {
+    "title": "X-CIRCLE-X Satellite Map",
+    "subtitle": "Global view of the Circle of Life network",
+    "totalMembers": "Total Members",
+    "activeMembers": "Active Members",
+    "peripheralSCs": "Peripheral SCs",
+    "profilesOnMap": "Profiles on map",
+    "legend": "Legend",
+    "membersOnMap": "Members on the map",
+    "noProfiles": "No profiles with postal address",
+    "addAddress": "Add your postal address in your profile to appear on the map!"
+  },
   "chat": {
     "title": "Chat",
     "notConfigured": "Chat Not Configured",
@@ -1181,5 +1208,110 @@
     "minutesAgo": "{{count}}m ago",
     "hoursAgo": "{{count}}h ago",
     "daysAgo": "{{count}}d ago"
+  },
+  "referral": {
+    "title": "Referral Code",
+    "subtitle": "Do you have a referral code? Your referrer will receive +1% bonus on their rewards!",
+    "inputLabel": "Enter your referral code",
+    "bonusInfo": "Referral Bonus",
+    "bonus1": "1 referral = +1% bonus for the referrer",
+    "bonus2": "Maximum 360 referrals = +360% bonus",
+    "bonus3": "Bonus applied to XCIRCLEX rewards",
+    "skip": "Skip",
+    "continue": "Continue",
+    "validating": "Validating...",
+    "invalidCode": "Invalid referral code",
+    "validationError": "Validation error",
+    "validCode": "Valid code! Referrer verified."
+  },
+  "investmentCircle": {
+    "title": "Investment Circles",
+    "subtitle": "Join collateral-backed savings circles. Deposit your collateral, make regular contributions, and receive the pooled funds in rotation.",
+    "totalCircles": "Total Circles",
+    "yourCircles": "Your Circles",
+    "yourBalance": "Your Balance",
+    "protocolFee": "Protocol Fee",
+    "allCircles": "All Circles",
+    "myCircles": "My Circles",
+    "createCircle": "Create Circle",
+    "noCircles": "No Circles Yet",
+    "noCirclesDesc": "Be the first to create an investment circle!",
+    "noUserCircles": "You haven't joined any circles",
+    "noUserCirclesDesc": "Join an existing circle or create your own.",
+    "createFirst": "Create First Circle",
+    "youAreMember": "You are a member",
+    "circleId": "Circle ID",
+    "contribution": "Contribution",
+    "frequency": "Frequency",
+    "members": "Members",
+    "period": "Period",
+    "currentPool": "Current Pool",
+    "nextDeadline": "Next Contribution Deadline",
+    "remaining": "remaining",
+    "connectWallet": "Connect your wallet to create or join circles",
+    "create": {
+      "title": "Create Investment Circle",
+      "name": "Circle Name",
+      "namePlaceholder": "My Investment Circle",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe your circle's purpose...",
+      "contributionAmount": "Contribution (EGLD)",
+      "frequency": "Frequency",
+      "totalPeriods": "Total Periods",
+      "minMembers": "Min Members",
+      "maxMembers": "Max Members",
+      "requiredCollateral": "Required Collateral",
+      "creating": "Creating...",
+      "submit": "Create Circle"
+    },
+    "details": {
+      "back": "Back",
+      "creator": "Creator",
+      "membership": "Your Membership",
+      "collateralDeposited": "Collateral Deposited",
+      "collateralUsed": "Collateral Used",
+      "claimable": "Claimable",
+      "contributionsPaid": "Contributions Paid",
+      "membersList": "Members"
+    },
+    "actions": {
+      "join": "Join",
+      "joining": "Joining...",
+      "start": "Start Circle",
+      "starting": "Starting...",
+      "contribute": "Contribute",
+      "contributing": "Contributing...",
+      "advancePeriod": "Advance Period & Distribute",
+      "advancing": "Processing...",
+      "claim": "Claim",
+      "claiming": "Claiming...",
+      "leave": "Leave Circle",
+      "leaving": "Leaving...",
+      "cancel": "Cancel Circle",
+      "cancelling": "Cancelling..."
+    },
+    "status": {
+      "pending": "Pending",
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "frequencies": {
+      "weekly": "Weekly",
+      "biweekly": "Bi-Weekly",
+      "monthly": "Monthly",
+      "quarterly": "Quarterly"
+    },
+    "distribution": {
+      "title": "Distribution",
+      "fair": "Each member receives {{count}} payout(s)",
+      "unfair": "Current member count does not allow fair distribution",
+      "unfairCreate": "Periods must be divisible by min members",
+      "waitMore": "Wait for more members or adjust the circle. Valid counts: {{counts}}",
+      "payouts": "payouts/member",
+      "validCounts": "Valid member counts",
+      "suggestion": "Try {{periods}} periods for {{members}} members",
+      "target": "With {{min}} members: {{count}} payout(s) each"
+    }
   }
 }

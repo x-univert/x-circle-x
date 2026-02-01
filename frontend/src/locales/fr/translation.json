@@ -12,10 +12,13 @@
     "retry": "Reessayer",
     "goBack": "Retour",
     "transaction": "Transaction",
-    "pleaseWait": "Veuillez patienter..."
+    "pleaseWait": "Veuillez patienter...",
+    "optional": "optionnel",
+    "you": "Vous"
   },
   "header": {
     "circleOfLife": "Cercle de Vie",
+    "investmentCircle": "Cercle d'Investissement",
     "staking": "Staking",
     "dao": "DAO",
     "vesting": "Vesting",
@@ -24,7 +27,8 @@
     "settings": "Parametres",
     "about": "A propos",
     "whitepaper": "Whitepaper",
-    "ido": "IDO"
+    "ido": "IDO",
+    "satelliteMap": "Carte Satellite"
   },
   "settings": {
     "title": "Parametres",
@@ -380,6 +384,14 @@
     "deposit": "Depot",
     "depositNote": "Deposez des EGLD pour augmenter votre bonus",
     "depositOrPioneer": "Deposez EGLD ou devenez pionnier!",
+    "referral": "Parrainage",
+    "referralBonus": "Bonus Parrainage",
+    "referralsCount": "Parrainages",
+    "currentBonus": "Bonus actuel",
+    "remainingSlots": "Places restantes",
+    "yourReferralCode": "Votre code de parrainage",
+    "copyReferralCode": "Copier le code",
+    "shareReferralNote": "Partagez ce code pour gagner +1% par parrainage !",
     "totalDistributed": "Total distribue",
     "legend": {
       "active": "Actif",
@@ -531,6 +543,9 @@
         "title": "Rejoindre le Cercle de Vie",
         "confirmTitle": "Creer votre Smart Contract",
         "confirmDesc": "Vous allez creer un smart contract peripherique et rejoindre le Cercle de Vie.",
+        "creationFee": "Frais de creation",
+        "estimatedGas": "Gas estime",
+        "referrer": "Parrain",
         "successTitle": "Bienvenue dans le Cercle !",
         "successMsg": "Votre smart contract a ete cree. Vous faites maintenant partie du Cercle de Vie.",
         "errorMsg": "Erreur lors de la creation du smart contract."
@@ -1137,6 +1152,18 @@
     "votesAgainst": "Contre",
     "created": "Creee"
   },
+  "satelliteMap": {
+    "title": "Carte Satellite X-CIRCLE-X",
+    "subtitle": "Vue globale du reseau Circle of Life",
+    "totalMembers": "Membres Total",
+    "activeMembers": "Membres Actifs",
+    "peripheralSCs": "SC Peripheriques",
+    "profilesOnMap": "Profils sur la carte",
+    "legend": "Legende",
+    "membersOnMap": "Membres sur la carte",
+    "noProfiles": "Aucun profil avec adresse postale",
+    "addAddress": "Ajoutez votre adresse postale dans votre profil pour apparaitre sur la carte!"
+  },
   "chat": {
     "title": "Chat",
     "notConfigured": "Chat Non Configure",
@@ -1181,5 +1208,110 @@
     "minutesAgo": "il y a {{count}}min",
     "hoursAgo": "il y a {{count}}h",
     "daysAgo": "il y a {{count}}j"
+  },
+  "referral": {
+    "title": "Code de Parrainage",
+    "subtitle": "Avez-vous un code de parrainage ? Votre parrain recevra +1% de bonus sur ses recompenses !",
+    "inputLabel": "Entrez votre code de parrainage",
+    "bonusInfo": "Bonus de Parrainage",
+    "bonus1": "1 parrainage = +1% bonus pour le parrain",
+    "bonus2": "Maximum 360 parrainages = +360% bonus",
+    "bonus3": "Bonus applique sur les recompenses XCIRCLEX",
+    "skip": "Passer",
+    "continue": "Continuer",
+    "validating": "Validation...",
+    "invalidCode": "Code de parrainage invalide",
+    "validationError": "Erreur de validation",
+    "validCode": "Code valide ! Parrain verifie."
+  },
+  "investmentCircle": {
+    "title": "Cercles d'Investissement",
+    "subtitle": "Rejoignez des cercles d'epargne avec caution. Deposez votre caution, effectuez des contributions regulieres et recevez les fonds collectes a tour de role.",
+    "totalCircles": "Total des Cercles",
+    "yourCircles": "Vos Cercles",
+    "yourBalance": "Votre Solde",
+    "protocolFee": "Frais de Protocole",
+    "allCircles": "Tous les Cercles",
+    "myCircles": "Mes Cercles",
+    "createCircle": "Creer un Cercle",
+    "noCircles": "Aucun Cercle",
+    "noCirclesDesc": "Soyez le premier a creer un cercle d'investissement !",
+    "noUserCircles": "Vous n'avez rejoint aucun cercle",
+    "noUserCirclesDesc": "Rejoignez un cercle existant ou creez le votre.",
+    "createFirst": "Creer le Premier Cercle",
+    "youAreMember": "Vous etes membre",
+    "circleId": "ID du Cercle",
+    "contribution": "Contribution",
+    "frequency": "Frequence",
+    "members": "Membres",
+    "period": "Periode",
+    "currentPool": "Pool Actuel",
+    "nextDeadline": "Prochaine Echeance",
+    "remaining": "restant",
+    "connectWallet": "Connectez votre wallet pour creer ou rejoindre des cercles",
+    "create": {
+      "title": "Creer un Cercle d'Investissement",
+      "name": "Nom du Cercle",
+      "namePlaceholder": "Mon Cercle d'Investissement",
+      "description": "Description",
+      "descriptionPlaceholder": "Decrivez l'objectif de votre cercle...",
+      "contributionAmount": "Contribution (EGLD)",
+      "frequency": "Frequence",
+      "totalPeriods": "Nombre de Periodes",
+      "minMembers": "Membres Minimum",
+      "maxMembers": "Membres Maximum",
+      "requiredCollateral": "Caution Requise",
+      "creating": "Creation...",
+      "submit": "Creer le Cercle"
+    },
+    "details": {
+      "back": "Retour",
+      "creator": "Createur",
+      "membership": "Votre Adhesion",
+      "collateralDeposited": "Caution Deposee",
+      "collateralUsed": "Caution Utilisee",
+      "claimable": "Recuperable",
+      "contributionsPaid": "Contributions Payees",
+      "membersList": "Membres"
+    },
+    "actions": {
+      "join": "Rejoindre",
+      "joining": "Adhesion...",
+      "start": "Demarrer le Cercle",
+      "starting": "Demarrage...",
+      "contribute": "Contribuer",
+      "contributing": "Contribution...",
+      "advancePeriod": "Avancer la Periode et Distribuer",
+      "advancing": "Traitement...",
+      "claim": "Reclamer",
+      "claiming": "Reclamation...",
+      "leave": "Quitter le Cercle",
+      "leaving": "Sortie...",
+      "cancel": "Annuler le Cercle",
+      "cancelling": "Annulation..."
+    },
+    "status": {
+      "pending": "En Attente",
+      "active": "Actif",
+      "completed": "Termine",
+      "cancelled": "Annule"
+    },
+    "frequencies": {
+      "weekly": "Hebdomadaire",
+      "biweekly": "Bi-Hebdomadaire",
+      "monthly": "Mensuel",
+      "quarterly": "Trimestriel"
+    },
+    "distribution": {
+      "title": "Distribution",
+      "fair": "Chaque membre recoit {{count}} paiement(s)",
+      "unfair": "Le nombre actuel de membres ne permet pas une distribution equitable",
+      "unfairCreate": "Les periodes doivent etre divisibles par le nombre minimum de membres",
+      "waitMore": "Attendez plus de membres ou ajustez le cercle. Nombres valides: {{counts}}",
+      "payouts": "paiements/membre",
+      "validCounts": "Nombres de membres valides",
+      "suggestion": "Essayez {{periods}} periodes pour {{members}} membres",
+      "target": "Avec {{min}} membres: {{count}} paiement(s) chacun"
+    }
   }
 }

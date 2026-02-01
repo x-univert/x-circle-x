@@ -14,6 +14,7 @@ export const LIQUIDITY_POOL_ADDRESS = 'erd1qqqqqqqqqqqqqpgqy4g7upd4dz4mp9qzw3w9x
 export const LP_LOCKER_ADDRESS = 'erd1qqqqqqqqqqqqqpgqtwutsamdra4capldu6nkzsu8zwkkdxfaflfqmzvuzz';
 export const TOKEN_PROTECTION_ADDRESS = 'erd1qqqqqqqqqqqqqpgqescv0dcpdgu62sa7a89s3w2qdc9njsydflfqwfxdvx';
 export const IDO_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgq5h7twxcl5fd0fwkfujxsnj7v6ww8ezd2flfqxnd5lt';
+export const INVESTMENT_CIRCLE_ADDRESS = 'erd1qqqqqqqqqqqqqpgqawyzdfj8ezzgtmysvq8xcgcwlg8ujzckflfq40xcxu';
 
 export const NETWORK_CONFIG = {
   id: 'devnet',

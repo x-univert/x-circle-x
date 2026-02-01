@@ -140,8 +140,10 @@ export const Header = () => {
   // Structure de navigation simplifiée pour X-CIRCLE-X
   const navigationItems: MenuItem[] = [
     { labelKey: 'header.circleOfLife', route: RouteNamesEnum.home, icon: '🌀' },
+    { labelKey: 'header.investmentCircle', route: RouteNamesEnum.investmentCircle, icon: '💰' },
     { labelKey: 'header.dashboard', route: RouteNamesEnum.dashboard, icon: '📊' },
     { labelKey: 'home.circles', route: RouteNamesEnum.circles, icon: '⭕' },
+    { labelKey: 'header.satelliteMap', route: RouteNamesEnum.satelliteMap, icon: '🛰️' },
     { labelKey: 'header.ido', route: RouteNamesEnum.ido, icon: '🚀' },
     { labelKey: 'header.vesting', route: RouteNamesEnum.vesting, icon: '🔒' }
   ];
