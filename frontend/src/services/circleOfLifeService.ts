@@ -1,5 +1,6 @@
 import {
   Address,
+  AddressValue,
   SmartContractTransactionsFactory,
   TransactionsFactoryConfig
 } from '@multiversx/sdk-core';
@@ -684,19 +685,38 @@ export const getCycleStats = async (): Promise<CycleStats> => {
 
 /**
  * Rejoindre le cercle (payer les frais d'entree)
+ * @param senderAddress - Adresse du nouvel adherent
+ * @param entryFee - Frais d'entree en EGLD (defaut: 1)
+ * @param referrerAddress - Adresse optionnelle du parrain (membre existant)
  */
-export const joinCircle = async (senderAddress: string, entryFee: string = '1') => {
+export const joinCircle = async (
+  senderAddress: string,
+  entryFee: string = '1',
+  referrerAddress?: string
+) => {
   const contractAddress = new Address(CIRCLE_OF_LIFE_ADDRESS);
   const sender = new Address(senderAddress);
 
   // Convertir en wei
   const feeInWei = new BigNumber(entryFee).multipliedBy('1000000000000000000').toFixed(0);
 
+  // Construire les arguments (optionnel: adresse du parrain)
+  // Pour OptionalValue<ManagedAddress> en Rust:
+  // - Aucun argument = None
+  // - Juste l'adresse (32 bytes) = Some(address)
+  // NE PAS utiliser OptionValue qui ajoute un prefixe 01
+  const args: any[] = [];
+  if (referrerAddress && referrerAddress.startsWith('erd1')) {
+    // Passer directement l'adresse sans wrapper OptionValue
+    args.push(new AddressValue(new Address(referrerAddress)));
+  }
+  // Si pas de referrer, args reste vide = OptionalValue::None
+
   const transaction = await getFactory().createTransactionForExecute(sender, {
     contract: contractAddress,
     function: 'joinCircle',
     gasLimit: BigInt(GAS_LIMITS.joinCircle),
-    arguments: [],
+    arguments: args,
     nativeTransferAmount: BigInt(feeInWei)
   });
 
@@ -2188,6 +2208,7 @@ export interface AllBonusesInfo {
   isPioneer: boolean;            // Is the member a pioneer
   pioneerBonusBps: number;       // Pioneer bonus in BPS (314 = 3.14%)
   depositBonusBps: number;       // Deposit bonus in BPS (100-36000)
+  referralBonusBps: number;      // Referral bonus in BPS (100-36000)
   totalBonusBps: number;         // Total bonus in BPS
 }
 
@@ -2286,20 +2307,20 @@ export const getTotalEgldDeposits = async (): Promise<string> => {
 };
 
 /**
- * Recupere tous les bonus pour un membre (pioneer + deposit)
- * Retourne: isPioneer, pioneerBonusBps, depositBonusBps, totalBonusBps
+ * Recupere tous les bonus pour un membre (pioneer + deposit + referral)
+ * Retourne: isPioneer, pioneerBonusBps, depositBonusBps, referralBonusBps, totalBonusBps
  */
 export const getAllBonuses = async (memberAddress: string): Promise<AllBonusesInfo> => {
   try {
     const addressHex = bech32ToHex(memberAddress);
     if (!addressHex) {
-      return { isPioneer: false, pioneerBonusBps: 0, depositBonusBps: 0, totalBonusBps: 0 };
+      return { isPioneer: false, pioneerBonusBps: 0, depositBonusBps: 0, referralBonusBps: 0, totalBonusBps: 0 };
     }
 
     const returnData = await queryContract('getAllBonuses', [addressHex]);
 
-    if (!returnData || returnData.length < 4) {
-      return { isPioneer: false, pioneerBonusBps: 0, depositBonusBps: 0, totalBonusBps: 0 };
+    if (!returnData || returnData.length < 5) {
+      return { isPioneer: false, pioneerBonusBps: 0, depositBonusBps: 0, referralBonusBps: 0, totalBonusBps: 0 };
     }
 
     const hexValues = returnData.map((b64: string) => b64 ? base64ToHex(b64) : '');
@@ -2307,12 +2328,155 @@ export const getAllBonuses = async (memberAddress: string): Promise<AllBonusesIn
     const isPioneer = returnData[0] === 'AQ==';
     const pioneerBonusBps = parseU64(hexValues[1]);
     const depositBonusBps = parseU64(hexValues[2]);
-    const totalBonusBps = parseU64(hexValues[3]);
+    const referralBonusBps = parseU64(hexValues[3]);
+    const totalBonusBps = parseU64(hexValues[4]);
 
-    return { isPioneer, pioneerBonusBps, depositBonusBps, totalBonusBps };
+    return { isPioneer, pioneerBonusBps, depositBonusBps, referralBonusBps, totalBonusBps };
   } catch (error) {
     console.error('Error fetching all bonuses:', error);
-    return { isPioneer: false, pioneerBonusBps: 0, depositBonusBps: 0, totalBonusBps: 0 };
+    return { isPioneer: false, pioneerBonusBps: 0, depositBonusBps: 0, referralBonusBps: 0, totalBonusBps: 0 };
+  }
+};
+
+// ==================== REFERRAL FUNCTIONS (1 parrainage = 1%, max 360%) ====================
+
+// Types for referral info
+export interface ReferralBonusInfo {
+  count: number;            // Number of referrals
+  bonusPercent: number;     // Bonus percentage (1-360)
+  bonusBps: number;         // Bonus in basis points (100-36000)
+  remainingSlots: number;   // Remaining referral slots (max 360)
+}
+
+/**
+ * Get the number of referrals for a member
+ */
+export const getReferralCount = async (memberAddress: string): Promise<number> => {
+  try {
+    const addressHex = bech32ToHex(memberAddress);
+    if (!addressHex) return 0;
+
+    const returnData = await queryContract('getReferralCount', [addressHex]);
+
+    if (!returnData || returnData.length === 0 || !returnData[0]) {
+      return 0;
+    }
+
+    const hex = base64ToHex(returnData[0]);
+    return parseU64(hex);
+  } catch (error) {
+    console.error('Error fetching referral count:', error);
+    return 0;
+  }
+};
+
+/**
+ * Get who referred a member (returns null if no referrer)
+ */
+export const getReferrer = async (memberAddress: string): Promise<string | null> => {
+  try {
+    const addressHex = bech32ToHex(memberAddress);
+    if (!addressHex) return null;
+
+    const returnData = await queryContract('getReferrer', [addressHex]);
+
+    if (!returnData || returnData.length === 0 || !returnData[0]) {
+      return null;
+    }
+
+    const hex = base64ToHex(returnData[0]);
+    if (!hex || hex === '') return null;
+
+    return hexToBech32(hex);
+  } catch (error) {
+    console.error('Error fetching referrer:', error);
+    return null;
+  }
+};
+
+/**
+ * Get referral bonus info for a member
+ * Returns: count, bonusPercent, bonusBps, remainingSlots
+ */
+export const getReferralBonusInfo = async (memberAddress: string): Promise<ReferralBonusInfo> => {
+  try {
+    const addressHex = bech32ToHex(memberAddress);
+    if (!addressHex) {
+      return { count: 0, bonusPercent: 0, bonusBps: 0, remainingSlots: 360 };
+    }
+
+    const returnData = await queryContract('getReferralBonusInfo', [addressHex]);
+
+    if (!returnData || returnData.length < 4) {
+      return { count: 0, bonusPercent: 0, bonusBps: 0, remainingSlots: 360 };
+    }
+
+    const hexValues = returnData.map((b64: string) => b64 ? base64ToHex(b64) : '');
+
+    const count = parseU64(hexValues[0]);
+    const bonusPercent = parseU64(hexValues[1]);
+    const bonusBps = parseU64(hexValues[2]);
+    const remainingSlots = parseU64(hexValues[3]);
+
+    return { count, bonusPercent, bonusBps, remainingSlots };
+  } catch (error) {
+    console.error('Error fetching referral bonus info:', error);
+    return { count: 0, bonusPercent: 0, bonusBps: 0, remainingSlots: 360 };
+  }
+};
+
+/**
+ * Get total number of referrals in the system
+ */
+export const getTotalReferrals = async (): Promise<number> => {
+  try {
+    const returnData = await queryContract('getTotalReferrals');
+
+    if (!returnData || returnData.length === 0 || !returnData[0]) {
+      return 0;
+    }
+
+    const hex = base64ToHex(returnData[0]);
+    return parseU64(hex);
+  } catch (error) {
+    console.error('Error fetching total referrals:', error);
+    return 0;
+  }
+};
+
+/**
+ * Validate a referral code (check if it's a valid member address)
+ * @param code - Either an address (erd1...) or a herotag (@name)
+ * @returns The resolved address if valid, null otherwise
+ */
+export const validateReferralCode = async (code: string): Promise<string | null> => {
+  try {
+    let address = code;
+
+    // If it's a herotag, resolve it
+    if (code.startsWith('@')) {
+      const herotag = code.substring(1);
+      const response = await fetch(`${multiversxApiUrl}/usernames/${herotag}`);
+      if (!response.ok) return null;
+      const data = await response.json();
+      address = data.address;
+    }
+
+    // Check if it's a valid address
+    if (!address || !address.startsWith('erd1')) {
+      return null;
+    }
+
+    // Check if the address is a member
+    const isMemberResult = await isMember(address);
+    if (!isMemberResult) {
+      return null;
+    }
+
+    return address;
+  } catch (error) {
+    console.error('Error validating referral code:', error);
+    return null;
   }
 };
 
