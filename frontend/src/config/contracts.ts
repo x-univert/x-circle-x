@@ -3,6 +3,7 @@
 
 import * as devnetContracts from './contracts.devnet';
 import * as testnetContracts from './contracts.testnet';
+import * as mainnetContracts from './contracts.mainnet';
 
 // Detecter le reseau selectionne
 const getSelectedNetwork = (): 'devnet' | 'testnet' | 'mainnet' => {
@@ -15,7 +16,18 @@ const getSelectedNetwork = (): 'devnet' | 'testnet' | 'mainnet' => {
 const selectedNetwork = getSelectedNetwork();
 
 // Selectionner les contrats en fonction du reseau
-const contracts = selectedNetwork === 'testnet' ? testnetContracts : devnetContracts;
+const getContracts = () => {
+  switch (selectedNetwork) {
+    case 'mainnet':
+      return mainnetContracts;
+    case 'testnet':
+      return testnetContracts;
+    default:
+      return devnetContracts;
+  }
+};
+
+const contracts = getContracts();
 
 // Exports dynamiques
 export const CIRCLE_MANAGER_ADDRESS = contracts.CIRCLE_MANAGER_ADDRESS;
