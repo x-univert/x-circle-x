@@ -9,7 +9,7 @@
     "dev:devnet": "npm run copy:devnet-config && vite",
     "dev:testnet": "npm run copy:testnet-config && vite",
     "dev:mainnet": "npm run copy:mainnet-config && vite",
-    "build": "npm run build:devnet",
+    "build": "npm run build:mainnet",
     "build:devnet": "npm run copy:devnet-config && vite build",
     "build:testnet": "npm run copy:testnet-config && vite build",
     "build:mainnet": "npm run copy:mainnet-config && vite build",

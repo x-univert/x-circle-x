@@ -30,3 +30,12 @@ export const GITHUB_REPO_URL = 'https://github.com/your-username/X-CIRCLE-X';
 // ID API URLs (pour les herotags)
 export const ID_API_URL = 'https://id-api.multiversx.com';
 export const USERS_API_URL = '/users/api/v1/users/';
+
+// Dynamic network config (pour les services qui lisent le reseau a chaque appel)
+export const getNetworkConfig = () => ({
+  apiUrl: multiversxApiUrl,
+  gatewayUrl: multiversxGatewayUrl,
+  chainId,
+  explorerUrl,
+  environment
+});
