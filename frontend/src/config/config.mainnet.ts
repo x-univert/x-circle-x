@@ -32,8 +32,9 @@ export const ID_API_URL = 'https://id-api.multiversx.com';
 export const USERS_API_URL = '/users/api/v1/users/';
 
 // Dynamic network config (pour les services qui lisent le reseau a chaque appel)
+// Utilise le gateway pour les requetes vm-values (CORS plus permissif que l'API)
 export const getNetworkConfig = () => ({
-  apiUrl: multiversxApiUrl,
+  apiUrl: multiversxGatewayUrl,
   gatewayUrl: multiversxGatewayUrl,
   chainId,
   explorerUrl,
