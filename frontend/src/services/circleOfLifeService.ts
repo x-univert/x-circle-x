@@ -15,7 +15,7 @@ const getFactory = () => new SmartContractTransactionsFactory({ config: getFacto
 
 // Gas limits pour Circle of Life v3 (avec transferts cross-contract)
 const GAS_LIMITS = {
-  joinCircle: 60_000_000,      // Deploie un SC peripherique
+  joinCircle: 150_000_000,     // Deploie un SC peripherique (augmente pour deploy_from_source)
   signAndForward: 100_000_000,  // Appel cross-contract + process pending (AUGMENTE: transfert vers SC suivant ou retour vers SC0)
   startDailyCycle: 30_000_000,  // Transfert vers le premier SC (augmente pour cross-contract)
   setActive: 8_000_000,
@@ -92,23 +92,38 @@ const parseBigUint = (hex: string): string => {
  */
 const queryContract = async (funcName: string, args: string[] = []): Promise<any> => {
   try {
-    const response = await fetch(
-      `${multiversxApiUrl}/vm-values/query`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          scAddress: CIRCLE_OF_LIFE_ADDRESS,
-          funcName,
-          args
-        })
-      }
-    );
+    const url = `${multiversxApiUrl}/vm-values/query`;
+    const body = {
+      scAddress: CIRCLE_OF_LIFE_ADDRESS,
+      funcName,
+      args
+    };
+
+    // Debug: log network config on first call
+    if (funcName === 'getCircleInfo') {
+      console.log('[DEBUG] queryContract config:', {
+        apiUrl: multiversxApiUrl,
+        contractAddress: CIRCLE_OF_LIFE_ADDRESS,
+        chainId: chainId,
+        network: localStorage.getItem('selectedNetwork')
+      });
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
 
     const data = await response.json();
 
     if (data.data?.data?.returnData) {
       return data.data.data.returnData;
+    }
+
+    // Debug: log empty responses for getCircleInfo
+    if (funcName === 'getCircleInfo') {
+      console.log('[DEBUG] getCircleInfo response:', data);
     }
 
     return null;
