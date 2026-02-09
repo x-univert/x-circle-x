@@ -8,9 +8,9 @@ import * as mainnetContracts from './contracts.mainnet';
 // Detecter le reseau selectionne
 const getSelectedNetwork = (): 'devnet' | 'testnet' | 'mainnet' => {
   if (typeof window !== 'undefined') {
-    return (localStorage.getItem('selectedNetwork') as 'devnet' | 'testnet' | 'mainnet') || 'devnet';
+    return (localStorage.getItem('selectedNetwork') as 'devnet' | 'testnet' | 'mainnet') || 'mainnet';
   }
-  return 'devnet';
+  return 'mainnet';
 };
 
 const selectedNetwork = getSelectedNetwork();

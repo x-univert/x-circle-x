@@ -11,11 +11,11 @@ const getSelectedNetwork = (): EnvironmentsEnum => {
   switch (savedNetwork) {
     case 'testnet':
       return EnvironmentsEnum.testnet;
-    case 'mainnet':
-      return EnvironmentsEnum.mainnet;
     case 'devnet':
-    default:
       return EnvironmentsEnum.devnet;
+    case 'mainnet':
+    default:
+      return EnvironmentsEnum.mainnet;  // Mainnet par defaut
   }
 };
 
