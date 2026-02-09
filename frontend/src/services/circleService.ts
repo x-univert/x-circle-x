@@ -12,10 +12,14 @@ import {
 import { signAndSendTransactions, signAndSendTransactionsWithHash } from '../helpers/signAndSendTransactions';
 import BigNumber from 'bignumber.js';
 import { CIRCLE_MANAGER_ADDRESS, GAS_LIMITS } from '../config/contracts';
-import { chainId, multiversxApiUrl } from '../config';
+import { getNetworkConfig } from '../config';
+
+// Lecture dynamique du reseau a chaque appel
+const getApiUrl = () => getNetworkConfig().apiUrl;
+const getChainId = () => getNetworkConfig().chainId;
 
 // Dynamic factory based on selected network
-const getFactoryConfig = () => new TransactionsFactoryConfig({ chainID: chainId });
+const getFactoryConfig = () => new TransactionsFactoryConfig({ chainID: getChainId() });
 const getFactory = () => new SmartContractTransactionsFactory({ config: getFactoryConfig() });
 
 /**
@@ -184,7 +188,7 @@ export const contribute = async (circleId: number, amount: string, senderAddress
 export const getCircle = async (circleId: number) => {
   try {
     const response = await fetch(
-      `${multiversxApiUrl}/vm-values/query`,
+      `${getApiUrl()}/vm-values/query`,
       {
         method: 'POST',
         headers: {
@@ -217,7 +221,7 @@ export const getCircle = async (circleId: number) => {
 export const getCircleCount = async (): Promise<number> => {
   try {
     const response = await fetch(
-      `${multiversxApiUrl}/vm-values/query`,
+      `${getApiUrl()}/vm-values/query`,
       {
         method: 'POST',
         headers: {
@@ -264,7 +268,7 @@ export const getCircleMembers = async (circleId: number): Promise<string[]> => {
     const circleIdHex = circleId.toString(16).padStart(2, '0');
 
     const response = await fetch(
-      `${multiversxApiUrl}/vm-values/query`,
+      `${getApiUrl()}/vm-values/query`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -316,7 +320,7 @@ export const getPendingRequests = async (circleId: number): Promise<string[]> =>
     const circleIdHex = circleId.toString(16).padStart(2, '0');
 
     const response = await fetch(
-      `${multiversxApiUrl}/vm-values/query`,
+      `${getApiUrl()}/vm-values/query`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -370,7 +374,7 @@ export const isMember = async (circleId: number, address: string): Promise<boole
     const addressHex = bech32ToHex(address);
 
     const response = await fetch(
-      `${multiversxApiUrl}/vm-values/query`,
+      `${getApiUrl()}/vm-values/query`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -410,7 +414,7 @@ export const hasVoted = async (circleId: number, candidateAddress: string, voter
     if (!candidateHex || !voterHex) return false;
 
     const response = await fetch(
-      `${multiversxApiUrl}/vm-values/query`,
+      `${getApiUrl()}/vm-values/query`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -449,7 +453,7 @@ export const hasContributed = async (circleId: number, memberAddress: string): P
     if (!memberHex) return false;
 
     const response = await fetch(
-      `${multiversxApiUrl}/vm-values/query`,
+      `${getApiUrl()}/vm-values/query`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -485,7 +489,7 @@ export const getCycleContributors = async (circleId: number): Promise<string[]> 
     const circleIdHex = circleId.toString(16).padStart(2, '0');
 
     const response = await fetch(
-      `${multiversxApiUrl}/vm-values/query`,
+      `${getApiUrl()}/vm-values/query`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -534,7 +538,7 @@ export const getCycleContributorCount = async (circleId: number): Promise<number
     const circleIdHex = circleId.toString(16).padStart(2, '0');
 
     const response = await fetch(
-      `${multiversxApiUrl}/vm-values/query`,
+      `${getApiUrl()}/vm-values/query`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

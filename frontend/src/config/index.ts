@@ -46,19 +46,18 @@ const networkConfigs = {
   }
 };
 
+// Fonction pour obtenir la config reseau dynamiquement
+export const getNetworkConfig = () => {
+  const network = getSelectedNetwork();
+  return networkConfigs[network];
+};
+
+// Exports statiques (pour compatibilite initiale)
 const config = networkConfigs[selectedNetwork];
-
-// Environnement MultiversX
 export const environment = config.environment;
-
-// URLs de l'API MultiversX
 export const multiversxApiUrl = config.apiUrl;
 export const multiversxGatewayUrl = config.gatewayUrl;
-
-// Chain ID
 export const chainId = config.chainId;
-
-// Explorer URL
 export const explorerUrl = config.explorerUrl;
 
 // GitHub Repository URL

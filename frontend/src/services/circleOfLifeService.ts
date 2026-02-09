@@ -7,10 +7,14 @@ import {
 import { signAndSendTransactions, signAndSendTransactionsWithHash } from '../helpers/signAndSendTransactions';
 import BigNumber from 'bignumber.js';
 import { CIRCLE_OF_LIFE_ADDRESS } from '../config/contracts';
-import { chainId, multiversxApiUrl } from '../config';
+import { getNetworkConfig } from '../config';
+
+// Lecture dynamique du reseau a chaque appel (pas au chargement du module)
+const getApiUrl = () => getNetworkConfig().apiUrl;
+const getChainId = () => getNetworkConfig().chainId;
 
 // Factory configuration dynamique basee sur le reseau selectionne
-const getFactoryConfig = () => new TransactionsFactoryConfig({ chainID: chainId });
+const getFactoryConfig = () => new TransactionsFactoryConfig({ chainID: getChainId() });
 const getFactory = () => new SmartContractTransactionsFactory({ config: getFactoryConfig() });
 
 // Gas limits pour Circle of Life v3 (avec transferts cross-contract)
@@ -92,19 +96,15 @@ const parseBigUint = (hex: string): string => {
  */
 const queryContract = async (funcName: string, args: string[] = []): Promise<any> => {
   try {
-    const url = `${multiversxApiUrl}/vm-values/query`;
-    const body = {
-      scAddress: CIRCLE_OF_LIFE_ADDRESS,
-      funcName,
-      args
-    };
+    const apiUrl = getApiUrl();
+    const url = `${apiUrl}/vm-values/query`;
 
     // Debug: log network config on first call
     if (funcName === 'getCircleInfo') {
-      console.log('[DEBUG] queryContract config:', {
-        apiUrl: multiversxApiUrl,
+      console.log('[CircleOfLife] Network config:', {
+        apiUrl,
         contractAddress: CIRCLE_OF_LIFE_ADDRESS,
-        chainId: chainId,
+        chainId: getChainId(),
         network: localStorage.getItem('selectedNetwork')
       });
     }
@@ -112,18 +112,17 @@ const queryContract = async (funcName: string, args: string[] = []): Promise<any
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      body: JSON.stringify({
+        scAddress: CIRCLE_OF_LIFE_ADDRESS,
+        funcName,
+        args
+      })
     });
 
     const data = await response.json();
 
     if (data.data?.data?.returnData) {
       return data.data.data.returnData;
-    }
-
-    // Debug: log empty responses for getCircleInfo
-    if (funcName === 'getCircleInfo') {
-      console.log('[DEBUG] getCircleInfo response:', data);
     }
 
     return null;
@@ -397,7 +396,7 @@ export const getPeripheralBalances = async (addresses: string[]): Promise<Map<st
       const batch = addresses.slice(i, i + batchSize);
       const promises = batch.map(async (addr) => {
         try {
-          const response = await fetch(`${multiversxApiUrl}/accounts/${addr}`);
+          const response = await fetch(`${getApiUrl()}/accounts/${addr}`);
           if (response.ok) {
             const data = await response.json();
             const balanceWei = data.balance || '0';
@@ -2471,7 +2470,7 @@ export const validateReferralCode = async (code: string): Promise<string | null>
     // If it's a herotag, resolve it
     if (code.startsWith('@')) {
       const herotag = code.substring(1);
-      const response = await fetch(`${multiversxApiUrl}/usernames/${herotag}`);
+      const response = await fetch(`${getApiUrl()}/usernames/${herotag}`);
       if (!response.ok) return null;
       const data = await response.json();
       address = data.address;

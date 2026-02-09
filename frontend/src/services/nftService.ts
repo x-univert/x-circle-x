@@ -8,20 +8,11 @@ import {
 } from '@multiversx/sdk-core';
 import { signAndSendTransactions } from '../helpers/signAndSendTransactions';
 import { NFT_CONTRACT_ADDRESS, NFT_TOKEN_ID } from '../config/contracts';
-import { multiversxApiUrl } from '../config';
+import { getNetworkConfig } from '../config';
 
-// Get chainId dynamically from localStorage to handle network switching
-const getChainId = (): string => {
-  if (typeof window !== 'undefined') {
-    const network = localStorage.getItem('selectedNetwork') || 'devnet';
-    switch (network) {
-      case 'testnet': return 'T';
-      case 'mainnet': return '1';
-      default: return 'D';
-    }
-  }
-  return 'D';
-};
+// Lecture dynamique du reseau a chaque appel
+const getApiUrl = () => getNetworkConfig().apiUrl;
+const getChainId = () => getNetworkConfig().chainId;
 
 // Dynamic factory based on selected network (reads chainId at call time)
 const getFactoryConfig = () => new TransactionsFactoryConfig({ chainID: getChainId() });
@@ -49,7 +40,7 @@ export const checkUserHasNft = async (userAddress: string): Promise<{
 
     // Requeter l'API pour les NFTs de l'utilisateur
     const response = await fetch(
-      `${multiversxApiUrl}/accounts/${userAddress}/nfts?collection=${NFT_TOKEN_ID}`
+      `${getApiUrl()}/accounts/${userAddress}/nfts?collection=${NFT_TOKEN_ID}`
     );
 
     if (!response.ok) {
@@ -95,7 +86,7 @@ export const getNftAttributes = async (nonce: number): Promise<{
     const identifier = `${NFT_TOKEN_ID}-${nonceHex}`;
 
     const response = await fetch(
-      `${multiversxApiUrl}/nfts/${identifier}`
+      `${getApiUrl()}/nfts/${identifier}`
     );
 
     if (!response.ok) {
@@ -225,7 +216,7 @@ export const getCollectionStats = async (): Promise<{
 
     // Utiliser l'endpoint /nfts/count pour le nombre de NFTs en circulation
     const countResponse = await fetch(
-      `${multiversxApiUrl}/collections/${NFT_TOKEN_ID}/nfts/count`
+      `${getApiUrl()}/collections/${NFT_TOKEN_ID}/nfts/count`
     );
 
     let nftCount = 0;
@@ -238,7 +229,7 @@ export const getCollectionStats = async (): Promise<{
     let holdersCount = 0;
     try {
       const nftsResponse = await fetch(
-        `${multiversxApiUrl}/nfts?collection=${NFT_TOKEN_ID}&withOwner=true&size=100`
+        `${getApiUrl()}/nfts?collection=${NFT_TOKEN_ID}&withOwner=true&size=100`
       );
       if (nftsResponse.ok) {
         const nfts = await nftsResponse.json();
