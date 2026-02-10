@@ -77,16 +77,40 @@ export function NftTab() {
   const nftContractDeployed = NFT_CONTRACT_ADDRESS !== '' || enablePreviewMode
 
   // Verifier si l'utilisateur possede deja un NFT
-  const checkNftOwnership = useCallback(async () => {
+  const checkNftOwnership = useCallback(async (retries = 1, delayMs = 0) => {
     if (!address || !NFT_CONTRACT_ADDRESS) return
 
-    try {
-      const result = await checkUserHasNft(address)
-      setHasNft(result.hasNft)
-      setNftNonce(result.nonce)
-    } catch (error) {
-      console.error('Error checking NFT ownership:', error)
+    const attempt = async () => {
+      try {
+        const result = await checkUserHasNft(address)
+        if (result.hasNft) {
+          setHasNft(true)
+          setNftNonce(result.nonce)
+          return true
+        }
+        return false
+      } catch (error) {
+        console.error('Error checking NFT ownership:', error)
+        return false
+      }
     }
+
+    // Premier essai apres le delai initial
+    if (delayMs > 0) {
+      await new Promise(r => setTimeout(r, delayMs))
+    }
+
+    for (let i = 0; i < retries; i++) {
+      const found = await attempt()
+      if (found) return
+      if (i < retries - 1) {
+        await new Promise(r => setTimeout(r, 5000))
+      }
+    }
+
+    // Si aucun NFT trouve apres tous les retries, mettre a jour l'etat
+    setHasNft(false)
+    setNftNonce(0)
   }, [address])
 
   // Charger les stats de la collection
@@ -124,11 +148,9 @@ export function NftTab() {
     setIsClaimingNft(true)
     try {
       await claimNft(address)
-      // Attendre un peu pour que la blockchain traite la transaction
-      setTimeout(() => {
-        checkNftOwnership()
-        loadCollectionStats()
-      }, 5000)
+      // Attendre que la blockchain indexe le nouveau NFT (retry avec delai)
+      checkNftOwnership(5, 10000)
+      loadCollectionStats()
     } catch (error: any) {
       console.error('Error claiming NFT:', error)
       alert(`Erreur lors du mint: ${error.message || 'Erreur inconnue'}`)
@@ -171,13 +193,12 @@ export function NftTab() {
     try {
       // Burn l'ancien NFT et mint un nouveau au bon niveau avec la bonne URI
       await burnAndReclaim(address, currentNonce)
-      // Rafraichir apres la transaction
-      setTimeout(() => {
-        checkNftOwnership()
-        loadCollectionStats()
-        // Forcer le rechargement des GIFs
-        setNftRefreshKey(prev => prev + 1)
-      }, 5000)
+      // Forcer le rechargement des GIFs immediatement
+      setNftRefreshKey(prev => prev + 1)
+      // Rafraichir apres la transaction avec retry (l'API peut mettre du temps a indexer le nouveau NFT)
+      // hasNft reste true pendant les retries pour ne pas perdre l'affichage du GIF
+      checkNftOwnership(5, 10000)
+      loadCollectionStats()
     } catch (error: any) {
       console.error('Error updating NFT:', error)
       // Extraire le message d'erreur de maniere plus robuste
