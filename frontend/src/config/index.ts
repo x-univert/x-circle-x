@@ -26,6 +26,7 @@ const networkConfigs = {
   devnet: {
     environment: EnvironmentsEnum.devnet,
     apiUrl: 'https://devnet-api.multiversx.com',
+    apiRestUrl: 'https://devnet-api.multiversx.com',
     gatewayUrl: 'https://devnet-gateway.multiversx.com',
     chainId: 'D',
     explorerUrl: 'https://devnet-explorer.multiversx.com'
@@ -33,6 +34,7 @@ const networkConfigs = {
   testnet: {
     environment: EnvironmentsEnum.testnet,
     apiUrl: 'https://testnet-api.multiversx.com',
+    apiRestUrl: 'https://testnet-api.multiversx.com',
     gatewayUrl: 'https://testnet-gateway.multiversx.com',
     chainId: 'T',
     explorerUrl: 'https://testnet-explorer.multiversx.com'
@@ -40,6 +42,7 @@ const networkConfigs = {
   mainnet: {
     environment: EnvironmentsEnum.mainnet,
     apiUrl: 'https://api.multiversx.com',
+    apiRestUrl: 'https://api.multiversx.com',
     gatewayUrl: 'https://gateway.multiversx.com',
     chainId: '1',
     explorerUrl: 'https://explorer.multiversx.com'

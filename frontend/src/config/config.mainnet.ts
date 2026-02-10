@@ -35,6 +35,7 @@ export const USERS_API_URL = '/users/api/v1/users/';
 // Utilise le gateway pour les requetes vm-values (CORS plus permissif que l'API)
 export const getNetworkConfig = () => ({
   apiUrl: multiversxGatewayUrl,
+  apiRestUrl: multiversxApiUrl,
   gatewayUrl: multiversxGatewayUrl,
   chainId,
   explorerUrl,

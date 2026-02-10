@@ -34,6 +34,7 @@ export const USERS_API_URL = '/users/api/v1/users/';
 // Dynamic network config (pour les services qui lisent le reseau a chaque appel)
 export const getNetworkConfig = () => ({
   apiUrl: multiversxApiUrl,
+  apiRestUrl: multiversxApiUrl,
   gatewayUrl: multiversxGatewayUrl,
   chainId,
   explorerUrl,
