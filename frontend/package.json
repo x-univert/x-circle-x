@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "postinstall": "node postinstall.js",
-    "dev": "npm run dev:devnet",
+    "dev": "npm run dev:mainnet",
     "dev:devnet": "npm run copy:devnet-config && vite",
     "dev:testnet": "npm run copy:testnet-config && vite",
     "dev:mainnet": "npm run copy:mainnet-config && vite",
