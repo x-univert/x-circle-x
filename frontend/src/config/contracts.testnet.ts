@@ -27,6 +27,7 @@ export const NETWORK_CONFIG = {
   walletConnectV2ProjectId: '9b1a9564f91cb659ffe21b73d5c4e2d8',
   walletAddress: 'https://testnet-wallet.multiversx.com/dapp/init',
   apiAddress: 'https://testnet-api.multiversx.com',
+  apiRestAddress: 'https://testnet-api.multiversx.com',
   explorerAddress: 'https://testnet-explorer.multiversx.com',
   apiTimeout: 6000
 };

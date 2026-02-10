@@ -41,7 +41,7 @@ const networkConfigs = {
   },
   mainnet: {
     environment: EnvironmentsEnum.mainnet,
-    apiUrl: 'https://api.multiversx.com',
+    apiUrl: 'https://gateway.multiversx.com',
     apiRestUrl: 'https://api.multiversx.com',
     gatewayUrl: 'https://gateway.multiversx.com',
     chainId: '1',

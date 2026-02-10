@@ -743,7 +743,7 @@ export const cancelProposal = async (
 export const getUserTokenBalance = async (userAddress: string): Promise<string> => {
   try {
     const response = await fetch(
-      `${NETWORK_CONFIG.apiAddress}/accounts/${userAddress}/tokens/${XCIRCLEX_TOKEN_ID}`
+      `${NETWORK_CONFIG.apiRestAddress}/accounts/${userAddress}/tokens/${XCIRCLEX_TOKEN_ID}`
     );
 
     if (!response.ok) {
@@ -813,7 +813,7 @@ export const forceExecute = async (
 export const getDaoOwner = async (): Promise<string> => {
   try {
     const response = await fetch(
-      `${NETWORK_CONFIG.apiAddress}/accounts/${DAO_CONTRACT_ADDRESS}`
+      `${NETWORK_CONFIG.apiRestAddress}/accounts/${DAO_CONTRACT_ADDRESS}`
     );
 
     if (!response.ok) {

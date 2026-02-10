@@ -10,7 +10,10 @@ import { CIRCLE_OF_LIFE_ADDRESS } from '../config/contracts';
 import { getNetworkConfig } from '../config';
 
 // Lecture dynamique du reseau a chaque appel (pas au chargement du module)
+// apiUrl = gateway (pour vm-values/query, CORS OK)
+// apiRestUrl = api (pour /accounts/, /usernames/, REST endpoints)
 const getApiUrl = () => getNetworkConfig().apiUrl;
+const getApiRestUrl = () => getNetworkConfig().apiRestUrl;
 const getChainId = () => getNetworkConfig().chainId;
 
 // Factory configuration dynamique basee sur le reseau selectionne
@@ -396,7 +399,7 @@ export const getPeripheralBalances = async (addresses: string[]): Promise<Map<st
       const batch = addresses.slice(i, i + batchSize);
       const promises = batch.map(async (addr) => {
         try {
-          const response = await fetch(`${getApiUrl()}/accounts/${addr}`);
+          const response = await fetch(`${getApiRestUrl()}/accounts/${addr}`);
           if (response.ok) {
             const data = await response.json();
             const balanceWei = data.balance || '0';
@@ -2470,7 +2473,7 @@ export const validateReferralCode = async (code: string): Promise<string | null>
     // If it's a herotag, resolve it
     if (code.startsWith('@')) {
       const herotag = code.substring(1);
-      const response = await fetch(`${getApiUrl()}/usernames/${herotag}`);
+      const response = await fetch(`${getApiRestUrl()}/usernames/${herotag}`);
       if (!response.ok) return null;
       const data = await response.json();
       address = data.address;

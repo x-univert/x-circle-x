@@ -415,7 +415,7 @@ export const getTotalReleased = async (): Promise<string> => {
 export const getContractBalance = async (): Promise<string> => {
   try {
     const response = await fetch(
-      `${NETWORK_CONFIG.apiAddress}/accounts/${VESTING_CONTRACT_ADDRESS}/tokens/${XCIRCLEX_TOKEN_ID}`
+      `${NETWORK_CONFIG.apiRestAddress}/accounts/${VESTING_CONTRACT_ADDRESS}/tokens/${XCIRCLEX_TOKEN_ID}`
     );
 
     if (!response.ok) {
@@ -471,7 +471,7 @@ export const getAllBeneficiarySchedules = async (beneficiaryAddress: string): Pr
  */
 export const getCurrentEpoch = async (): Promise<number> => {
   try {
-    const response = await fetch(`${NETWORK_CONFIG.apiAddress}/stats`);
+    const response = await fetch(`${NETWORK_CONFIG.apiRestAddress}/stats`);
     const data = await response.json();
     return data.epoch || 0;
   } catch (error) {

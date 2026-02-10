@@ -19,12 +19,23 @@ const getSelectedNetwork = (): EnvironmentsEnum => {
   }
 };
 
+// Sur mainnet, utiliser le gateway comme apiAddress pour eviter les erreurs CORS
+// (api.multiversx.com bloque CORS depuis localhost, le gateway est plus permissif)
+const getCustomNetworkConfig = () => {
+  const network = getSelectedNetwork();
+  if (network === EnvironmentsEnum.mainnet) {
+    return { apiAddress: 'https://gateway.multiversx.com' };
+  }
+  return {};
+};
+
 export const config: InitAppType = {
   storage: { getStorageCallback: () => sessionStorage },
   dAppConfig: {
     nativeAuth,
     environment: getSelectedNetwork(),
     theme: 'mvx:dark-theme',
+    customNetworkConfig: getCustomNetworkConfig(),
     providers: {
       walletConnect: {
         walletConnectV2ProjectId

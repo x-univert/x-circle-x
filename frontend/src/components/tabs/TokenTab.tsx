@@ -70,7 +70,7 @@ export function TokenTab() {
       try {
         // Fetch token info
         const tokenResponse = await fetch(
-          `${NETWORK_CONFIG.apiAddress}/tokens/${XCIRCLEX_TOKEN_ID}`
+          `${NETWORK_CONFIG.apiRestAddress}/tokens/${XCIRCLEX_TOKEN_ID}`
         )
         if (!tokenResponse.ok) throw new Error('Failed to fetch token info')
         const token = await tokenResponse.json()
@@ -93,7 +93,7 @@ export function TokenTab() {
         if (isLoggedIn && address) {
           try {
             const balanceResponse = await fetch(
-              `${NETWORK_CONFIG.apiAddress}/accounts/${address}/tokens/${XCIRCLEX_TOKEN_ID}`
+              `${NETWORK_CONFIG.apiRestAddress}/accounts/${address}/tokens/${XCIRCLEX_TOKEN_ID}`
             )
             if (balanceResponse.ok) {
               const balanceData = await balanceResponse.json()
@@ -107,7 +107,7 @@ export function TokenTab() {
         // Fetch holders count
         try {
           const holdersResponse = await fetch(
-            `${NETWORK_CONFIG.apiAddress}/tokens/${XCIRCLEX_TOKEN_ID}/accounts/count`
+            `${NETWORK_CONFIG.apiRestAddress}/tokens/${XCIRCLEX_TOKEN_ID}/accounts/count`
           )
           if (holdersResponse.ok) {
             const count = await holdersResponse.json()
@@ -155,7 +155,7 @@ export function TokenTab() {
         const allocationPromises = allocationAddresses.map(async (alloc) => {
           try {
             const response = await fetch(
-              `${NETWORK_CONFIG.apiAddress}/accounts/${alloc.address}/tokens/${XCIRCLEX_TOKEN_ID}`
+              `${NETWORK_CONFIG.apiRestAddress}/accounts/${alloc.address}/tokens/${XCIRCLEX_TOKEN_ID}`
             )
             if (response.ok) {
               const data = await response.json()

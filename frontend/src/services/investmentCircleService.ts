@@ -803,7 +803,7 @@ export const getAllCircles = async (): Promise<CircleInfo[]> => {
 export const getUserEgldBalance = async (userAddress: string): Promise<string> => {
   try {
     const response = await fetch(
-      `${NETWORK_CONFIG.apiAddress}/accounts/${userAddress}`
+      `${NETWORK_CONFIG.apiRestAddress}/accounts/${userAddress}`
     );
 
     if (!response.ok) {

@@ -357,7 +357,7 @@ export const getStakingStats = async (): Promise<StakingStats> => {
 export const getUserTokenBalance = async (userAddress: string): Promise<string> => {
   try {
     const response = await fetch(
-      `${NETWORK_CONFIG.apiAddress}/accounts/${userAddress}/tokens/${XCIRCLEX_TOKEN_ID}`
+      `${NETWORK_CONFIG.apiRestAddress}/accounts/${userAddress}/tokens/${XCIRCLEX_TOKEN_ID}`
     );
 
     if (!response.ok) {

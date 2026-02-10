@@ -24,10 +24,13 @@ export const TOKEN_PROTECTION_ADDRESS = ''; // A deployer si necessaire
 export const IDO_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgqr3rmwdfw2qc4pkkzqth8nhcmslffh490sh0qe6m3kh';
 
 // === CONFIGURATION RESEAU ===
+// apiAddress = gateway (pour vm-values/query, CORS OK depuis localhost)
+// apiRestAddress = api (pour /accounts/, /tokens/, /nfts/ REST endpoints)
 export const NETWORK_CONFIG = {
   id: 'mainnet',
   name: 'MultiversX Mainnet',
-  apiAddress: 'https://api.multiversx.com',
+  apiAddress: 'https://gateway.multiversx.com',
+  apiRestAddress: 'https://api.multiversx.com',
   gatewayAddress: 'https://gateway.multiversx.com',
   explorerAddress: 'https://explorer.multiversx.com',
   chainId: '1',

@@ -161,7 +161,7 @@ export const getAllProfilesWithAddresses = (): Array<{
 export const getUserNFTs = async (userAddress: string, size: number = 100): Promise<NFT[]> => {
   try {
     const response = await fetch(
-      `${NETWORK_CONFIG.apiAddress}/accounts/${userAddress}/nfts?size=${size}`
+      `${NETWORK_CONFIG.apiRestAddress}/accounts/${userAddress}/nfts?size=${size}`
     );
 
     if (!response.ok) {
@@ -193,7 +193,7 @@ export const getUserNFTs = async (userAddress: string, size: number = 100): Prom
 export const getNFTDetails = async (identifier: string): Promise<NFT | null> => {
   try {
     const response = await fetch(
-      `${NETWORK_CONFIG.apiAddress}/nfts/${identifier}`
+      `${NETWORK_CONFIG.apiRestAddress}/nfts/${identifier}`
     );
 
     if (!response.ok) {
