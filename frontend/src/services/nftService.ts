@@ -24,7 +24,7 @@ const getFactory = () => new SmartContractTransactionsFactory({ config: getFacto
 const NFT_GAS_LIMITS = {
   claimNft: 20_000_000,       // Mint d'un nouveau NFT
   evolveNft: 30_000_000,      // Evolution du NFT (envoie au contrat, mise a jour, retour)
-  burnAndReclaim: 25_000_000, // Burn ancien NFT et mint nouveau
+  burnAndReclaim: 60_000_000, // Burn ancien NFT et mint nouveau (esdt_local_burn + nft_create + direct_esdt)
 };
 
 /**
