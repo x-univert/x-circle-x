@@ -3,8 +3,11 @@ import { useGetAccountInfo } from 'lib';
 import * as circleOfLifeService from '../services/circleOfLifeService';
 import toast from 'react-hot-toast';
 
-// Adresse du owner du contrat (deployer)
-const OWNER_ADDRESS = 'erd1ff267s6mprn09d3zcuptyqc3h44psl3dfpp7uza5j74qv0kyflfq5z9tyg';
+// Adresses autorisees pour le panel admin
+const ADMIN_ADDRESSES = [
+  'erd1ff267s6mprn09d3zcuptyqc3h44psl3dfpp7uza5j74qv0kyflfq5z9tyg',
+  'erd1t5hn3guzdeevftqmrqa3cue8df6p8zfej60v5yaplduc87v3sh0q7enffw',
+];
 
 interface AdminPanelProps {
   onRefresh?: () => void;
@@ -15,8 +18,10 @@ export const AdminPanel = ({ onRefresh }: AdminPanelProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Verifier si l'utilisateur est admin (owner du contrat)
-  const isAdmin = address?.toLowerCase() === OWNER_ADDRESS.toLowerCase();
+  // Verifier si l'utilisateur est admin
+  const isAdmin = ADMIN_ADDRESSES.some(
+    admin => address?.toLowerCase() === admin.toLowerCase()
+  );
 
   // Ne pas afficher si pas connecte ou pas admin
   if (!address || !isAdmin) {
