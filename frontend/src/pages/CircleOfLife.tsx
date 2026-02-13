@@ -702,7 +702,7 @@ function CircleOfLife() {
   }
 
   const creationFee = circleInfo?.entryFee || '1'
-  const circulationAmount = circleInfo?.circulationAmount || '0.001'
+  const circulationAmount = circleInfo?.circulationAmount || '1'
   const totalContracts = circleInfo?.totalMembers || 0
   const activeContractsCount = circleInfo?.activeMembers || 0
   const currentCycleIndex = circleInfo?.currentCycleIndex || 0

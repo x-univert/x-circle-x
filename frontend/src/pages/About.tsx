@@ -56,7 +56,7 @@ const About = () => {
                 <p className="text-gray-400 text-sm">{t('about.circleOfLife.sc0Subtitle')}</p>
               </div>
 
-              <div className="text-3xl text-purple-400 my-2">↓ 0.001 EGLD ↓</div>
+              <div className="text-3xl text-purple-400 my-2">↓ 1 EGLD ↓</div>
 
               <div className="flex flex-wrap justify-center gap-4 my-4">
                 {['SC1', 'SC2', 'SC3', '...', 'SCn'].map((sc, i) => (

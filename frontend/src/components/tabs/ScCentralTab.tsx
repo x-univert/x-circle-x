@@ -261,7 +261,7 @@ export function ScCentralTab() {
 
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
             <p className="text-gray-400 text-sm">{t('scCentral.circulatingAmount', 'Circulating Amount')}</p>
-            <p className="text-2xl font-bold text-white">{circleInfo?.circulationAmount || '0.001'} EGLD</p>
+            <p className="text-2xl font-bold text-white">{circleInfo?.circulationAmount || '1'} EGLD</p>
           </div>
 
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">

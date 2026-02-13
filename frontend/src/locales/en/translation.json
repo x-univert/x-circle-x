@@ -247,7 +247,7 @@
         "title": "How it works",
         "step1": "<strong>SC0</strong> is the central contract that orchestrates the entire system",
         "step2": "Each member creates their own <strong>peripheral SC</strong> (SC1, SC2, SC3...)",
-        "step3": "Each day, <strong>0.001 EGLD</strong> circulates from SC0 to SC1, then SC1→SC2, etc.",
+        "step3": "Each day, <strong>1 EGLD</strong> circulates from SC0 to SC1, then SC1→SC2, etc.",
         "step4": "Members must <strong>sign before midnight (UTC)</strong> to validate the transfer",
         "step5": "The cycle completes when funds return to SC0"
       },
@@ -277,7 +277,7 @@
         },
         "step3": {
           "title": "Sign your transfer",
-          "description": "When it's your turn, sign before midnight UTC to transfer 0.001 EGLD to the next SC. You can also pre-sign or enable auto-signature."
+          "description": "When it's your turn, sign before midnight UTC to transfer 1 EGLD to the next SC. You can also pre-sign or enable auto-signature."
         },
         "step4": {
           "title": "Earn rewards",

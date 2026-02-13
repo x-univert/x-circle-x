@@ -247,7 +247,7 @@
         "title": "Principio de funcionamiento",
         "step1": "<strong>SC0</strong> es el contrato central que orquesta todo el sistema",
         "step2": "Cada miembro crea su propio <strong>SC periferico</strong> (SC1, SC2, SC3...)",
-        "step3": "Cada dia, <strong>0.001 EGLD</strong> circula de SC0 a SC1, luego SC1→SC2, etc.",
+        "step3": "Cada dia, <strong>1 EGLD</strong> circula de SC0 a SC1, luego SC1→SC2, etc.",
         "step4": "Los miembros deben <strong>firmar antes de medianoche (UTC)</strong> para validar la transferencia",
         "step5": "El ciclo se completa cuando los fondos regresan a SC0"
       },
@@ -277,7 +277,7 @@
         },
         "step3": {
           "title": "Firma tu transferencia",
-          "description": "Cuando sea tu turno, firma antes de medianoche UTC para transferir los 0.001 EGLD al siguiente SC. Tambien puedes pre-firmar o activar la auto-firma."
+          "description": "Cuando sea tu turno, firma antes de medianoche UTC para transferir los 1 EGLD al siguiente SC. Tambien puedes pre-firmar o activar la auto-firma."
         },
         "step4": {
           "title": "Gana recompensas",
