@@ -1615,6 +1615,29 @@ function CircleOfLife() {
                       </>
                     )}
 
+                    {/* Start cycle button - au dessus de Auto-Signature */}
+                    {activeContractsCount > 0 && !cycleHolder && !isCycleComplete && (
+                      <div className="space-y-2">
+                        <button
+                          onClick={() => setShowStartCycleModal(true)}
+                          disabled={isPaused || isLoading}
+                          className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition animate-pulse shadow-lg shadow-orange-500/50"
+                        >
+                          <span className="flex items-center justify-center gap-2">
+                            <span className="text-lg">🚀</span>
+                            {t('circle.startDailyCycle', 'Demarrer le Cycle Quotidien')}
+                            <span className="text-lg">🚀</span>
+                          </span>
+                        </button>
+                        <p className="text-cyan-400 text-xs text-center font-semibold">
+                          Bonus: +3600.0000 XCX pour demarrer!
+                        </p>
+                        <p className="text-center text-xs text-gray-400">
+                          Lancez le cycle pour commencer les transferts
+                        </p>
+                      </div>
+                    )}
+
                     {/* Section Auto-Sign */}
                     {!isMyScBanned && (
                       <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg space-y-3">
@@ -1739,33 +1762,6 @@ function CircleOfLife() {
                   </>
                 )}
 
-                {/* Start cycle button - seulement si membre et le cycle n'est pas en cours */}
-                {isMember && activeContractsCount > 0 && !cycleHolder && !isCycleComplete && (
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => setShowStartCycleModal(true)}
-                      disabled={isPaused || isLoading}
-                      className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition animate-pulse shadow-lg shadow-orange-500/50"
-                    >
-                      <span className="flex items-center justify-center gap-2">
-                        <span className="text-lg">🚀</span>
-                        {t('circle.startDailyCycle', 'Start Daily Cycle')}
-                        {starterBonusInfo.percentage > 0 && (
-                          <span className="text-cyan-200 text-sm">⭐ +{(starterBonusInfo.percentage / 100).toFixed(0)}%</span>
-                        )}
-                        <span className="text-lg">🚀</span>
-                      </span>
-                    </button>
-                    {starterBonusInfo.percentage > 0 && (
-                      <p className="text-cyan-400 text-xs text-center">
-                        {t('circle.bonusForStart', 'Bonus')}: +{starterBonusInfo.potentialBonus} XCX {t('circle.toStart', 'to start')}!
-                      </p>
-                    )}
-                    <p className="text-center text-xs text-gray-400">
-                      {t('circle.launchCycleTransfers', 'Launch the cycle to start the transfers')}
-                    </p>
-                  </div>
-                )}
 
                 {/* Indicateur cycle en cours */}
                 {cycleHolder && !isCycleInTimeout && (
