@@ -206,6 +206,9 @@ frontend/.env.local
 # mx-assets submission (local only)
 mx-assets-submission/
 
+# Dossier X (posts/notes)
+X/
+
 # Scripts locaux
 *.bat
 deploy-*.bat
